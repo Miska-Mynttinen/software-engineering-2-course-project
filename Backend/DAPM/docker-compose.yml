@@ -1,113 +1,6 @@
 version: '3.4'
 
 services:
-  dapm.clientapi:
-    image: ${DOCKER_REGISTRY-}dapmclientapi
-    build:
-      context: .
-      dockerfile: DAPM.ClientApi/Dockerfile
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    ports:
-        - "5000:8080"
-    networks:
-    - DAPM
-
-
-  dapm.peerapi:
-    image: ${DOCKER_REGISTRY-}dapmpeerapi
-    build:
-      context: .
-      dockerfile: DAPM.PeerApi/Dockerfile
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    ports:
-        - "5001:8080"
-    networks:
-    - DAPM
-
-
-
-  dapm.repositoryms.api:
-    image: ${DOCKER_REGISTRY-}dapmrepositorymsapi
-    build:
-      context: .
-      dockerfile: DAPM.RepositoryMS.Api/Dockerfile
-    depends_on:
-      mongo:
-          condition: service_healthy
-      rabbitmq:
-          condition: service_healthy
-      postgres-repository:
-          condition: service_healthy
-    ports:
-      - "6000:8080"
-    networks:
-    - DAPM
-
-
-  dapm.resourceregistryms.api:
-    image: ${DOCKER_REGISTRY-}dapmresourceregistrymsapi
-    build:
-      context: .
-      dockerfile: DAPM.ResourceRegistryMS.Api/Dockerfile
-    depends_on:
-      postgres:
-          condition: service_healthy
-      rabbitmq:
-          condition: service_healthy
-    ports:
-      - "7000:8080"
-    networks:
-    - DAPM
-
-
-  dapm.pipelineorchestratorms.api:
-    image: ${DOCKER_REGISTRY-}dapmpipelineorchestratormsapi
-    build:
-      context: .
-      dockerfile: DAPM.PipelineOrchestratorMS.Api/Dockerfile
-    depends_on:
-      rabbitmq:
-          condition: service_healthy
-    ports:
-      - "8000:8080"
-    networks:
-    - DAPM
-
-
-  dapm.orchestrator:
-    image: ${DOCKER_REGISTRY-}dapmorchestrator
-    build:
-      context: .
-      dockerfile: DAPM.Orchestrator/Dockerfile
-    depends_on:
-      rabbitmq:
-          condition: service_healthy
-    ports:
-      - "9000:8080"
-    networks:
-    - DAPM
-
-  dapm.operatorMS.api:
-    image: ${DOCKER_REGISTRY-}dapmoperatormsapi
-    build:
-       context: .
-       dockerfile: DAPM.OperatorMS.Api/Dockerfile
-    ports:
-       - "5100:8080"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - operator-data:/app/shared 
-    user: root
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    networks:
-    - DAPM
-
   rabbitmq: # login guest:guest
     image: rabbitmq:3-management
     hostname: "rabbitmq"
@@ -150,7 +43,7 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
-      ME_CONFIG_BASICAUTH: false
+      ME_CONFIG_BASICAUTH: "false"
     networks:
     - DAPM
 

@@ -1,0 +1,237 @@
+version: '3.4'
+
+services:
+  dapm.clientapi:
+    image: ${DOCKER_REGISTRY-}dapmclientapi
+    build:
+      context: .
+      dockerfile: DAPM.ClientApi/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+        - "5000:8080"
+    networks:
+    - DAPM
+
+
+  dapm.peerapi:
+    image: ${DOCKER_REGISTRY-}dapmpeerapi
+    build:
+      context: .
+      dockerfile: DAPM.PeerApi/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+        - "5001:8080"
+    networks:
+    - DAPM
+
+
+
+  dapm.repositoryms.api:
+    image: ${DOCKER_REGISTRY-}dapmrepositorymsapi
+    build:
+      context: .
+      dockerfile: DAPM.RepositoryMS.Api/Dockerfile
+    depends_on:
+      mongo:
+          condition: service_healthy
+      rabbitmq:
+          condition: service_healthy
+      postgres-repository:
+          condition: service_healthy
+    ports:
+      - "6000:8080"
+    networks:
+    - DAPM
+
+
+  dapm.resourceregistryms.api:
+    image: ${DOCKER_REGISTRY-}dapmresourceregistrymsapi
+    build:
+      context: .
+      dockerfile: DAPM.ResourceRegistryMS.Api/Dockerfile
+    depends_on:
+      postgres:
+          condition: service_healthy
+      rabbitmq:
+          condition: service_healthy
+    ports:
+      - "7000:8080"
+    networks:
+    - DAPM
+
+
+  dapm.pipelineorchestratorms.api:
+    image: ${DOCKER_REGISTRY-}dapmpipelineorchestratormsapi
+    build:
+      context: .
+      dockerfile: DAPM.PipelineOrchestratorMS.Api/Dockerfile
+    depends_on:
+      rabbitmq:
+          condition: service_healthy
+    ports:
+      - "8000:8080"
+    networks:
+    - DAPM
+
+
+  dapm.orchestrator:
+    image: ${DOCKER_REGISTRY-}dapmorchestrator
+    build:
+      context: .
+      dockerfile: DAPM.Orchestrator/Dockerfile
+    depends_on:
+      rabbitmq:
+          condition: service_healthy
+    ports:
+      - "9000:8080"
+    networks:
+    - DAPM
+
+  dapm.operatorMS.api:
+    image: ${DOCKER_REGISTRY-}dapmoperatormsapi
+    build:
+       context: .
+       dockerfile: DAPM.OperatorMS.Api/Dockerfile
+    ports:
+       - "5100:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - operator-data:/app/shared 
+    user: root
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+    - DAPM
+
+  rabbitmq: # login guest:guest
+    image: rabbitmq:3-management
+    hostname: "rabbitmq"
+    labels:
+      NAME: "rabbitmq"
+    ports:
+    - "5672:5672"
+    - "8083:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 30s
+      retries: 3
+    networks:
+    - DAPM
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27018:27017"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok'
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+    - DAPM
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8089:8089
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+      ME_CONFIG_BASICAUTH: false
+    networks:
+    - DAPM
+
+  postgres:
+    image: postgres
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: DAPM_ResourceRegistry
+    volumes:
+      - type: tmpfs
+        target: /dev/shm
+        tmpfs:
+          size: 134217728 # 128*2^20 bytes = 128Mb
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+    - DAPM
+
+  postgres-repository:
+    image: postgres
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: DAPM_Repository
+    volumes:
+      - type: tmpfs
+        target: /dev/shm
+        tmpfs:
+          size: 134217728 # 128*2^20 bytes = 128Mb
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+    - DAPM
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8082:8082
+    networks:
+    - DAPM
+
+networks:
+  DAPM:
+    name: DAPM
+    driver: bridge
+
+volumes:
+  operator-data:
+    name: operator-data
+   
+
+
+
+
