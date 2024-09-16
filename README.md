@@ -12,45 +12,45 @@ Backend uses containerized components that communicate with each other through a
 
 #### Organisations
 
-GET /organisations
-GET /organisations/{organisationId}
-GET /organisations/{organisationId}/repositories
-POST /organisations/{organisationId}/repositories
+- GET /organisations
+- GET /organisations/{organisationId}
+- GET /organisations/{organisationId}/repositories
+- POST /organisations/{organisationId}/repositories
 
 #### Pipeline
 
-GET /organisations/{organisationId}/repositories/{repositoryId}/pipelines/{pipelineId}
-POST .../pipelines/{pipelineId}/executions
-POST .../pipelines/{pipelineId}/executions/{executionId}/commands/start
-GET .../pipelines/{pipelineId}/executions/{executionId}/status
+- GET /organisations/{organisationId}/repositories/{repositoryId}/pipelines/{pipelineId}
+- POST .../pipelines/{pipelineId}/executions
+- POST .../pipelines/{pipelineId}/executions/{executionId}/commands/start
+- GET .../pipelines/{pipelineId}/executions/{executionId}/status
 
 #### Repository
 
-GET /organisations/{organisationId}/repositories/{repositoryId}
-GET /organisations/{organisationId}/repositories/{repositoryId}/resources
-POST /organisations/{organisationId}/repositories/{repositoryId}/resources
-GET /organisations/{organisationId}/repositories/{repositoryId}/pipelines
-POST /organisations/{organisationId}/repositories/{repositoryId}/pipelines
-POST /organisations/{organisationId}/repositories/{repositoryId}/resources/operators
+- GET /organisations/{organisationId}/repositories/{repositoryId}
+- GET /organisations/{organisationId}/repositories/{repositoryId}/resources
+- POST /organisations/{organisationId}/repositories/{repositoryId}/resources
+- GET /organisations/{organisationId}/repositories/{repositoryId}/pipelines
+- POST /organisations/{organisationId}/repositories/{repositoryId}/pipelines
+- POST /organisations/{organisationId}/repositories/{repositoryId}/resources/operators
 
 #### Resource
 
-GET /organisations/{organisationId}/repositories/{repositoryId}/resources/{resourceId}
-GET /organisations/{organisationId}/repositories/{repositoryId}/resources/{resourceId}/file
+- GET /organisations/{organisationId}/repositories/{repositoryId}/resources/{resourceId}
+- GET /organisations/{organisationId}/repositories/{repositoryId}/resources/{resourceId}/file
 
 #### Status
 
-GET /status/{ticketId}
+- GET /status/{ticketId}
 
 #### System
 
-POST /system/collabhandshake
+- POST /system/collabhandshake
 
 
 ### Backend API
 
-/organizations/{organizationId}/repositories/{repositoryId}/resources
-/organizations/{organizationId}/repositories/{repositoryId}/resources/operators
+- POST /organizations/{organizationId}/repositories/{repositoryId}/resources
+- POST /organizations/{organizationId}/repositories/{repositoryId}/resources/operators
 
 
 ### Prerequisites
