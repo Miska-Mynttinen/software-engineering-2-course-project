@@ -27,13 +27,22 @@ All these layers are abstracted using interfaces, so their implementations can b
 Due to time and resource limitations during the project, these principles are not always applied. Despite this, this principles have allowed us to implement an easily extensible software for future developers.
 
 ## Deployment
-The different services are containerized. To execute the project, you need to use Docker Compose and execute the following command within the DAPM folder:
+- First setup /etc/hosts/ by adding 127.0.0.1	rabbitmq to the end (first time only).
+
+- Use 3 terminal windows
+
+- Go to Backend/DAPM and run:
+
 ```
-docker compose up --build
+docker-compose up
 ```
+
 If you do not want to block the command line, you can add the option `-d`.
 
-Once the containers are up and running, you can interact with the platform by using the Client API. The Client API is deployed in port 5000. You can interact with the Client API visiting the following link:
+In a different terminal window go to Backend/DAPM/DAPM.AppHost and run
 
-http://localhost:5000/swagger/v1/swagger.json
+```
+dotnet run
+```
 
+In the terminal there will be a link to the .NET microservices dashboard.

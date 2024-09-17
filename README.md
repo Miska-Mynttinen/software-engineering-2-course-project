@@ -59,26 +59,39 @@ Before you begin, ensure you have the following installed:
 - Node.js (v12.x or later)
 - npm (v6.x or later)
 - Docker (For Backend)
+- .NET 8.0 (8.0.401 is the newest on Linux)
 
 
 ### To run both
 
+- First setup /etc/hosts/ by adding 127.0.0.1	rabbitmq to the end (first time only).
+
+- Use 3 terminal windows
+
 - Go to Backend/DAPM and run:
 
 ```
-docker compose up --build
+docker-compose up
 ```
+
 If you do not want to block the command line, you can add the option `-d`.
 
-Once the containers are up and running, you can interact with the platform by using the Client API. The Client API is deployed in port 5000. You can interact with the Client API visiting the following link:
+In a different terminal window go to Backend/DAPM/DAPM.AppHost and run
 
-http://localhost:5000/swagger/v1/swagger.json
+```
+dotnet run
+```
+
+In the terminal there will be a link to the .NET microservices dashboard.
 
 
+- Go to Frontend in a different window and run npm install (only on the first time).
 
-- Go to Frontend and run npm install (only on the first time).
+- Run
 
-- Run npm start.
+```
+npm start
+```
 
 The program is stated at http://localhost:3000
 
