@@ -66,23 +66,21 @@ Before you begin, ensure you have the following installed:
 
 - First setup /etc/hosts/ by adding 127.0.0.1	rabbitmq to the end (first time only).
 
-- Use 3 terminal windows
+- (If docker complains about paths: /ASP.NET/Https OR /Microsoft/UserSecrets then add them at Docker Desktop Settings/Resources/File sharing , by writing the path and pressing +)
+
+- Use 2 terminal windows
 
 - Go to Backend/DAPM and run:
 
 ```
-docker-compose up
+docker compose up --build
 ```
 
 If you do not want to block the command line, you can add the option `-d`.
 
-In a different terminal window go to Backend/DAPM/DAPM.AppHost and run
+Once the containers are up and running, you can interact with the platform by using the Client API. The Client API is deployed in port 5000. You can interact with the Client API visiting the following link:
 
-```
-dotnet run
-```
-
-In the terminal there will be a link to the .NET microservices dashboard.
+http://localhost:5000/swagger/v1/swagger.json
 
 
 - Go to Frontend in a different window and run npm install (only on the first time).
