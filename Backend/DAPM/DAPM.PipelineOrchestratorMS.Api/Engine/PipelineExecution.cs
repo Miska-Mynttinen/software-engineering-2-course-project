@@ -241,58 +241,98 @@ namespace DAPM.PipelineOrchestratorMS.Api.Engine
         private List<Step> CreateStepListRecursive(EngineNode currentNode, List<Guid> visitedNodes)
         {
             var result = new List<Step>();
-            // If the path has already been visited or the node is a data source, we trigger base case
+
+            // Check if the current node has already been visited or is a data source
             if (visitedNodes.Contains(currentNode.Id) || currentNode.NodeType == "dataSource")
             {
                 return result;
             }
 
-            ExecuteOperatorStep executeOperatorStep = new ExecuteOperatorStep(_id ,_serviceProvider);
+            // Only create an ExecuteOperatorStep if the current node is an operator
+            ExecuteOperatorStep executeOperatorStep = null;
 
-            var predecessorNodesIds = _predecessorDictionary[currentNode.Id];
+            // Ensure the predecessor dictionary exists and contains the current node ID
+            if (!_predecessorDictionary.TryGetValue(currentNode.Id, out var predecessorNodesIds))
+            {
+                // Log a warning about the missing predecessor IDs
+                Console.WriteLine($"Warning: No predecessors found for node ID: {currentNode.Id}");
+                return result;
+            }
 
             foreach (var predecessorId in predecessorNodesIds)
             {
-                
-                result.AddRange(CreateStepListRecursive(_nodes[predecessorId], visitedNodes));
+                // Ensure the predecessor node exists in _nodes
+                if (!_nodes.TryGetValue(predecessorId, out var predecessorNode))
+                {
+                    // Log a warning about the missing predecessor node
+                    Console.WriteLine($"Warning: Predecessor node ID {predecessorId} not found in _nodes.");
+                    continue; // Skip this iteration
+                }
+
+                // Recursive call
+                result.AddRange(CreateStepListRecursive(predecessorNode, visitedNodes));
 
                 var transferDataStep = GenerateTransferDataStep(predecessorId, currentNode.Id);
-                var predecessorLastAssociatedStepId = _nodes[predecessorId].GetLastAssociatedStep();
+                var predecessorLastAssociatedStepId = predecessorNode.GetLastAssociatedStep();
 
-                if(predecessorLastAssociatedStepId != Guid.Empty)
-                    transferDataStep.PrerequisiteSteps.Add(predecessorLastAssociatedStepId);
+                // Check if the last associated step ID is valid and retrieve the last step
+                if (predecessorLastAssociatedStepId != Guid.Empty)
+                {
+                    if (_stepsDictionary.TryGetValue(predecessorLastAssociatedStepId, out var lastStep) && lastStep is TransferDataStep transferStep)
+                    {
+                        transferDataStep.PrerequisiteSteps.Add(predecessorLastAssociatedStepId);
+                    }
+                }
 
                 result.Add(transferDataStep);
-
                 AssociateNodeWithStep(currentNode.Id, transferDataStep.Id);
                 _stepsDictionary[transferDataStep.Id] = transferDataStep;
 
+                // Only create an ExecuteOperatorStep if the current node is an operator
                 if (currentNode.NodeType == "operator")
                 {
+                    // Create and configure the ExecuteOperatorStep only for operator nodes
+                    if (executeOperatorStep == null) // Only create it once per node
+                    {
+                        executeOperatorStep = new ExecuteOperatorStep(_id, _serviceProvider);
+                    }
                     executeOperatorStep.PrerequisiteSteps.Add(transferDataStep.Id);
                     executeOperatorStep.InputResources.Add(transferDataStep.GetResourceToTransfer());
                 }
             }
+
+            // Handle operator node specific logic
             if (currentNode.NodeType == "operator")
             {
-                var operatorResource = new EngineResource()
+                // Check if ResourceId has a value before using it
+                if (currentNode.ResourceId.HasValue)
                 {
-                    OrganizationId = currentNode.OrganizationId,
-                    RepositoryId = currentNode.RepositoryId,
-                    ResourceId = (Guid)currentNode.ResourceId,
-                };
+                    var operatorResource = new EngineResource()
+                    {
+                        OrganizationId = currentNode.OrganizationId,
+                        RepositoryId = currentNode.RepositoryId,
+                        ResourceId = currentNode.ResourceId.Value, // Use Value since we checked HasValue
+                    };
 
-                executeOperatorStep.OperatorResource = operatorResource;
+                    executeOperatorStep.OperatorResource = operatorResource;
 
-                result.Add(executeOperatorStep);
-                AssociateNodeWithStep(currentNode.Id, executeOperatorStep.Id);
-                _stepsDictionary[executeOperatorStep.Id] = executeOperatorStep;
+                    result.Add(executeOperatorStep);
+                    AssociateNodeWithStep(currentNode.Id, executeOperatorStep.Id);
+                    _stepsDictionary[executeOperatorStep.Id] = executeOperatorStep;
+                }
+                else
+                {
+                    // Log a warning about the missing ResourceId
+                    Console.WriteLine($"Warning: ResourceId for node ID {currentNode.Id} is null.");
+                }
             }
 
             visitedNodes.Add(currentNode.Id);
             return result;
-
         }
+
+
+
 
         private List<Step> GenerateSteps()
         {
@@ -316,30 +356,38 @@ namespace DAPM.PipelineOrchestratorMS.Api.Engine
 
             var resourceToTransfer = new EngineResource();
 
-
-            if(sourceNode.NodeType == "operator")
+            // Ensure you get the last associated step and check its type
+            Guid lastAssociatedStepId = sourceNode.GetLastAssociatedStep();
+            if (lastAssociatedStepId != Guid.Empty && _stepsDictionary.TryGetValue(lastAssociatedStepId, out var lastStep))
             {
-                var operatorStep = (ExecuteOperatorStep)_stepsDictionary[sourceNode.GetLastAssociatedStep()];
-                resourceToTransfer.OrganizationId = operatorStep.OperatorResource.OrganizationId;
-                resourceToTransfer.ResourceId = operatorStep.OutputResourceId; 
+                if (lastStep is ExecuteOperatorStep operatorStep)
+                {
+                    resourceToTransfer.OrganizationId = operatorStep.OperatorResource.OrganizationId;
+                    resourceToTransfer.ResourceId = operatorStep.OutputResourceId;
+                }
+                else
+                {
+                    // Handle the case where the last step is not an ExecuteOperatorStep
+                    Console.WriteLine($"Warning: Last associated step is not an ExecuteOperatorStep for node ID {sourceNodeId}.");
+                }
             }
             else
             {
+                // Handle the case where there is no last associated step
+                Console.WriteLine($"Warning: No last associated step found for node ID {sourceNodeId}.");
                 resourceToTransfer.OrganizationId = sourceNode.OrganizationId;
                 resourceToTransfer.RepositoryId = sourceNode.RepositoryId;
                 resourceToTransfer.ResourceId = (Guid)sourceNode.ResourceId;
             }
 
             Guid? destinationRepository = null;
-            string? destinationName = null; 
-            
-            if(targetNode.NodeType == "dataSink")
+            string? destinationName = null;
+
+            if (targetNode.NodeType == "dataSink")
             {
                 destinationRepository = targetNode.RepositoryId;
-                destinationName =  targetNode.ResourceName;
+                destinationName = targetNode.ResourceName;
             }
-                
-                
 
             var sourceStorageMode = GetStorageModeFromNode(sourceNode);
             var targetStorageMode = GetStorageModeFromNode(targetNode);
@@ -349,6 +397,7 @@ namespace DAPM.PipelineOrchestratorMS.Api.Engine
 
             return step;
         }
+
 
         private StorageMode GetStorageModeFromNode(EngineNode node)
         {

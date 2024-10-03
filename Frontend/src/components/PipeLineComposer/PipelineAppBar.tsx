@@ -2,13 +2,14 @@ import { AppBar, Box, Button, TextField, Toolbar, Typography } from "@mui/materi
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getActiveFlowData, getActivePipeline } from "../../redux/selectors";
-import { useState } from "react";
+import { getActiveFlowData, getActivePipeline, getCurrentSessionTickets } from "../../redux/selectors";
+import { useState, useEffect } from "react";
 import { updatePipelineName } from "../../redux/slices/pipelineSlice";
+import { addNewTicket, deleteTicket } from "../../redux/slices/currentSessionTicketSlice";
 import EditIcon from '@mui/icons-material/Edit';
 import { Node } from "reactflow";
 import { DataSinkNodeData, DataSourceNodeData, OperatorNodeData } from "../../redux/states/pipelineState";
-import { putCommandStart, putExecution, putPipeline } from "../../services/backendAPI";
+import { putCommandStart, putExecution, putPipeline, fetchAllCurrentSessionTicketStatus } from "../../services/backendAPI";
 import { getOrganizations, getRepositories } from "../../redux/selectors/apiSelector";
 import { getHandleId, getNodeId } from "./Flow";
 
@@ -17,6 +18,31 @@ export default function PipelineAppBar() {
   const dispatch = useDispatch();
 
   const [isEditing, setIsEditing] = useState(false);
+
+  // Get current session tickets at the top level of the component
+  const tickets = useSelector(getCurrentSessionTickets); 
+
+  // Function to fetch ticket statuses
+  const fetchTicketStatuses = async () => {
+    if (tickets.length === 0) return; // Prevent API call if there are no tickets
+    try {
+      const response = await fetchAllCurrentSessionTicketStatus(tickets);
+      console.log('API call successful:', response);
+      // Process the response as needed
+    } catch (error) {
+      console.error('Error during API call:', error);
+    }
+  };
+
+  // Set up the interval for polling the API
+  useEffect(() => {
+    fetchTicketStatuses(); // Call immediately to get current statuses
+
+    const interval = setInterval(fetchTicketStatuses, 10000); // Poll every 10 seconds
+
+    // Cleanup the interval on component unmount
+    return () => clearInterval(interval);
+  }, [tickets]); // Add tickets as a dependency to re-fetch if they change
 
   const handleStartEditing = () => {
     setIsEditing(true);
@@ -127,9 +153,11 @@ export default function PipelineAppBar() {
     const selectedRepo = repositories.filter(repo => repo.organizationId === selectedOrg.id)[0]
 
     const pipelineId = await putPipeline(selectedOrg.id, selectedRepo.id, requestData)
+    dispatch(addNewTicket(pipelineId))
     const executionId = await putExecution(selectedOrg.id, selectedRepo.id, pipelineId)
-    await putCommandStart(selectedOrg.id, selectedRepo.id, pipelineId, executionId)
-
+    dispatch(addNewTicket(executionId))
+    const startId = await putCommandStart(selectedOrg.id, selectedRepo.id, pipelineId, executionId)
+    dispatch(addNewTicket(startId))
   }
 
   return (

@@ -43,11 +43,28 @@ namespace DAPM.ClientApi.Controllers
 
         [HttpPost("{organizationId}/repositories/{repositoryId}/pipelines/{pipelineId}/executions/{executionId}/commands/start")]
         [SwaggerOperation(Description = "Posts a start command to the defined pipeline execution. The start command will start the pipeline execution.")]
-        public async Task<ActionResult<Guid>> PostStartCommand(Guid organizationId, Guid repositoryId, Guid pipelineId, Guid executionId)
+        public async Task<ActionResult<ApiResponse>> PostStartCommand(Guid organizationId, Guid repositoryId, Guid pipelineId, Guid executionId)
         {
-            Guid id = _pipelineService.PostStartCommand(organizationId, repositoryId, pipelineId, executionId);
-            return Ok(new ApiResponse { RequestName = "PostStartCommand", TicketId = id });
+            try
+            {
+                // Make sure the service call is asynchronous
+                Guid id = _pipelineService.PostStartCommand(organizationId, repositoryId, pipelineId, executionId);
+
+                // Return a proper response object
+                return Ok(new ApiResponse { RequestName = "PostStartCommand", TicketId = id });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // Handle specific exceptions (e.g., entity not found)
+                return NotFound(new { Message = $"One or more provided IDs were not found. Details: {ex.Message}" });
+            }
+            catch (Exception ex)
+            {
+                // Catch-all for any other unhandled exceptions
+                return StatusCode(500, new { Message = $"An error occurred while processing the request. Details: {ex.Message}" });
+            }
         }
+
 
         [HttpGet("{organizationId}/repositories/{repositoryId}/pipelines/{pipelineId}/executions/{executionId}/status")]
         [SwaggerOperation(Description = "Gets the status of a running execution")]

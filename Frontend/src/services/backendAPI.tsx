@@ -4,8 +4,30 @@ import { json } from "stream/consumers";
 const vmPath = `dapm1.compute.dtu.dk:5000`
 const localPath = `localhost:5000`
 
-// const path = vmPath
-const path = localPath
+let path = localPath
+
+if (process.env.IS_VM) {
+    path = vmPath
+}
+
+export async function fetchAllCurrentSessionTicketStatus(tickets: string[]) {
+    const results = []; // Array to store the results for each ticket
+
+    // Fetch status for each ticket
+    for (const ticket of tickets) {
+        try {
+            const response = await fetch(`http://${path}/status/${ticket}`);
+
+            const jsonData = await response.json();
+            results.push({ ticket, status: jsonData }); // Store the ticket and its status
+        } catch (error) {
+            console.log(`Error fetching status for ticket ${ticket}:`, error);
+            results.push({ ticket, status: 'error' }); // Store the error with the ticket
+        }
+    }
+
+    return results; // Return the array of results
+}
 
 export async function fetchStatus(ticket: string) {
 
@@ -14,11 +36,10 @@ export async function fetchStatus(ticket: string) {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
+
         const jsonData = await response.json();
-        //console.log(jsonData)
         return jsonData;
     } catch (error) {
-        console.error('Error fetching status:', error);
         return error;
     }
 }
@@ -80,7 +101,7 @@ export async function fetchOrganisations() {
 
 export async function fetchOrganisation(orgId: string) {
     try {
-        const response = await fetch(`http://` + path + `/Organizations/${orgId}`);
+        const response = await fetch(`http://` + path + `/organizations/${orgId}`);
         if (!response.ok) {
             throw new Error('Fetching org, Network response was not ok');
         }
@@ -117,7 +138,7 @@ export async function fetchOrganisation(orgId: string) {
 
 export async function fetchOrganisationRepositories(orgId: string) {
     try {
-        const response = await fetch(`http://` + path + `/Organizations/${orgId}/repositories`);
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories`);
         if (!response.ok) {
             throw new Error('Fecthing reps, Network response was not ok');
         }
@@ -154,7 +175,7 @@ export async function fetchOrganisationRepositories(orgId: string) {
 
 export async function fetchRepository(orgId: string, repId: string) {
     try {
-        const response = await fetch(`http://` + path + `/Organizations/${orgId}/repositories/${repId}`);
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}`);
         if (!response.ok) {
             throw new Error('Fecthing rep, Network response was not ok');
         }
@@ -190,7 +211,7 @@ export async function fetchRepository(orgId: string, repId: string) {
 
 export async function fetchRepositoryResources(orgId: string, repId: string) {
     try {
-        const response = await fetch(`http://` + path + `/Organizations/${orgId}/repositories/${repId}/resources`);
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/resources`);
         if (!response.ok) {
             throw new Error('Fetching resources, Network response was not ok');
         }
@@ -228,7 +249,7 @@ export async function fetchRepositoryResources(orgId: string, repId: string) {
 
 export async function fetchResource(orgId: string, repId: string, resId: string) {
     try {
-        const response = await fetch(`http://` + path + `/Organizations/${orgId}/repositories/${repId}/resources/${resId}`);
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/resources/${resId}`);
         if (!response.ok) {
             throw new Error('Fetching resource, Feching Network response was not ok');
         }
@@ -265,7 +286,7 @@ export async function fetchResource(orgId: string, repId: string, resId: string)
 
 export async function fetchRepositoryPipelines(orgId: string, repId: string) {
     try {
-        const response = await fetch(`http://` + path + `/Organizations/${orgId}/repositories/${repId}/pipelines`);
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/pipelines`);
         if (!response.ok) {
             throw new Error('fetching pipelines, Network response was not ok');
         }
@@ -302,7 +323,7 @@ export async function fetchRepositoryPipelines(orgId: string, repId: string) {
 
 export async function fetchPipeline(orgId: string, repId: string, pipId: string) {
     try {
-        const response = await fetch(`http://` + path + `/Organizations/${orgId}/repositories/${repId}/pipelines/${pipId}`);
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/pipelines/${pipId}`);
         if (!response.ok) {
             throw new Error('fetching pipeline, Network response was not ok');
         }
@@ -345,7 +366,7 @@ export async function putRepository(orgId: string, repositoryName: string) {
     
 
     try {
-        const response = await fetch(`http://` + path + `/Organizations/${orgId}/repositories`, {
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories`, {
             method: "POST",
             headers: headers,
             body: JSON.stringify({ name: repositoryName })
@@ -388,7 +409,7 @@ export async function putRepository(orgId: string, repositoryName: string) {
 
 export async function putResource(orgId: string, repId: string, formData: FormData) {
     try {
-        const response = await fetch(`http://` + path + `/Organizations/${orgId}/repositories/${repId}/resources`, {
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/resources`, {
             method: "POST",
             body: formData
         });
@@ -429,9 +450,8 @@ export async function putResource(orgId: string, repId: string, formData: FormDa
 }
 
 export async function putPipeline(orgId: string, repId: string, pipelineData:any){
-    console.log(pipelineData)
     try {
-        const response = await fetch(`http://${path}/Organizations/${orgId}/repositories/${repId}/pipelines`, {
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -447,7 +467,7 @@ export async function putPipeline(orgId: string, repId: string, pipelineData:any
         const jsonData = await response.json();
         // Fetch additional data recursively
         const getData = async (ticketId: string): Promise<any> => {
-            const maxRetries = 10;
+            const maxRetries = 1000;
             const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
             for (let retries = 0; retries < maxRetries; retries++) {
@@ -476,7 +496,7 @@ export async function putPipeline(orgId: string, repId: string, pipelineData:any
 
 export async function putExecution(orgId: string, repId: string, pipeId: string) {
     try {
-        const response = await fetch(`http://${path}/Organizations/${orgId}/repositories/${repId}/pipelines/${pipeId}/executions`, {
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines/${pipeId}/executions`, {
             method: "POST",
         });
 
@@ -488,14 +508,14 @@ export async function putExecution(orgId: string, repId: string, pipeId: string)
 
         // Fetch additional data recursively
         const getData = async (ticketId: string): Promise<any> => {
-            const maxRetries = 10;
+            const maxRetries = 1000;
             const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
             for (let retries = 0; retries < maxRetries; retries++) {
                 try {
                     const data = await fetchStatus(ticketId);
                     if (data.status) {
-                        return data.result.itemIds.executionId as string;;
+                        return data.result.itemIds.executionId as string;
                     }
                     await delay(1000); // Wait for 1 second before retrying
                 } catch (error) {
@@ -517,9 +537,11 @@ export async function putExecution(orgId: string, repId: string, pipeId: string)
 
 export async function putCommandStart(orgId: string, repId: string, pipeId: string, exeId:string) {
     try {
-        const response = await fetch(`http://${path}/Organizations/${orgId}/repositories/${repId}/pipelines/${pipeId}/executions/${exeId}/commands/start`, {
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines/${pipeId}/executions/${exeId}/commands/start`, {
             method: "POST",
         });
+
+        console.log('putCommandStart response', response)
 
         if (!response.ok) {
             throw new Error('put command start, Network response was not ok');
@@ -529,7 +551,7 @@ export async function putCommandStart(orgId: string, repId: string, pipeId: stri
 
         // Fetch additional data recursively
         const getData = async (ticketId: string): Promise<any> => {
-            const maxRetries = 10;
+            const maxRetries = 1000;
             const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
             for (let retries = 0; retries < maxRetries; retries++) {
@@ -558,7 +580,7 @@ export async function putCommandStart(orgId: string, repId: string, pipeId: stri
 
 export async function putOperator(orgId: string, repId: string, formData: FormData) {
     try {
-        const response = await fetch(`http://` + path + `/Organizations/${orgId}/repositories/${repId}/resources/operators`, {
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/resources/operators`, {
             method: "POST",
             body: formData
         });
@@ -599,6 +621,7 @@ export async function putOperator(orgId: string, repId: string, formData: FormDa
 }
 
 export async function PostNewPeer(domainName: string) {
+    console.log('PostNewPeer')
     try {
         const formData = new FormData();
         formData.append('targetPeerDomain', domainName);
@@ -606,14 +629,17 @@ export async function PostNewPeer(domainName: string) {
         const headers = new Headers();
         headers.append('Content-Type', 'application/json');
 
+        console.log('Before post')
         const response = await fetch(`http://` + path +`/system/collab-handshake`, {
             method: "POST",
             body: JSON.stringify({targetPeerDomain: domainName}),
             headers: headers
         });
 
+        console.log('After Post:', response)
+
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error('Network response was not ok (PostNewPeer)');
         }
 
         const jsonData = await response.json();

@@ -11,3 +11,5 @@ export const getActiveFlowData = (state: RootState) => state.pipelineState.pipel
 export const getActivePipeline = (state: RootState) => state.pipelineState.pipelines.find(pipeline => pipeline.id === state.pipelineState.activePipelineId)
 
 export const getPipelines = (state: RootState) => state.pipelineState.pipelines
+
+export const getCurrentSessionTickets = (state: RootState) => state.currentSessionTicketState.tickets

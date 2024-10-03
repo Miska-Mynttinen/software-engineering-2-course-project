@@ -24,11 +24,16 @@ const ResourceUploadButton = ({ orgId, repId }: UploadButtonProps) => {
     const dataTypes = ["eventLog", "bpmnModel", "petriNet"]
 
     const [open, setOpen] = React.useState(false);
+    const [disabled, setDisabled] = React.useState(false);
+
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        // Disable the submit button to prevent multiple submissions
+        setDisabled(true);
 
         const formData = new FormData(event.currentTarget);
         const formEntries = Object.fromEntries(formData.entries());
@@ -47,6 +52,9 @@ const ResourceUploadButton = ({ orgId, repId }: UploadButtonProps) => {
         }
 
         alert("Form Submitted");
+
+        // Re-enable the submit button after submission is done
+        setDisabled(false);
     };
 
     return (
@@ -81,7 +89,13 @@ const ResourceUploadButton = ({ orgId, repId }: UploadButtonProps) => {
                                 <input type="file" name="ResourceFile" />
                             </FormControl>
 
-                            <Button type="submit" sx={{ backgroundColor: "gray", padding: "1px", color: "black" }}>Submit</Button>
+                            <Button 
+                                disabled={disabled}
+                                type="submit" 
+                                sx={{ backgroundColor: "gray", padding: "1px", color: disabled ? "lightgray" : "black" }}
+                            >
+                                {disabled ? 'Submitting...' : 'Submit'}
+                            </Button>
                         </form>
                     </Box>
                 </Box>

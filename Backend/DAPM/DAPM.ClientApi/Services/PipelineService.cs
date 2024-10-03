@@ -104,7 +104,7 @@ namespace DAPM.ClientApi.Services
 
             _pipelineStartCommandProducer.PublishMessage(message);
 
-            _logger.LogDebug("PipelineStartCommandRequest Enqueued");
+            _logger.LogDebug("PipelineStartCommandRequest Enqueued" + message);
 
             return ticketId;
         }
