@@ -1,7 +1,9 @@
 import { ThemeProvider, createTheme } from "@mui/material";
 
+import { useEffect } from 'react';
+
 import "./index.css";
-import { Provider } from "react-redux";
+import { Provider, useDispatch  } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import rootReducer from "./redux/slices";
 
@@ -11,6 +13,7 @@ import { RouterProvider, createBrowserRouter, createHashRouter } from "react-rou
 import PipelineComposer from "./routes/PipeLineComposer";
 import UserPage from "./routes/OverviewPage";
 import { loadState, saveState } from "./redux/browser-storage";
+import { clearTickets } from "./redux/slices/currentSessionTicketSlice";
 
 // Configure redux-persist
 const persistConfig = {
@@ -56,11 +59,23 @@ const router = createBrowserRouter([
   }
 ]);
 
+function ClearTicketsOnLoad() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(clearTickets());  // Clear tickets on initial load
+  }, [dispatch]);
+
+  return null;
+}
+
 export default function App() {
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className="App">
         <Provider store={store}>
+          <ClearTicketsOnLoad /> {/* Dispatch the action after the store is initialized */}
           <RouterProvider router={router} />
         </Provider>
       </div>

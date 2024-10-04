@@ -10,23 +10,18 @@ if (process.env.IS_VM) {
     path = vmPath
 }
 
-export async function fetchAllCurrentSessionTicketStatus(tickets: string[]) {
-    const results = []; // Array to store the results for each ticket
-
-    // Fetch status for each ticket
-    for (const ticket of tickets) {
-        try {
-            const response = await fetch(`http://${path}/status/${ticket}`);
-
-            const jsonData = await response.json();
-            results.push({ ticket, status: jsonData }); // Store the ticket and its status
-        } catch (error) {
-            console.log(`Error fetching status for ticket ${ticket}:`, error);
-            results.push({ ticket, status: 'error' }); // Store the error with the ticket
+export async function fetchPipelineExecutionStatus(orgId: string, repId: string, pipeId: string, exeId:string) {
+    try {
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines/${pipeId}/executions/${exeId}/status`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
-    }
 
-    return results; // Return the array of results
+        const jsonData = await response.json();
+        return jsonData;
+    } catch (error) {
+        return error;
+    }
 }
 
 export async function fetchStatus(ticket: string) {
@@ -51,7 +46,7 @@ export async function fetchFile(ticket: string) {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        //console.log(jsonData)
+
         return response;
     } catch (error) {
         console.error('Error fetching status:', error);
@@ -228,7 +223,7 @@ export async function fetchRepositoryResources(orgId: string, repId: string) {
                     if (data.status) {
                         return data;
                     }
-                    //console.log(data)
+
                     await delay(1000); // Wait for 1 second before retrying
                 } catch (error) {
                     if (retries === maxRetries - 1) {
@@ -508,14 +503,14 @@ export async function putExecution(orgId: string, repId: string, pipeId: string)
 
         // Fetch additional data recursively
         const getData = async (ticketId: string): Promise<any> => {
-            const maxRetries = 1000;
+            const maxRetries = 10;
             const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
             for (let retries = 0; retries < maxRetries; retries++) {
                 try {
                     const data = await fetchStatus(ticketId);
                     if (data.status) {
-                        return data.result.itemIds.executionId as string;
+                        return { ...data.result, ticketId } as object;
                     }
                     await delay(1000); // Wait for 1 second before retrying
                 } catch (error) {
@@ -541,8 +536,6 @@ export async function putCommandStart(orgId: string, repId: string, pipeId: stri
             method: "POST",
         });
 
-        console.log('putCommandStart response', response)
-
         if (!response.ok) {
             throw new Error('put command start, Network response was not ok');
         }
@@ -551,7 +544,7 @@ export async function putCommandStart(orgId: string, repId: string, pipeId: stri
 
         // Fetch additional data recursively
         const getData = async (ticketId: string): Promise<any> => {
-            const maxRetries = 1000;
+            const maxRetries = 10;
             const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
             for (let retries = 0; retries < maxRetries; retries++) {
@@ -621,7 +614,6 @@ export async function putOperator(orgId: string, repId: string, formData: FormDa
 }
 
 export async function PostNewPeer(domainName: string) {
-    console.log('PostNewPeer')
     try {
         const formData = new FormData();
         formData.append('targetPeerDomain', domainName);
@@ -629,14 +621,11 @@ export async function PostNewPeer(domainName: string) {
         const headers = new Headers();
         headers.append('Content-Type', 'application/json');
 
-        console.log('Before post')
         const response = await fetch(`http://` + path +`/system/collab-handshake`, {
             method: "POST",
             body: JSON.stringify({targetPeerDomain: domainName}),
             headers: headers
         });
-
-        console.log('After Post:', response)
 
         if (!response.ok) {
             throw new Error('Network response was not ok (PostNewPeer)');

@@ -5,11 +5,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { getActiveFlowData, getActivePipeline, getCurrentSessionTickets } from "../../redux/selectors";
 import { useState, useEffect } from "react";
 import { updatePipelineName } from "../../redux/slices/pipelineSlice";
-import { addNewTicket, deleteTicket } from "../../redux/slices/currentSessionTicketSlice";
+import { addNewNotStartedTicket, addNewStartedTicket, addNewFinishedTicket, deleteTicket} from "../../redux/slices/currentSessionTicketSlice";
 import EditIcon from '@mui/icons-material/Edit';
 import { Node } from "reactflow";
 import { DataSinkNodeData, DataSourceNodeData, OperatorNodeData } from "../../redux/states/pipelineState";
-import { putCommandStart, putExecution, putPipeline, fetchAllCurrentSessionTicketStatus } from "../../services/backendAPI";
+import { putCommandStart, putExecution, putPipeline, fetchPipelineExecutionStatus, fetchStatus } from "../../services/backendAPI";
 import { getOrganizations, getRepositories } from "../../redux/selectors/apiSelector";
 import { getHandleId, getNodeId } from "./Flow";
 
@@ -24,13 +24,44 @@ export default function PipelineAppBar() {
 
   // Function to fetch ticket statuses
   const fetchTicketStatuses = async () => {
-    if (tickets.length === 0) return; // Prevent API call if there are no tickets
-    try {
-      const response = await fetchAllCurrentSessionTicketStatus(tickets);
-      console.log('API call successful:', response);
-      // Process the response as needed
-    } catch (error) {
-      console.error('Error during API call:', error);
+    if (tickets.startedTickets.length === 0) return; // Prevent API call if there are no running tickets
+
+    for (const ticket of tickets.startedTickets) {
+      try {
+        const response = await fetchPipelineExecutionStatus(ticket.orgId, ticket.repId, ticket.pipeId, ticket.exeId);
+        
+        // Fetch additional data recursively
+        const getData = async (ticketId: string): Promise<any> => {
+          const maxRetries = 10;
+          const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+          for (let retries = 0; retries < maxRetries; retries++) {
+              try {
+                  const data = await fetchStatus(ticketId);
+                  if (data.status) {
+                      return data;
+                  }
+                  await delay(1000); // Wait for 1 second before retrying
+              } catch (error) {
+                  if (retries === maxRetries - 1) {
+                      throw new Error('Max retries reached');
+                  }
+              }
+          }
+          throw new Error('Failed to command start');
+        };
+
+        // Call getData function with the ticketId obtained from putExecution
+        const pipelineStatus = await getData(response.ticketId);
+        console.log(`Pipeline status for pipeline: ${ticket.pipeId}`, pipelineStatus);
+
+        const ticketStatus = await getData(ticket.ticketId)
+        console.log(`Original pipeline ticket status for ticket: ${ticket.ticketId}`, ticketStatus);
+
+      // If pipeline status is fully finished then delete from started tickets and move to finished tickets
+      } catch (error) {
+        // ticket not finished or something
+      }
     }
   };
 
@@ -38,7 +69,7 @@ export default function PipelineAppBar() {
   useEffect(() => {
     fetchTicketStatuses(); // Call immediately to get current statuses
 
-    const interval = setInterval(fetchTicketStatuses, 10000); // Poll every 10 seconds
+    const interval = setInterval(fetchTicketStatuses, 30000); // Poll every 30 seconds
 
     // Cleanup the interval on component unmount
     return () => clearInterval(interval);
@@ -65,13 +96,9 @@ export default function PipelineAppBar() {
 
   const generateJson = async () => {
 
-    //console.log(flowData)
-
     var edges = flowData!.edges.map(edge => {
       return { sourceHandle: edge.sourceHandle, targetHandle: edge.targetHandle }
     })
-
-    console.log("copied", edges)
 
     const dataSinks = flowData?.edges.map((edge) => {
       if (edge.data?.filename) {
@@ -153,11 +180,12 @@ export default function PipelineAppBar() {
     const selectedRepo = repositories.filter(repo => repo.organizationId === selectedOrg.id)[0]
 
     const pipelineId = await putPipeline(selectedOrg.id, selectedRepo.id, requestData)
-    dispatch(addNewTicket(pipelineId))
     const executionId = await putExecution(selectedOrg.id, selectedRepo.id, pipelineId)
-    dispatch(addNewTicket(executionId))
-    const startId = await putCommandStart(selectedOrg.id, selectedRepo.id, pipelineId, executionId)
-    dispatch(addNewTicket(startId))
+    dispatch(addNewNotStartedTicket({ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, exeId: executionId.itemIds.executionId}))
+
+    const startId = await putCommandStart(selectedOrg.id, selectedRepo.id, pipelineId, executionId.itemIds.executionId)
+    dispatch(deleteTicket({ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, exeId: executionId.itemIds.executionId}))
+    dispatch(addNewStartedTicket({ticketId: startId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, exeId: executionId.itemIds.executionId}))
   }
 
   return (

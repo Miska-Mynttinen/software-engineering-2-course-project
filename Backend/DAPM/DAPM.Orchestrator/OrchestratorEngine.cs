@@ -49,9 +49,6 @@ namespace DAPM.Orchestrator
         public void StartCollabHandshakeProcess(Guid apiTicketId, string requestedPeerDomain)
         {
             var processId = Guid.NewGuid();
-            _logger.LogInformation("apiTicketId" + apiTicketId.ToString());
-            _logger.LogInformation("processId" + processId.ToString());
-            _logger.LogInformation("requestedPeerDomain" + requestedPeerDomain.ToString());
             var collabHandshakeProcess = new CollabHandshakeProcess(this, _serviceProvider, apiTicketId, processId, requestedPeerDomain);
             _processes[processId] = collabHandshakeProcess;
             collabHandshakeProcess.StartProcess();

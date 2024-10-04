@@ -12,4 +12,8 @@ export const getActivePipeline = (state: RootState) => state.pipelineState.pipel
 
 export const getPipelines = (state: RootState) => state.pipelineState.pipelines
 
-export const getCurrentSessionTickets = (state: RootState) => state.currentSessionTicketState.tickets
+export const getCurrentSessionTickets = (state: RootState) => ({
+    notStartedTickets: state.currentSessionTicketState.notStartedTickets,
+    startedTickets: state.currentSessionTicketState.startedTickets,
+    finishedTickets: state.currentSessionTicketState.finishedTickets,
+  });
