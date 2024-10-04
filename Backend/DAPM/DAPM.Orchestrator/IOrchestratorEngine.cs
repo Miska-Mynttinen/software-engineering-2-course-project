@@ -6,6 +6,7 @@ namespace DAPM.Orchestrator
     public interface IOrchestratorEngine
     {
         public OrchestratorProcess GetProcess(Guid processId);
+        public Dictionary<Guid, OrchestratorProcess> GetProcessesDictionary();
         public void DeleteProcess(Guid processId);
         public void StartGetOrganizationProcess(Guid ticketId, Guid? organizationId);
         public void StartGetRepositoriesProcess(Guid ticketId, Guid organizationId, Guid? repositoryId);

@@ -371,13 +371,20 @@ namespace DAPM.Orchestrator.Processes.PipelineActions
 
         private void SendResourceToPeer()
         {
-
+            // Wait for the organizations to be populated
             while (!_organizationsInRegistry.Any())
             {
-                continue;
-            };
+                Thread.Sleep(100); // Prevents busy-waiting, adds a small delay
+            }
 
-            var organization = _organizationsInRegistry.First(o => o.Id == _destinationOrganizationId);
+            // Check for the organization before accessing
+            var organization = _organizationsInRegistry.FirstOrDefault(o => o.Id == _destinationOrganizationId);
+            if (organization == null)
+            {
+                // Log a warning instead of throwing an exception
+                Console.WriteLine($"Warning: No organization found with ID {_destinationOrganizationId}");
+                return; // Early exit or handle it as needed
+            }
 
             var sendResourceToPeerMessageProducer = _serviceScope.ServiceProvider.GetRequiredService<IQueueProducer<SendResourceToPeerMessage>>();
 
@@ -400,7 +407,16 @@ namespace DAPM.Orchestrator.Processes.PipelineActions
                 Resource = _resource,
             };
 
-            sendResourceToPeerMessageProducer.PublishMessage(sendResourceMessage);
+            try
+            {
+                sendResourceToPeerMessageProducer.PublishMessage(sendResourceMessage);
+                Console.WriteLine($"Resource sent to peer at domain: {organization.Domain}");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception if message publishing fails
+                Console.WriteLine($"Error publishing message: {ex.Message}");
+            }
         }
 
         public override void OnSendResourceToPeerResult(SendResourceToPeerResultMessage message)

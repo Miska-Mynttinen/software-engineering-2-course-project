@@ -65,8 +65,29 @@ namespace DAPM.Orchestrator.Services
 
         private void PostIdentityToRegistry(Identity identity)
         {
+            if (identity == null)
+            {
+                _logger.LogError("Identity cannot be null.");
+                throw new ArgumentNullException(nameof(identity), "Identity cannot be null.");
+            }
+
+            // Check if the peer ID exists (i.e., not null or an empty Guid)
+            if (identity.Id == null || identity.Id == Guid.Empty)
+            {
+                _logger.LogWarning("Peer ID is missing. Skipping the post to the registry.");
+                return; // Skip posting if no valid peer ID is present
+            }
+
+            if (string.IsNullOrEmpty(identity.Name) || string.IsNullOrEmpty(identity.Domain))
+            {
+                _logger.LogError("Identity Name and Domain cannot be null or empty.");
+                throw new InvalidOperationException("Identity Name and Domain must be valid non-null and non-empty strings.");
+            }
+
+            // Retrieve the post peer message producer from the service provider
             var postPeerProducer = _serviceScope.ServiceProvider.GetRequiredService<IQueueProducer<PostPeerMessage>>();
 
+            // Create the message
             var postPeerMessage = new PostPeerMessage()
             {
                 TimeToLive = TimeSpan.FromMinutes(1),
@@ -78,7 +99,9 @@ namespace DAPM.Orchestrator.Services
                 }
             };
 
+            // Publish the message
             postPeerProducer.PublishMessage(postPeerMessage);
+            _logger.LogInformation($"PostPeerMessage for Identity '{identity.Name}' has been published.");
         }
     }
 }

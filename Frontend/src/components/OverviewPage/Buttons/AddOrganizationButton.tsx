@@ -18,10 +18,18 @@ export default function AddOrganizationButton() {
     const [domainName, setDomainName] = React.useState('');
     
     const [open, setOpen] = React.useState(false);
+    const [disabled, setDisabled] = React.useState(false);
+
     const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const handleClose = () => {
+        setOpen(false);
+        setDisabled(false);
+    };
 
     const handleUpload = () => {
+        // Disable the submit button to prevent multiple submissions
+        setDisabled(true);
+
         PostNewPeer(domainName)
     }
 

@@ -93,5 +93,74 @@ npm start
 
 The program is stated at http://localhost:3000
 
+### How correctly setup pipeline in Frontend client and deploy pipeline to Backend
+
+- Under organization (DTU) create a repository
+
+- In repository add a file
+
+![alt text](image.png)
+
+- Create a pipeline within an organization that has an input with a type and a file
+
+- Connect to a miner or something
+
+- Connect the miner or something to a data sink and set the data sink setting to a specific repository defined before
+
+- Click on the line between the miner and the datasink and set the filename as something you want to store in the data sink
+
+- Deploy (currently deployment does not work)
+
+
+### How to monitor pipelines states from the Backend
+
+![alt text](image-1.png)
+
+- The pipeline goes to the Backend through DAPM.ClientApi
+
+- Then it is sent to DAPM.PipelineOrchestratorMS.Api
+
+- The orchestrator loops through all the pipeline step asynchronously until all steps are complete
+
+- Using the defined C# web sockets send data to the Frontend when pipeline has started and when it has finished
+
+- Have the Frontend Receive these:
+
+useEffect(() => {
+    const socket = new WebSocket('ws://localhost:5000/ws');
+
+    socket.onmessage = (event) => {
+        const message = event.data;
+        setPipelineUpdates((prevUpdates) => [...prevUpdates, message]);
+    };
+
+    socket.onerror = (error) => {
+        console.error('WebSocket Error: ', error);
+    };
+
+    return () => socket.close();
+}, []);
+
 
 ![Containerized DAPM Peer Overview. From Backend thesis](Models/Backend_in_docker_thesis_image.png)
+
+
+
+
+#### All the changes made to the software
+
+- Fixed dockerfile so .net containers actually wait for rabbit mqtt to be fully operational before starting
+
+- Removed form backend gitignore: DAPM/DAPM.Orchestrator/Services/Configuration/IdentityConfiguration.json, because orchestrator microservice cannot run without a organization defined in it
+
+- Changed Frontend buttons to be disabled while submitting so userr does not accidentally submit many copies
+
+- Fixed pipeline orcherstrator microservice to be able to use ticket id and handle errors
+
+- Fixed orchestrator microservice to use the ticket id for process id instead of generating a random new id not related to anything
+
+- added a function to check all available processes in the orchestrator microservice: _orchestratorEngine.GetProcessesDictionary()
+
+- Added redux state for current browser sessions pipeline tickets
+
+- Also API call that checks the status of all of the tickets of the current browser session
