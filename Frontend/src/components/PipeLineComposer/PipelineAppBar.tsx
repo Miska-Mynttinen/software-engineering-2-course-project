@@ -12,6 +12,7 @@ import { DataSinkNodeData, DataSourceNodeData, OperatorNodeData } from "../../re
 import { putCommandStart, putExecution, putPipeline, fetchPipelineExecutionStatus, fetchStatus } from "../../services/backendAPI";
 import { getOrganizations, getRepositories } from "../../redux/selectors/apiSelector";
 import { getHandleId, getNodeId } from "./Flow";
+import PipelineStatusDialogBox from "./PipelineStatusDialogBox";
 
 export default function PipelineAppBar() {
   const navigate = useNavigate();
@@ -210,6 +211,7 @@ export default function PipelineAppBar() {
             </Box>
           )}
         </Box>
+        <PipelineStatusDialogBox/>
         <Button onClick={() => generateJson()}>
           <Typography variant="body1" sx={{ color: "white" }}>Deploy pipeline</Typography>
         </Button>
