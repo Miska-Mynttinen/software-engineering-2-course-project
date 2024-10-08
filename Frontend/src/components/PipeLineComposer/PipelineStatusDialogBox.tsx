@@ -14,6 +14,10 @@ import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
+import ReactDOM from 'react-dom';
+import FlowDiagram from '../OverviewPage/ImageGeneration/FlowDiagram';
+import { useSelector } from 'react-redux';
+import { getPipelines } from '../../redux/selectors';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -25,6 +29,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function PipelineStatusDialog() {
+  const pipelines = useSelector(getPipelines); // Move this inside the component
   const [open, setOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<string | null>(null);
   const [popupOpen, setPopupOpen] = React.useState(false);
@@ -82,17 +87,17 @@ export default function PipelineStatusDialog() {
               <Typography variant="h6" gutterBottom>Not Started</Typography>
               <Paper elevation={1} sx={{ borderRadius: 2 }}>
                 <List>
-                  <ListItemButton onClick={() => handleItemClick('Source 1')}>
-                    <ListItemText primary="Source 1" secondary="Details of source 1" />
-                  </ListItemButton>
-                  <ListItemButton onClick={() => handleItemClick('Source 2')}>
-                    <ListItemText primary="Source 2" secondary="Details of source 2" />
-                  </ListItemButton>
+                  {/* Dynamically render pipeline names in "Not Started" */}
+                  {pipelines.map(({ pipeline: flowData, id, name }) => (
+                    <ListItemButton key={id} onClick={() => handleItemClick(name)}>
+                      <ListItemText primary={name} secondary="Details of the pipeline" />
+                    </ListItemButton>
+                  ))}
                 </List>
               </Paper>
             </Grid>
 
-            {/* Column 2 */}
+            {/* Other columns can remain the same */}
             <Grid item xs={4}>
               <Typography variant="h6" gutterBottom>Running</Typography>
               <Paper elevation={1} sx={{ borderRadius: 2 }}>
@@ -149,7 +154,7 @@ export default function PipelineStatusDialog() {
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Box sx={{ p: 4, height: '400px', overflow: 'auto' }}> {/* Increased height and overflow handling */}
+        <Box sx={{ p: 4, height: '400px', overflow: 'auto' }}>
           <Typography id="popup-dialog-description" variant="body1">
             More details about {selectedItem} will be shown here.
           </Typography>

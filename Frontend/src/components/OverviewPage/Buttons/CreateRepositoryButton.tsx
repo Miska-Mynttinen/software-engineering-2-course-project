@@ -5,6 +5,7 @@ import { putRepository } from '../../../services/backendAPI';
 
 export interface CreateRepositoryButtonProps {
     orgId: string,
+    onRepositoryCreated: () => void;
 }
 
 const style = {
@@ -19,7 +20,7 @@ const style = {
     p: 4,
 };
 
-const CreateRepositoryButton = ({ orgId }: CreateRepositoryButtonProps) => {
+const CreateRepositoryButton = ({ orgId , onRepositoryCreated}: CreateRepositoryButtonProps) => {
     const [open, setOpen] = React.useState(false);
     const [disabled, setDisabled] = React.useState(false);
 
@@ -39,6 +40,11 @@ const CreateRepositoryButton = ({ orgId }: CreateRepositoryButtonProps) => {
             try {
                 const result = await putRepository(orgId, repositoryName);
                 console.log('Repository successfully created:', result);
+                 // Call the callback function to refresh the page
+                onRepositoryCreated();
+
+                 // Close modal after submission
+                 handleClose();
             } catch (error) {
                 console.error('Error creating repository:', error);
             }
@@ -46,7 +52,7 @@ const CreateRepositoryButton = ({ orgId }: CreateRepositoryButtonProps) => {
             console.error('No repository name given.');
         }
 
-        alert("Form Submitted");
+        //alert("Form Submitted");
 
         // Re-enable the submit button after submission is done
         setDisabled(false);

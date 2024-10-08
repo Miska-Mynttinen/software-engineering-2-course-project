@@ -39,6 +39,10 @@ export default function PersistentDrawerLeft() {
   const repositories: Repository[] = useAppSelector(getRepositories)
   const resources = useSelector(getResources)
 
+  // Function to refresh repositories
+  const refreshRepositories = () => {
+    dispatch(repositoryThunk(organizations));
+  };
   useEffect(() => {
     dispatch(organizationThunk())
     dispatch(repositoryThunk(organizations));
@@ -132,7 +136,10 @@ async function downloadReadableStream(url: string, fileName: string) {
             ))}
             <ListItem sx={{ justifyContent: 'center' }}>
               <Box sx={{ width: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <CreateRepositoryButton orgId={organization.id} />
+                <CreateRepositoryButton orgId={organization.id}
+                onRepositoryCreated={refreshRepositories}
+                 />
+                
               </Box>
             </ListItem>
           </>
