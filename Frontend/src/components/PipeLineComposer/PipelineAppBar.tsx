@@ -29,7 +29,7 @@ export default function PipelineAppBar() {
     for (const ticket of tickets.startedTickets) {
       try {
         const response = await fetchPipelineExecutionStatus(ticket.orgId, ticket.repId, ticket.pipeId, ticket.exeId);
-        
+
         // Fetch additional data recursively
         const getData = async (ticketId: string): Promise<any> => {
           const maxRetries = 10;
@@ -54,9 +54,6 @@ export default function PipelineAppBar() {
         // Call getData function with the ticketId obtained from putExecution
         const pipelineStatus = await getData(response.ticketId);
         console.log(`Pipeline status for pipeline: ${ticket.pipeId}`, pipelineStatus);
-
-        const ticketStatus = await getData(ticket.ticketId)
-        console.log(`Original pipeline ticket status for ticket: ${ticket.ticketId}`, ticketStatus);
 
       // If pipeline status is fully finished then delete from started tickets and move to finished tickets
       } catch (error) {
