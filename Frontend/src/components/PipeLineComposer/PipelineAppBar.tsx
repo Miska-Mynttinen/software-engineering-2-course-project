@@ -42,6 +42,7 @@ export default function PipelineAppBar() {
       try {
         const response = await fetchPipelineExecutionStatus(ticket.orgId, ticket.repId, ticket.pipeId, ticket.exeId);
       
+        // Fetch additional data recursively
         const getData = async (ticketId: string): Promise<any> => {
           const maxRetries = 10;
           const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -72,6 +73,8 @@ export default function PipelineAppBar() {
           pipelineName: response.pipelineName || response.pipeline?.name, // Include the pipeline name here
           status,
         });
+
+      // If pipeline status is fully finished then delete from started tickets and move to finished tickets
       } catch (error) {
         console.error(`Error fetching status for ticket ${ticket.ticketId}:`, error);
       }
