@@ -16,7 +16,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { getPipelines } from '../../redux/selectors';
+import { getPipelines, getCurrentSessionTickets } from '../../redux/selectors';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -31,8 +31,8 @@ const Transition = React.forwardRef(function Transition(
 interface PipelineStatus {
   ticketId: string;
   pipelineId: string;
-  pipelineName: string; // Ensure this is included
-  status: 'Not Started' | 'Running' | 'Finished';
+  pipelineName: string | undefined;
+  status: 'Not Started' | 'Running' | 'Completed';
 }
 
 // Define the props type for the dialog component
@@ -46,6 +46,9 @@ console.log("All Pipeline:",pipelines)
   const [open, setOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<PipelineStatus | null>(null);
   const [popupOpen, setPopupOpen] = useState(false);
+
+  // Get current session tickets at the top level of the component
+  const tickets = useSelector(getCurrentSessionTickets);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -67,7 +70,11 @@ console.log("All Pipeline:",pipelines)
   // Create arrays for each status
   const notStartedPipelines = statuses.filter(status => status.status === 'Not Started');
   const runningPipelines = statuses.filter(status => status.status === 'Running');
-  const finishedPipelines = statuses.filter(status => status.status === 'Finished');
+  const finishedPipelines = statuses.filter(status => status.status === 'Completed');
+
+  /* const notStartedPipelines = tickets.notStartedTickets;
+  const runningPipelines = tickets.startedTickets;
+  const finishedPipelines = tickets.finishedTickets; */
   console.log("NS:",notStartedPipelines);
   console.log("RP:",runningPipelines);
   console.log("FP:",finishedPipelines);
@@ -110,7 +117,7 @@ console.log("All Pipeline:",pipelines)
                 <List>
                   {notStartedPipelines.map(status => (
                     <ListItemButton key={status.ticketId} onClick={() => handleItemClick(status)}>
-                      <ListItemText primary={status.pipelineName || "No Name Available"} secondary="Click for details" /> {/* Use pipelineName here */}
+                      <ListItemText primary={status.pipelineName || "No Name Available"} secondary={status.ticketId} />
                     </ListItemButton>
                   ))}
                 </List>
@@ -124,7 +131,7 @@ console.log("All Pipeline:",pipelines)
                 <List>
                   {runningPipelines.map(status => (
                     <ListItemButton key={status.ticketId} onClick={() => handleItemClick(status)}>
-                      <ListItemText primary={status.ticketId} secondary={status.pipelineName} /> {/* Use pipelineName here */}
+                      <ListItemText primary={status.pipelineName || "No Name Available"} secondary={status.ticketId} />
                     </ListItemButton>
                   ))}
                 </List>
@@ -138,7 +145,7 @@ console.log("All Pipeline:",pipelines)
                 <List>
                   {finishedPipelines.map(status => (
                     <ListItemButton key={status.ticketId} onClick={() => handleItemClick(status)}>
-                      <ListItemText primary={status.pipelineName || "No Name Available"} secondary="Click for details" /> {/* Use pipelineName here */}
+                      <ListItemText primary={status.pipelineName || "No Name Available"} secondary={status.ticketId} />
                     </ListItemButton>
                   ))}
                 </List>

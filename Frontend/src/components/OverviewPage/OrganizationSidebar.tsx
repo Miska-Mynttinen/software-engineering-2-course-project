@@ -43,6 +43,11 @@ export default function PersistentDrawerLeft() {
   const refreshRepositories = () => {
     dispatch(repositoryThunk(organizations));
   };
+
+  const refreshResources = () => {
+    dispatch(resourceThunk({ organizations, repositories }));
+  };
+
   useEffect(() => {
     dispatch(organizationThunk())
     dispatch(repositoryThunk(organizations));
@@ -104,7 +109,7 @@ async function downloadReadableStream(url: string, fileName: string) {
                 <div style={{ display: 'flex', alignItems: 'center', paddingInline: '0.5rem' }}>
                   <p style={{fontSize: '0.9rem' }}>Resources</p>
                   <Box sx={{ marginLeft: 'auto' }}>
-                    <ResourceUploadButton orgId={repository.organizationId} repId={repository.id} />
+                    <ResourceUploadButton orgId={repository.organizationId} repId={repository.id} onResourceCreated={refreshResources} />
                   </Box>
                 </div>
                 {resources.map((resource) => (resource.repositoryId === repository.id && resource.type !== "operator" ?
@@ -120,7 +125,7 @@ async function downloadReadableStream(url: string, fileName: string) {
                 <div style={{ display: 'flex', alignItems: 'center', paddingInline: '0.5rem' }}>
                   <p style={{fontSize: '0.9rem'}}>Operators</p>
                   <Box sx={{ marginLeft: 'auto' }}>
-                    <OperatorUploadButton orgId={repository.organizationId} repId={repository.id} />
+                    <OperatorUploadButton orgId={repository.organizationId} repId={repository.id} onOperatorCreated={refreshResources} />
                   </Box>
                 </div>
                 {resources.map((resource) => (resource.repositoryId === repository.id && resource.type === "operator" ?
@@ -136,9 +141,7 @@ async function downloadReadableStream(url: string, fileName: string) {
             ))}
             <ListItem sx={{ justifyContent: 'center' }}>
               <Box sx={{ width: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <CreateRepositoryButton orgId={organization.id}
-                onRepositoryCreated={refreshRepositories} />
-                
+                <CreateRepositoryButton orgId={organization.id} onRepositoryCreated={refreshRepositories} />
               </Box>
             </ListItem>
           </>

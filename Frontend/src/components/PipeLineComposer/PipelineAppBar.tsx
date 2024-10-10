@@ -14,12 +14,11 @@ import { getOrganizations, getRepositories } from "../../redux/selectors/apiSele
 import { getHandleId, getNodeId } from "./Flow";
 import PipelineStatusDialogBox from "./PipelineStatusDialogBox";
 
-// Define the type for each status item
 interface PipelineStatus {
   ticketId: string;
   pipelineId: string;
-  pipelineName: string; // Add pipelineName to the interface
-  status: 'Not Started' | 'Running' | 'Finished';
+  pipelineName: string | undefined;
+  status: 'Not Started' | 'Running' | 'Completed';
 }
 
 export default function PipelineAppBar() {
@@ -65,22 +64,38 @@ export default function PipelineAppBar() {
 
         // Call getData function with the ticketId obtained from putExecution
         const pipelineStatus = await getData(response.ticketId);
-        const status = pipelineStatus.result.status.state as 'Not Started' | 'Running' | 'Finished'; // Cast the status
-        console.log(`Pipeline status for pipeline: ${ticket.pipeId}`, pipelineStatus.result.status.state, {ticket});
-        fetchedStatuses.push({
-          ticketId: ticket.ticketId,
-          pipelineId: ticket.pipeId,
-          pipelineName: response.pipelineName || response.pipeline?.name, // Include the pipeline name here
-          status,
-        });
 
-      // If pipeline status is fully finished then delete from started tickets and move to finished tickets
+        console.log(`Pipeline status for pipeline: ${ticket.pipeId}`, pipelineStatus.result.status.state, pipelineStatus);
+
+        const status = pipelineStatus.result.status.state as 'Not Started' | 'Running' | 'Completed'; // Cast the status
+
+        if (status === 'Completed') {
+          dispatch(deleteTicket({ ticketId: ticket.ticketId, orgId: ticket.orgId, repId: ticket.repId, pipeId: ticket.pipeId, pipeName: ticket.pipeName, exeId: ticket.exeId}));
+          dispatch(addNewFinishedTicket({ ticketId: ticket.ticketId, orgId: ticket.orgId, repId: ticket.repId, pipeId: ticket.pipeId, pipeName: ticket.pipeName, exeId: ticket.exeId }));
+
+          fetchedStatuses.filter((pipelineStatus) => pipelineStatus.pipelineId !== ticket.pipeId);
+          fetchedStatuses.push({
+            ticketId: ticket.ticketId,
+            pipelineId: ticket.pipeId,
+            pipelineName: ticket.pipeName,
+            status,
+          });
+        } else {
+          const pipelineExists = fetchedStatuses.some(pipelineStatus => pipelineStatus.pipelineId === ticket.pipeId);
+          if (!pipelineExists) {
+            // If not found, add it to fetchedStatuses
+            fetchedStatuses.push({
+              ticketId: ticket.ticketId,
+              pipelineId: ticket.pipeId,
+              pipelineName: ticket.pipeName,
+              status,
+            });
+          }
+        }
       } catch (error) {
         console.error(`Error fetching status for ticket ${ticket.ticketId}:`, error);
       }
     }
-    
-    //console.log("fetchedStatuses",fetchedStatuses);
 
     setStatuses(fetchedStatuses); // Update the statuses state with the fetched statuses
   };
@@ -89,7 +104,7 @@ export default function PipelineAppBar() {
   useEffect(() => {
     fetchTicketStatuses(); // Call immediately to get current statuses
 
-    const interval = setInterval(fetchTicketStatuses, 30000); // Poll every 30 seconds
+    const interval = setInterval(fetchTicketStatuses, 10000); // Poll every 10 seconds
 
     // Cleanup the interval on component unmount
     return () => clearInterval(interval);
@@ -197,11 +212,23 @@ export default function PipelineAppBar() {
 
     const pipelineId = await putPipeline(selectedOrg.id, selectedRepo.id, requestData);
     const executionId = await putExecution(selectedOrg.id, selectedRepo.id, pipelineId);
-    dispatch(addNewNotStartedTicket({ ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, exeId: executionId.itemIds.executionId }));
+    dispatch(addNewNotStartedTicket({ ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, pipeName: pipelineName, exeId: executionId.itemIds.executionId }));
+  
+    const newStatuses = statuses;
+    // If you want to add another status entry, it should be done here explicitly
+    newStatuses.push({
+      ticketId: executionId.ticketId,
+      pipelineId: executionId.itemIds.executionId,
+      pipelineName: pipelineName,
+      status: 'Not Started',
+    });
+
+    setStatuses(newStatuses);
+
 
     const startId = await putCommandStart(selectedOrg.id, selectedRepo.id, pipelineId, executionId.itemIds.executionId);
-    dispatch(deleteTicket({ ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, exeId: executionId.itemIds.executionId }));
-    dispatch(addNewStartedTicket({ ticketId: startId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, exeId: executionId.itemIds.executionId }));
+    dispatch(deleteTicket({ ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, pipeName: pipelineName, exeId: executionId.itemIds.executionId }));
+    dispatch(addNewStartedTicket({ ticketId: startId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, pipeName: pipelineName, exeId: executionId.itemIds.executionId }));
   };
 
   return (

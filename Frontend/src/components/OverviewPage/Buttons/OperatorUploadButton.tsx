@@ -5,6 +5,7 @@ import { putOperator, putResource } from '../../../services/backendAPI';
 export interface UploadButtonProps {
     orgId: string,
     repId: string,
+    onOperatorCreated: () => void;
 }
 
 const style = {
@@ -19,7 +20,7 @@ const style = {
     p: 4,
 };
 
-const OperatorUploadButton = ({ orgId, repId }: UploadButtonProps) => {
+const OperatorUploadButton = ({ orgId, repId, onOperatorCreated }: UploadButtonProps) => {
 
     const [open, setOpen] = React.useState(false);
     const [disabled, setDisabled] = React.useState(false);
@@ -42,7 +43,10 @@ const OperatorUploadButton = ({ orgId, repId }: UploadButtonProps) => {
         if (formData.get('SourceCodeFile')) {
             try {
                 const result = await putOperator(orgId, repId, formData);
-                console.log('Resource successfully uploaded:', result);
+                console.log('Operator successfully uploaded:', result);
+                onOperatorCreated();
+
+                handleClose();
             } catch (error) {
                 console.error('Error uploading resource:', error);
             }

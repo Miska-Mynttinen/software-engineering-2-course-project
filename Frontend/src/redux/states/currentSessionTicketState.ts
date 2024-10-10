@@ -4,6 +4,7 @@ export interface Ticket {
   orgId: string;
   repId: string;
   pipeId: string;
+  pipeName: string | undefined;
   exeId: string;
 }
 

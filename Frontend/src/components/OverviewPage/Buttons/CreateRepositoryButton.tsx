@@ -20,7 +20,7 @@ const style = {
     p: 4,
 };
 
-const CreateRepositoryButton = ({ orgId , onRepositoryCreated}: CreateRepositoryButtonProps) => {
+const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositoryButtonProps) => {
     const [open, setOpen] = React.useState(false);
     const [disabled, setDisabled] = React.useState(false);
 

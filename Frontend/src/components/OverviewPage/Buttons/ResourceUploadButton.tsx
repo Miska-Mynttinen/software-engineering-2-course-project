@@ -5,6 +5,7 @@ import { putResource } from '../../../services/backendAPI';
 export interface UploadButtonProps {
     orgId: string,
     repId: string,
+    onResourceCreated: () => void;
 }
 
 const style = {
@@ -19,7 +20,7 @@ const style = {
     p: 4,
 };
 
-const ResourceUploadButton = ({ orgId, repId }: UploadButtonProps) => {
+const ResourceUploadButton = ({ orgId, repId, onResourceCreated }: UploadButtonProps) => {
 
     const dataTypes = ["eventLog", "bpmnModel", "petriNet"]
 
@@ -44,6 +45,9 @@ const ResourceUploadButton = ({ orgId, repId }: UploadButtonProps) => {
             try {
                 const result = await putResource(orgId, repId, formData);
                 console.log('Resource successfully uploaded:', result);
+                onResourceCreated();
+
+                handleClose();
             } catch (error) {
                 console.error('Error uploading resource:', error);
             }
