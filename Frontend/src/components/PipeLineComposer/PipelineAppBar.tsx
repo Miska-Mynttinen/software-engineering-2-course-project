@@ -5,31 +5,42 @@ import { useDispatch, useSelector } from "react-redux";
 import { getActiveFlowData, getActivePipeline, getCurrentSessionTickets } from "../../redux/selectors";
 import { useState, useEffect } from "react";
 import { updatePipelineName } from "../../redux/slices/pipelineSlice";
-import { addNewNotStartedTicket, addNewStartedTicket, addNewFinishedTicket, deleteTicket} from "../../redux/slices/currentSessionTicketSlice";
+import { addNewNotStartedTicket, addNewStartedTicket, addNewFinishedTicket, deleteTicket } from "../../redux/slices/currentSessionTicketSlice";
 import EditIcon from '@mui/icons-material/Edit';
 import { Node } from "reactflow";
 import { DataSinkNodeData, DataSourceNodeData, OperatorNodeData } from "../../redux/states/pipelineState";
 import { putCommandStart, putExecution, putPipeline, fetchPipelineExecutionStatus, fetchStatus } from "../../services/backendAPI";
 import { getOrganizations, getRepositories } from "../../redux/selectors/apiSelector";
 import { getHandleId, getNodeId } from "./Flow";
+import PipelineStatusDialogBox from "./PipelineStatusDialogBox";
+
+interface PipelineStatus {
+  ticketId: string;
+  pipelineId: string;
+  pipelineName: string | undefined;
+  status: 'Not Started' | 'Running' | 'Completed';
+}
 
 export default function PipelineAppBar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [statuses, setStatuses] = useState<PipelineStatus[]>([]); // State for pipeline statuses
 
   // Get current session tickets at the top level of the component
-  const tickets = useSelector(getCurrentSessionTickets); 
+  const tickets = useSelector(getCurrentSessionTickets);
 
   // Function to fetch ticket statuses
   const fetchTicketStatuses = async () => {
     if (tickets.startedTickets.length === 0) return; // Prevent API call if there are no running tickets
 
+    const fetchedStatuses: PipelineStatus[] = []; // Initialize an array to hold the fetched statuses
+
     for (const ticket of tickets.startedTickets) {
       try {
         const response = await fetchPipelineExecutionStatus(ticket.orgId, ticket.repId, ticket.pipeId, ticket.exeId);
-
+      
         // Fetch additional data recursively
         const getData = async (ticketId: string): Promise<any> => {
           const maxRetries = 10;
@@ -53,20 +64,47 @@ export default function PipelineAppBar() {
 
         // Call getData function with the ticketId obtained from putExecution
         const pipelineStatus = await getData(response.ticketId);
-        console.log(`Pipeline status for pipeline: ${ticket.pipeId}`, pipelineStatus);
 
-      // If pipeline status is fully finished then delete from started tickets and move to finished tickets
+        console.log(`Pipeline status for pipeline: ${ticket.pipeId}`, pipelineStatus.result.status.state, pipelineStatus);
+
+        const status = pipelineStatus.result.status.state as 'Not Started' | 'Running' | 'Completed'; // Cast the status
+
+        if (status === 'Completed') {
+          dispatch(deleteTicket({ ticketId: ticket.ticketId, orgId: ticket.orgId, repId: ticket.repId, pipeId: ticket.pipeId, pipeName: ticket.pipeName, exeId: ticket.exeId}));
+          dispatch(addNewFinishedTicket({ ticketId: ticket.ticketId, orgId: ticket.orgId, repId: ticket.repId, pipeId: ticket.pipeId, pipeName: ticket.pipeName, exeId: ticket.exeId }));
+
+          fetchedStatuses.filter((pipelineStatus) => pipelineStatus.pipelineId !== ticket.pipeId);
+          fetchedStatuses.push({
+            ticketId: ticket.ticketId,
+            pipelineId: ticket.pipeId,
+            pipelineName: ticket.pipeName,
+            status,
+          });
+        } else {
+          const pipelineExists = fetchedStatuses.some(pipelineStatus => pipelineStatus.pipelineId === ticket.pipeId);
+          if (!pipelineExists) {
+            // If not found, add it to fetchedStatuses
+            fetchedStatuses.push({
+              ticketId: ticket.ticketId,
+              pipelineId: ticket.pipeId,
+              pipelineName: ticket.pipeName,
+              status,
+            });
+          }
+        }
       } catch (error) {
-        // ticket not finished or something
+        console.error(`Error fetching status for ticket ${ticket.ticketId}:`, error);
       }
     }
+
+    setStatuses(fetchedStatuses); // Update the statuses state with the fetched statuses
   };
 
   // Set up the interval for polling the API
   useEffect(() => {
     fetchTicketStatuses(); // Call immediately to get current statuses
 
-    const interval = setInterval(fetchTicketStatuses, 30000); // Poll every 30 seconds
+    const interval = setInterval(fetchTicketStatuses, 10000); // Poll every 10 seconds
 
     // Cleanup the interval on component unmount
     return () => clearInterval(interval);
@@ -80,30 +118,28 @@ export default function PipelineAppBar() {
     setIsEditing(false);
   };
 
-  const organizations = useSelector(getOrganizations)
-  const repositories = useSelector(getRepositories)
-
-  const pipelineName = useSelector(getActivePipeline)?.name
+  const organizations = useSelector(getOrganizations);
+  const repositories = useSelector(getRepositories);
+  const pipelineName = useSelector(getActivePipeline)?.name;
 
   const setPipelineName = (name: string) => {
-    dispatch(updatePipelineName(name))
-  }
+    dispatch(updatePipelineName(name));
+  };
 
-  const flowData = useSelector(getActiveFlowData)
+  const flowData = useSelector(getActiveFlowData);
 
   const generateJson = async () => {
-
     var edges = flowData!.edges.map(edge => {
-      return { sourceHandle: edge.sourceHandle, targetHandle: edge.targetHandle }
-    })
+      return { sourceHandle: edge.sourceHandle, targetHandle: edge.targetHandle };
+    });
 
     const dataSinks = flowData?.edges.map((edge) => {
       if (edge.data?.filename) {
-        const newTarget = getHandleId()
-        const egeToModify = edges.find(e => e.sourceHandle == edge.sourceHandle && e.targetHandle == edge.targetHandle)
-        egeToModify!.targetHandle = newTarget
+        const newTarget = getHandleId();
+        const egeToModify = edges.find(e => e.sourceHandle === edge.sourceHandle && e.targetHandle === edge.targetHandle);
+        egeToModify!.targetHandle = newTarget;
 
-        const originalDataSink = flowData!.nodes.find(node => node.id === edge.target) as Node<DataSinkNodeData>
+        const originalDataSink = flowData!.nodes.find(node => node.id === edge.target) as Node<DataSinkNodeData>;
         return {
           type: originalDataSink?.type,
           data: {
@@ -111,10 +147,9 @@ export default function PipelineAppBar() {
             templateData: { sourceHandles: [], targetHandles: [{ id: newTarget }] },
             instantiationData: {
               resource: {
-                //...originalDataSink?.data?.instantiationData.repository, 
                 organizationId: originalDataSink?.data?.instantiationData.repository?.organizationId,
                 repositoryId: originalDataSink?.data?.instantiationData.repository?.id,
-                name: edge?.data?.filename
+                name: edge?.data?.filename,
               }
             }
           },
@@ -122,11 +157,11 @@ export default function PipelineAppBar() {
           id: getNodeId(),
           width: 100,
           height: 100,
-        }
+        };
       }
-    }).filter(node => node !== undefined) as any
+    }).filter(node => node !== undefined) as any;
 
-    console.log(JSON.stringify(dataSinks))
+    console.log(JSON.stringify(dataSinks));
 
     const requestData = {
       name: pipelineName,
@@ -138,7 +173,6 @@ export default function PipelineAppBar() {
               ...node.data,
               instantiationData: {
                 resource: {
-                  //...node?.data?.instantiationData.resource,
                   organizationId: node?.data?.instantiationData.resource?.organizationId,
                   repositoryId: node?.data?.instantiationData.resource?.repositoryId,
                   resourceId: node?.data?.instantiationData.resource?.id,
@@ -146,15 +180,15 @@ export default function PipelineAppBar() {
               }
             },
             width: 100, height: 100, position: { x: 100, y: 100 }, id: node.id, label: "",
-          } as any
+          } as any;
         }).concat(
           flowData?.nodes?.filter(node => node.type === 'operator').map(node => node as Node<OperatorNodeData>).map(node => {
             return {
-              type: node.type, data: {
+              type: node.type,
+              data: {
                 ...node.data,
                 instantiationData: {
                   resource: {
-                    //...node?.data?.instantiationData.algorithm,
                     organizationId: node?.data?.instantiationData.algorithm?.organizationId,
                     repositoryId: node?.data?.instantiationData.algorithm?.repositoryId,
                     resourceId: node?.data?.instantiationData.algorithm?.id,
@@ -162,28 +196,40 @@ export default function PipelineAppBar() {
                 }
               },
               width: 100, height: 100, position: { x: 100, y: 100 }, id: node.id, label: "",
-            } as any
+            } as any;
           })
         ).concat(dataSinks),
         edges: edges.map(edge => {
-          return { sourceHandle: edge.sourceHandle, targetHandle: edge.targetHandle }
+          return { sourceHandle: edge.sourceHandle, targetHandle: edge.targetHandle };
         })
       }
-    }
+    };
 
-    console.log(JSON.stringify(requestData))
+    console.log(JSON.stringify(requestData));
 
-    const selectedOrg = organizations[0]
-    const selectedRepo = repositories.filter(repo => repo.organizationId === selectedOrg.id)[0]
+    const selectedOrg = organizations[0];
+    const selectedRepo = repositories.filter(repo => repo.organizationId === selectedOrg.id)[0];
 
-    const pipelineId = await putPipeline(selectedOrg.id, selectedRepo.id, requestData)
-    const executionId = await putExecution(selectedOrg.id, selectedRepo.id, pipelineId)
-    dispatch(addNewNotStartedTicket({ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, exeId: executionId.itemIds.executionId}))
+    const pipelineId = await putPipeline(selectedOrg.id, selectedRepo.id, requestData);
+    const executionId = await putExecution(selectedOrg.id, selectedRepo.id, pipelineId);
+    dispatch(addNewNotStartedTicket({ ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, pipeName: pipelineName, exeId: executionId.itemIds.executionId }));
+  
+    const newStatuses = statuses;
+    // If you want to add another status entry, it should be done here explicitly
+    newStatuses.push({
+      ticketId: executionId.ticketId,
+      pipelineId: executionId.itemIds.executionId,
+      pipelineName: pipelineName,
+      status: 'Not Started',
+    });
 
-    const startId = await putCommandStart(selectedOrg.id, selectedRepo.id, pipelineId, executionId.itemIds.executionId)
-    dispatch(deleteTicket({ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, exeId: executionId.itemIds.executionId}))
-    dispatch(addNewStartedTicket({ticketId: startId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, exeId: executionId.itemIds.executionId}))
-  }
+    setStatuses(newStatuses);
+
+
+    const startId = await putCommandStart(selectedOrg.id, selectedRepo.id, pipelineId, executionId.itemIds.executionId);
+    dispatch(deleteTicket({ ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, pipeName: pipelineName, exeId: executionId.itemIds.executionId }));
+    dispatch(addNewStartedTicket({ ticketId: startId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, pipeName: pipelineName, exeId: executionId.itemIds.executionId }));
+  };
 
   return (
     <AppBar position="fixed">
@@ -207,11 +253,11 @@ export default function PipelineAppBar() {
             </Box>
           )}
         </Box>
+        <PipelineStatusDialogBox statuses={statuses} /> {/* Pass the statuses */}
         <Button onClick={() => generateJson()}>
           <Typography variant="body1" sx={{ color: "white" }}>Deploy pipeline</Typography>
         </Button>
       </Toolbar>
     </AppBar>
-  )
+  );
 }
-
