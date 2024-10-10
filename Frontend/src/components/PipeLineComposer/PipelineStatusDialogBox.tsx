@@ -14,8 +14,7 @@ import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
-import ReactDOM from 'react-dom';
-import FlowDiagram from '../OverviewPage/ImageGeneration/FlowDiagram';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { getPipelines } from '../../redux/selectors';
 
@@ -28,11 +27,25 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function PipelineStatusDialog() {
-  const pipelines = useSelector(getPipelines); // Move this inside the component
-  const [open, setOpen] = React.useState(false);
-  const [selectedItem, setSelectedItem] = React.useState<string | null>(null);
-  const [popupOpen, setPopupOpen] = React.useState(false);
+// Define the type for each status item
+interface PipelineStatus {
+  ticketId: string;
+  pipelineId: string;
+  pipelineName: string; // Ensure this is included
+  status: 'Not Started' | 'Running' | 'Finished';
+}
+
+// Define the props type for the dialog component
+interface PipelineStatusDialogBoxProps {
+  statuses: PipelineStatus[];
+}
+
+export default function PipelineStatusDialogBox({ statuses }: PipelineStatusDialogBoxProps) {
+  const pipelines = useSelector(getPipelines);
+console.log("All Pipeline:",pipelines)
+  const [open, setOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<PipelineStatus | null>(null);
+  const [popupOpen, setPopupOpen] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -42,14 +55,22 @@ export default function PipelineStatusDialog() {
     setOpen(false);
   };
 
-  const handleItemClick = (item: string) => {
-    setSelectedItem(item);
+  const handleItemClick = (status: PipelineStatus) => {
+    setSelectedItem(status);
     setPopupOpen(true); // Open the popup dialog
   };
 
   const handlePopupClose = () => {
     setPopupOpen(false);
   };
+
+  // Create arrays for each status
+  const notStartedPipelines = statuses.filter(status => status.status === 'Not Started');
+  const runningPipelines = statuses.filter(status => status.status === 'Running');
+  const finishedPipelines = statuses.filter(status => status.status === 'Finished');
+  console.log("NS:",notStartedPipelines);
+  console.log("RP:",runningPipelines);
+  console.log("FP:",finishedPipelines);
 
   return (
     <React.Fragment>
@@ -82,47 +103,44 @@ export default function PipelineStatusDialog() {
         {/* Content area */}
         <Box sx={{ p: 3 }}>
           <Grid container spacing={4}>
-            {/* Column 1 */}
+            {/* Column 1 - Not Started */}
             <Grid item xs={4}>
               <Typography variant="h6" gutterBottom>Not Started</Typography>
               <Paper elevation={1} sx={{ borderRadius: 2 }}>
                 <List>
-                  {/* Dynamically render pipeline names in "Not Started" */}
-                  {pipelines.map(({ pipeline: flowData, id, name }) => (
-                    <ListItemButton key={id} onClick={() => handleItemClick(name)}>
-                      <ListItemText primary={name} secondary="Details of the pipeline" />
+                  {notStartedPipelines.map(status => (
+                    <ListItemButton key={status.ticketId} onClick={() => handleItemClick(status)}>
+                      <ListItemText primary={status.pipelineName || "No Name Available"} secondary="Click for details" /> {/* Use pipelineName here */}
                     </ListItemButton>
                   ))}
                 </List>
               </Paper>
             </Grid>
 
-            {/* Other columns can remain the same */}
+            {/* Column 2 - Running */}
             <Grid item xs={4}>
               <Typography variant="h6" gutterBottom>Running</Typography>
               <Paper elevation={1} sx={{ borderRadius: 2 }}>
                 <List>
-                  <ListItemButton onClick={() => handleItemClick('Operator 1')}>
-                    <ListItemText primary="Operator 1" secondary="Details of operator 1" />
-                  </ListItemButton>
-                  <ListItemButton onClick={() => handleItemClick('Operator 2')}>
-                    <ListItemText primary="Operator 2" secondary="Details of operator 2" />
-                  </ListItemButton>
+                  {runningPipelines.map(status => (
+                    <ListItemButton key={status.ticketId} onClick={() => handleItemClick(status)}>
+                      <ListItemText primary={status.ticketId} secondary={status.pipelineName} /> {/* Use pipelineName here */}
+                    </ListItemButton>
+                  ))}
                 </List>
               </Paper>
             </Grid>
 
-            {/* Column 3 */}
+            {/* Column 3 - Finished */}
             <Grid item xs={4}>
               <Typography variant="h6" gutterBottom>Finished</Typography>
               <Paper elevation={1} sx={{ borderRadius: 2 }}>
                 <List>
-                  <ListItemButton onClick={() => handleItemClick('Sink 1')}>
-                    <ListItemText primary="Sink 1" secondary="Details of sink 1" />
-                  </ListItemButton>
-                  <ListItemButton onClick={() => handleItemClick('Sink 2')}>
-                    <ListItemText primary="Sink 2" secondary="Details of sink 2" />
-                  </ListItemButton>
+                  {finishedPipelines.map(status => (
+                    <ListItemButton key={status.ticketId} onClick={() => handleItemClick(status)}>
+                      <ListItemText primary={status.pipelineName || "No Name Available"} secondary="Click for details" /> {/* Use pipelineName here */}
+                    </ListItemButton>
+                  ))}
                 </List>
               </Paper>
             </Grid>
@@ -130,7 +148,7 @@ export default function PipelineStatusDialog() {
         </Box>
       </Dialog>
 
-      {/* Popup Dialog */}
+      {/* Popup Dialog for Pipeline Details */}
       <Dialog
         open={popupOpen}
         onClose={handlePopupClose}
@@ -142,7 +160,7 @@ export default function PipelineStatusDialog() {
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>
             <Typography sx={{ flex: 1 }} variant="h6" component="div">
-              {selectedItem}
+              {selectedItem?.pipelineName} {/* Display the pipeline name */}
             </Typography>
             <IconButton
               edge="end"
@@ -156,8 +174,9 @@ export default function PipelineStatusDialog() {
         </AppBar>
         <Box sx={{ p: 4, height: '400px', overflow: 'auto' }}>
           <Typography id="popup-dialog-description" variant="body1">
-            More details about {selectedItem} will be shown here.
+            Ticket ID: {selectedItem?.ticketId} {/* Show ticket ID in the details */}
           </Typography>
+          {/* Add more details about the pipeline here if needed */}
         </Box>
       </Dialog>
     </React.Fragment>
