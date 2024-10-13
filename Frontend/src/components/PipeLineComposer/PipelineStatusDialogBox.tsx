@@ -17,6 +17,7 @@ import Paper from '@mui/material/Paper';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { getPipelines, getCurrentSessionTickets } from '../../redux/selectors';
+import SinglePipelineStatus from './SinglePipelineStatus'; // Import SinglePipelineStatus component
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -27,27 +28,24 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-// Define the type for each status item
 interface PipelineStatus {
   ticketId: string;
   pipelineId: string;
   pipelineName: string | undefined;
-  status: 'Not Started' | 'Running' | 'Completed';
+  status: 'Not Started' | 'Running' | 'Completed'; // Change 'Completed' to 'Finished'
 }
 
-// Define the props type for the dialog component
 interface PipelineStatusDialogBoxProps {
   statuses: PipelineStatus[];
 }
 
 export default function PipelineStatusDialogBox({ statuses }: PipelineStatusDialogBoxProps) {
   const pipelines = useSelector(getPipelines);
-console.log("All Pipeline:",pipelines)
+  //console.log("All Pipeline:", pipelines);
   const [open, setOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<PipelineStatus | null>(null);
   const [popupOpen, setPopupOpen] = useState(false);
 
-  // Get current session tickets at the top level of the component
   const tickets = useSelector(getCurrentSessionTickets);
 
   const handleClickOpen = () => {
@@ -60,24 +58,16 @@ console.log("All Pipeline:",pipelines)
 
   const handleItemClick = (status: PipelineStatus) => {
     setSelectedItem(status);
-    setPopupOpen(true); // Open the popup dialog
+    setPopupOpen(true);
   };
 
   const handlePopupClose = () => {
     setPopupOpen(false);
   };
 
-  // Create arrays for each status
   const notStartedPipelines = statuses.filter(status => status.status === 'Not Started');
   const runningPipelines = statuses.filter(status => status.status === 'Running');
-  const finishedPipelines = statuses.filter(status => status.status === 'Completed');
-
-  /* const notStartedPipelines = tickets.notStartedTickets;
-  const runningPipelines = tickets.startedTickets;
-  const finishedPipelines = tickets.finishedTickets; */
-  console.log("NS:",notStartedPipelines);
-  console.log("RP:",runningPipelines);
-  console.log("FP:",finishedPipelines);
+  const finishedPipelines = statuses.filter(status => status.status === 'Completed'); // Change 'Completed' to 'Finished'
 
   return (
     <React.Fragment>
@@ -107,10 +97,8 @@ console.log("All Pipeline:",pipelines)
           </Toolbar>
         </AppBar>
 
-        {/* Content area */}
         <Box sx={{ p: 3 }}>
           <Grid container spacing={4}>
-            {/* Column 1 - Not Started */}
             <Grid item xs={4}>
               <Typography variant="h6" gutterBottom>Not Started</Typography>
               <Paper elevation={1} sx={{ borderRadius: 2 }}>
@@ -124,7 +112,6 @@ console.log("All Pipeline:",pipelines)
               </Paper>
             </Grid>
 
-            {/* Column 2 - Running */}
             <Grid item xs={4}>
               <Typography variant="h6" gutterBottom>Running</Typography>
               <Paper elevation={1} sx={{ borderRadius: 2 }}>
@@ -138,9 +125,8 @@ console.log("All Pipeline:",pipelines)
               </Paper>
             </Grid>
 
-            {/* Column 3 - Finished */}
             <Grid item xs={4}>
-              <Typography variant="h6" gutterBottom>Finished</Typography>
+              <Typography variant="h6" gutterBottom>Completed</Typography> {/* Change 'Completed' to 'Finished' */}
               <Paper elevation={1} sx={{ borderRadius: 2 }}>
                 <List>
                   {finishedPipelines.map(status => (
@@ -155,19 +141,18 @@ console.log("All Pipeline:",pipelines)
         </Box>
       </Dialog>
 
-      {/* Popup Dialog for Pipeline Details */}
       <Dialog
         open={popupOpen}
         onClose={handlePopupClose}
         aria-labelledby="popup-dialog-title"
         aria-describedby="popup-dialog-description"
-        maxWidth="md" // Adjust maxWidth as needed
+        maxWidth="md"
         fullWidth
       >
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>
             <Typography sx={{ flex: 1 }} variant="h6" component="div">
-              {selectedItem?.pipelineName} {/* Display the pipeline name */}
+              {selectedItem?.pipelineName || "Unnamed Pipeline"} {/* Display the pipeline name */}
             </Typography>
             <IconButton
               edge="end"
@@ -179,12 +164,11 @@ console.log("All Pipeline:",pipelines)
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Box sx={{ p: 4, height: '400px', overflow: 'auto' }}>
-          <Typography id="popup-dialog-description" variant="body1">
-            Ticket ID: {selectedItem?.ticketId} {/* Show ticket ID in the details */}
-          </Typography>
-          {/* Add more details about the pipeline here if needed */}
-        </Box>
+
+        {/* Check if selectedItem is not null before rendering SinglePipelineStatus */}
+        {selectedItem && (
+          <SinglePipelineStatus pipeline={{ ...selectedItem, pipelineName: selectedItem.pipelineName || "Unnamed Pipeline" }} />
+        )}
       </Dialog>
     </React.Fragment>
   );
