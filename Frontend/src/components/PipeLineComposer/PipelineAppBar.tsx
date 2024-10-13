@@ -14,11 +14,20 @@ import { getOrganizations, getRepositories } from "../../redux/selectors/apiSele
 import { getHandleId, getNodeId } from "./Flow";
 import PipelineStatusDialogBox from "./PipelineStatusDialogBox";
 
+interface Step {
+  executionTime: string;
+  executionerPeer: string;
+  stepId: string;
+  stepState: string;
+  stepType: string;
+}
+
 interface PipelineStatus {
   ticketId: string;
   pipelineId: string;
   pipelineName: string | undefined;
   status: 'Not Started' | 'Running' | 'Completed';
+  steps: Step[];
 }
 
 export default function PipelineAppBar() {
@@ -30,6 +39,32 @@ export default function PipelineAppBar() {
 
   // Get current session tickets at the top level of the component
   const tickets = useSelector(getCurrentSessionTickets);
+  
+  useEffect(() => {
+    if (tickets) {
+      const initialStatuses: PipelineStatus[] = [];
+  
+      const ticketTypes = Object.values(tickets); // Get all ticket types
+      const statusesByType: ('Not Started' | 'Running' | 'Completed')[] = ['Not Started', 'Running', 'Completed']; // Define statuses for each ticket type with correct type
+  
+      // Loop over different ticket types and assign appropriate status
+      ticketTypes.forEach((ticketType, index) => {
+        const status = statusesByType[index] || 'Not Started'; // Use 'Not Started' as fallback if there are more ticket types than statuses
+  
+        ticketType.forEach((ticket: any) => {
+          initialStatuses.push({
+            ticketId: ticket.ticketId,
+            pipelineId: ticket.pipeId,
+            pipelineName: ticket.pipeName,
+            status: status, // Set status with correct type
+            steps: [] // Initial placeholder for steps
+          });
+        });
+      });
+  
+      setStatuses(initialStatuses); // Set initial statuses only once on mount
+    }
+  }, []); // Only run once
 
   // Function to fetch ticket statuses
   const fetchTicketStatuses = async () => {
@@ -79,6 +114,7 @@ export default function PipelineAppBar() {
             pipelineId: ticket.pipeId,
             pipelineName: ticket.pipeName,
             status,
+            steps: pipelineStatus.result.status.currentSteps
           });
         } else {
           const pipelineExists = fetchedStatuses.some(pipelineStatus => pipelineStatus.pipelineId === ticket.pipeId);
@@ -89,6 +125,7 @@ export default function PipelineAppBar() {
               pipelineId: ticket.pipeId,
               pipelineName: ticket.pipeName,
               status,
+              steps: pipelineStatus.result.status.currentSteps
             });
           }
         }
@@ -221,6 +258,7 @@ export default function PipelineAppBar() {
       pipelineId: executionId.itemIds.executionId,
       pipelineName: pipelineName,
       status: 'Not Started',
+      steps: []
     });
 
     setStatuses(newStatuses);

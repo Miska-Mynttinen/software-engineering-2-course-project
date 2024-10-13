@@ -55,6 +55,7 @@ namespace DAPM.PipelineOrchestratorMS.Api.Models
             {
                 StepId = Id,
                 StepType = this.GetType().Name,
+                StepState = Status.ToString(),
                 ExecutionerPeer = _resourceToTransfer.OrganizationId,
                 ExecutionTime = _executionTimer.Elapsed,
             };
@@ -62,6 +63,7 @@ namespace DAPM.PipelineOrchestratorMS.Api.Models
 
         public override void Execute()
         {
+            Status = StepState.Running;
             _executionTimer = Stopwatch.StartNew();
             var transferDataRequestProducer = _serviceScope.ServiceProvider.GetRequiredService<IQueueProducer<TransferDataActionRequest>>();
 
