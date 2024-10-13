@@ -6,5 +6,6 @@
         public Guid ExecutionerPeer { get; set; }
         public string StepType { get; set; }
         public TimeSpan ExecutionTime { get; set; }
+        public string StepState { get; set; }
     }
 }

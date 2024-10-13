@@ -23,6 +23,7 @@ namespace DAPM.PipelineOrchestratorMS.Api.Models
             {
                 StepId = Id,
                 StepType = this.GetType().Name,
+                StepState = Status.ToString(),
                 ExecutionerPeer = OperatorResource.OrganizationId,
                 ExecutionTime = _executionTimer.Elapsed,
             };

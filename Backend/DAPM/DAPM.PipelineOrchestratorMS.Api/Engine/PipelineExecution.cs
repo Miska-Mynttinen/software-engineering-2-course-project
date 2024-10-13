@@ -93,7 +93,7 @@ namespace DAPM.PipelineOrchestratorMS.Api.Engine
             if(result == ActionResult.Completed)
             {
                 _stepsDictionary[actionResult.StepId].Status = StepState.Completed;
-                _currentSteps.Remove(actionResult.StepId);
+                // _currentSteps.Remove(actionResult.StepId);
                 ExecuteAvailableSteps();
             }
             else

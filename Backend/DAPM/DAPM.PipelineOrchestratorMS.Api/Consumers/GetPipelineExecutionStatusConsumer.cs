@@ -32,6 +32,7 @@ namespace DAPM.PipelineOrchestratorMS.Api.Consumers
                     ExecutionerPeer = step.ExecutionerPeer,
                     ExecutionTime = step.ExecutionTime,
                     StepType = step.StepType,
+                    StepState = step.StepState,
                 };
                 currentStepsDtos.Add(stepDto);
             }

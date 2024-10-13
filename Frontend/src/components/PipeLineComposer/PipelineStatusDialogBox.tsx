@@ -28,11 +28,20 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
+interface Step {
+  executionTime: string;
+  executionerPeer: string;
+  stepId: string;
+  stepState: string;
+  stepType: string;
+}
+
 interface PipelineStatus {
   ticketId: string;
   pipelineId: string;
   pipelineName: string | undefined;
   status: 'Not Started' | 'Running' | 'Completed'; // Change 'Completed' to 'Finished'
+  steps: Step[];
 }
 
 interface PipelineStatusDialogBoxProps {
@@ -167,7 +176,7 @@ export default function PipelineStatusDialogBox({ statuses }: PipelineStatusDial
 
         {/* Check if selectedItem is not null before rendering SinglePipelineStatus */}
         {selectedItem && (
-          <SinglePipelineStatus pipeline={{ ...selectedItem, pipelineName: selectedItem.pipelineName || "Unnamed Pipeline" }} />
+          <SinglePipelineStatus pipeline={{ ticketId: selectedItem.ticketId, pipelineId: selectedItem.pipelineId, pipelineName: selectedItem.pipelineName || "Unnamed Pipeline", steps: selectedItem.steps, status: selectedItem.status }} />
         )}
       </Dialog>
     </React.Fragment>
