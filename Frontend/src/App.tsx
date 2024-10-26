@@ -14,6 +14,7 @@ import PipelineComposer from "./routes/PipeLineComposer";
 import UserPage from "./routes/OverviewPage";
 import { loadState, saveState } from "./redux/browser-storage";
 import { clearTickets } from "./redux/slices/currentSessionTicketSlice";
+import AdminDashboard from "./components/AdminPages/AdminDashboard";
 
 // Configure redux-persist
 const persistConfig = {
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
   {
     path: "/pipeline",
     element: <PipelineComposer/>,
+  },
+  {
+    path: "/admin/dashboard",
+    element: <AdminDashboard/>,
   }
 ]);
 
