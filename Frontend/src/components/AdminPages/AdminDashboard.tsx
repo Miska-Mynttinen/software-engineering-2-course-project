@@ -13,21 +13,21 @@ interface User {
 const drawerWidth = 240;
 
 const rows: User[] = [
-  { userId: '1', username: 'JohnDoe', userType: 'user', userStatus: 'active' },
-  { userId: '2', username: 'JaneSmith', userType: 'admin', userStatus: 'pending' },
-  { userId: '3', username: 'AliceJohnson', userType: 'user', userStatus: 'deactivated' },
-  { userId: '4', username: 'KaneSmith', userType: 'admin', userStatus: 'pending' },
-  { userId: '5', username: 'BobBrown', userType: 'user', userStatus: 'banned' },
-  { userId: '6', username: 'CharlieDavis', userType: 'admin', userStatus: 'active' },
-  { userId: '7', username: 'DaneSmith', userType: 'admin', userStatus: 'pending' },
-  { userId: '8', username: 'EveJackson', userType: 'user', userStatus: 'active' },
-  { userId: '9', username: 'FrankGreen', userType: 'user', userStatus: 'banned' },
-  { userId: '10', username: 'GraceLee', userType: 'admin', userStatus: 'pending' },
-  { userId: '11', username: 'HankWhite', userType: 'user', userStatus: 'deactivated' },
-  { userId: '12', username: 'IvyClark', userType: 'user', userStatus: 'active' },
-  { userId: '13', username: 'JackWright', userType: 'admin', userStatus: 'active' },
-  { userId: '14', username: 'KateMartin', userType: 'user', userStatus: 'pending' },
-  { userId: '15', username: 'LeoGarcia', userType: 'admin', userStatus: 'active' },
+  { userId: '1', username: 'JohnDoe', userType: 'USER', userStatus: 'ACTIVE' },
+  { userId: '2', username: 'JaneSmith', userType: 'USER', userStatus: 'PENDING' },
+  { userId: '3', username: 'AliceJohnson', userType: 'USER', userStatus: 'DEACTIVATED' },
+  { userId: '4', username: 'KaneSmith', userType: 'USER', userStatus: 'PENDING' },
+  { userId: '5', username: 'BobBrown', userType: 'USER', userStatus: 'SUSPENDED' },
+  { userId: '6', username: 'CharlieDavis', userType: 'USER', userStatus: 'ACTIVE' },
+  { userId: '7', username: 'DaneSmith', userType: 'USER', userStatus: 'PENDING' },
+  { userId: '8', username: 'EveJackson', userType: 'USER', userStatus: 'ACTIVE' },
+  { userId: '9', username: 'FrankGreen', userType: 'USER', userStatus: 'SUSPENDED' },
+  { userId: '10', username: 'GraceLee', userType: 'USER', userStatus: 'PENDING' },
+  { userId: '11', username: 'HankWhite', userType: 'USER', userStatus: 'DEACTIVATED' },
+  { userId: '12', username: 'IvyClark', userType: 'USER', userStatus: 'ACTIVE' },
+  { userId: '13', username: 'JackWright', userType: 'USER', userStatus: 'ACTIVE' },
+  { userId: '14', username: 'KateMartin', userType: 'USER', userStatus: 'PENDING' },
+  { userId: '15', username: 'LeoGarcia', userType: 'USER', userStatus: 'ACTIVE' },
 ];
 
 const AdminDashboard: React.FC = () => {

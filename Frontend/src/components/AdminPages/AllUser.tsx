@@ -1,16 +1,5 @@
-import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-  Box,
-  Typography,
-} from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Typography, TablePagination } from '@mui/material';
 
 interface User {
   userId: string;
@@ -24,45 +13,45 @@ interface AllUserProps {
 }
 
 const AllUser: React.FC<AllUserProps> = ({ rows }) => {
+  // State for pagination
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   return (
-    <Box sx={{ padding: 2 }}>
-      <Typography variant="h5" gutterBottom>
-        All Users
+    <Box>
+      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+        Manage All User Here!!!
       </Typography>
-      <Typography variant="body1" paragraph>
-        Manage all registered users. You can suspend or delete users as necessary.
-      </Typography>
-      
       <TableContainer component={Paper}>
-        <Table>
+        <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell>Username</TableCell>
-              <TableCell>User Type</TableCell>
-              <TableCell>User Status</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell sx={{ backgroundColor: '#1976d2', color: '#fff', fontWeight: 'bold' }}>Username</TableCell>
+              <TableCell sx={{ backgroundColor: '#1976d2', color: '#fff', fontWeight: 'bold' }}>User Type</TableCell>
+              <TableCell sx={{ backgroundColor: '#1976d2', color: '#fff', fontWeight: 'bold' }}>User Status</TableCell>
+              <TableCell sx={{ backgroundColor: '#1976d2', color: '#fff', fontWeight: 'bold' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
               <TableRow key={row.userId}>
                 <TableCell>{row.username}</TableCell>
                 <TableCell>{row.userType}</TableCell>
                 <TableCell>{row.userStatus}</TableCell>
                 <TableCell>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => console.log(`Suspended user: ${row.userId}`)}
-                  >
+                  <Button variant="contained" color="secondary" onClick={() => console.log(`Suspended user: ${row.userId}`)}>
                     Suspend
                   </Button>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    onClick={() => console.log(`Deleted user: ${row.userId}`)}
-                    sx={{ ml: 1 }}
-                  >
+                  <Button variant="outlined" color="error" onClick={() => console.log(`Deleted user: ${row.userId}`)} sx={{ ml: 1 }}>
                     Delete
                   </Button>
                 </TableCell>
@@ -71,6 +60,15 @@ const AllUser: React.FC<AllUserProps> = ({ rows }) => {
           </TableBody>
         </Table>
       </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={rows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </Box>
   );
 };
