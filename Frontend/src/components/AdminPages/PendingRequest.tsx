@@ -13,7 +13,7 @@ interface PendingRequestProps {
 }
 
 const PendingRequest: React.FC<PendingRequestProps> = ({ rows }) => {
-  const pendingRows = rows.filter((row) => row.userStatus === 'pending');
+  const pendingRows = rows.filter((row) => row.userStatus === 'PENDING');
   
   // State for pagination
   const [page, setPage] = useState(0);

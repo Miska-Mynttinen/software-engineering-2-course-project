@@ -13,6 +13,7 @@ interface AllUserProps {
 }
 
 const AllUser: React.FC<AllUserProps> = ({ rows }) => {
+  const nonPendingRows = rows.filter((row) => row.userStatus !== 'PENDING');
   // State for pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -42,7 +43,7 @@ const AllUser: React.FC<AllUserProps> = ({ rows }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+            {nonPendingRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
               <TableRow key={row.userId}>
                 <TableCell>{row.username}</TableCell>
                 <TableCell>{row.userType}</TableCell>
