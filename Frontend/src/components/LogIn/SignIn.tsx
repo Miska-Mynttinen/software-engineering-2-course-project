@@ -2,14 +2,17 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
-import FormLabel from '@mui/material/FormLabel';
-import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
+
+// Define the toggleForm prop type
+interface SignInProps {
+  toggleForm: () => void;
+}
 
 const theme = createTheme({
   palette: {
@@ -22,13 +25,13 @@ const Card = styled(MuiCard)(({ theme }) => ({
   flexDirection: 'column',
   alignSelf: 'center',
   width: '100%',
-  padding: theme.spacing(4),
-  gap: theme.spacing(2),
+  padding: theme.spacing(2),
+  gap: theme.spacing(1.5),
   margin: 'auto',
   backgroundColor: theme.palette.background.paper,
   color: theme.palette.text.primary,
   [theme.breakpoints.up('sm')]: {
-    maxWidth: '450px',
+    maxWidth: '380px',
   },
   boxShadow:
     'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
@@ -37,9 +40,9 @@ const Card = styled(MuiCard)(({ theme }) => ({
 const SignInContainer = styled(Stack)(({ theme }) => ({
   height: '100vh',
   minHeight: '100%',
-  padding: theme.spacing(2),
+  padding: theme.spacing(1),
   [theme.breakpoints.up('sm')]: {
-    padding: theme.spacing(4),
+    padding: theme.spacing(2),
   },
   backgroundColor: theme.palette.background.default,
   '&::before': {
@@ -54,7 +57,7 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignIn() {
+export default function SignIn({ toggleForm }: SignInProps) {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
@@ -87,9 +90,9 @@ export default function SignIn() {
       setEmailErrorMessage('');
     }
 
-    if (!password.value || password.value.length < 6) {
+    if (!password.value || password.value.length < 6 || !/\d/.test(password.value) || !/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) {
       setPasswordError(true);
-      setPasswordErrorMessage('Password must be at least 6 characters long.');
+      setPasswordErrorMessage('Password must be 6 characters long, including a number and special character');
       isValid = false;
     } else {
       setPasswordError(false);
@@ -104,26 +107,26 @@ export default function SignIn() {
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="center">
         <Card variant="outlined">
-            <Typography
-            variant="h4" // Changed to h4 to increase the font size
+          <Typography
+            variant="h5"
             component="h2"
             sx={{
-                textAlign: 'center',
-                fontWeight: 'bold',
-                fontSize: '2.5rem', // Custom font size to make it larger
-                marginBottom: 2,
-                color: '#FFFFFF', // Changed color to white
+              textAlign: 'center',
+              fontWeight: 'bold',
+              fontSize: '1.75rem',
+              marginBottom: 1,
+              color: '#FFFFFF',
             }}
-            >
+          >
             DAPM
-            </Typography>
+          </Typography>
 
           <Typography
             component="h1"
-            variant="h4"
-            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+            variant="h6"
+            sx={{ width: '100%', fontSize: '1.25rem', textAlign: 'left'  }}
           >
-            Sign in
+            Sign In
           </Typography>
           <Box
             component="form"
@@ -133,63 +136,68 @@ export default function SignIn() {
               display: 'flex',
               flexDirection: 'column',
               width: '100%',
-              gap: 2,
+              gap: 1.5,
             }}
           >
-            <FormControl>
-              <FormLabel htmlFor="email">Email</FormLabel>
-              <TextField
-                error={emailError}
-                helperText={emailErrorMessage}
-                id="email"
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                autoComplete="email"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                color={emailError ? 'error' : 'primary'}
-                sx={{ ariaLabel: 'email' }}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="password">Password</FormLabel>
-              <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                name="password"
-                placeholder="••••••"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                required
-                fullWidth
-                variant="outlined"
-                color={passwordError ? 'error' : 'primary'}
-              />
-            </FormControl>
+            <TextField
+              error={emailError}
+              helperText={emailErrorMessage}
+              id="email"
+              type="email"
+              name="email"
+              label="Email"
+              placeholder="your@email.com"
+              autoComplete="email"
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+              size="small"
+              color={emailError ? 'error' : 'primary'}
+            />
+            <TextField
+              error={passwordError}
+              helperText={passwordErrorMessage}
+              name="password"
+              label="Password"
+              placeholder="••••••"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              required
+              fullWidth
+              variant="outlined"
+              size="small"
+              color={passwordError ? 'error' : 'primary'}
+            />
             <Button
               type="submit"
               fullWidth
               variant="contained"
               onClick={validateInputs}
-              sx={{ bgcolor: '#1a73e8' }} // Light blue color
+              sx={{
+                bgcolor: '#1a73e8',
+                color: 'white',
+                padding: theme.spacing(0.75),
+                fontSize: '0.875rem',
+                fontWeight: 'bold',
+              }}
             >
               SIGN IN
             </Button>
-            <Typography sx={{ textAlign: 'center' }}>
+            <Typography sx={{ textAlign: 'center', fontSize: '0.75rem' }}>
               Don&apos;t have an account?{' '}
-              <span>
-                <Link
-                  href="/signup" // Adjusted to your signup route
-                  variant="body2"
-                  sx={{ alignSelf: 'center' }}
-                >
-                  Sign up
-                </Link>
-              </span>
+              <Link
+                onClick={toggleForm} // Call toggleForm to switch to Sign Up
+                variant="body2"
+                sx={{
+                  cursor: 'pointer',
+                  color: '#1a73e8',
+                  fontSize: '0.75rem',
+                }}
+              >
+                Sign up
+              </Link>
             </Typography>
           </Box>
         </Card>
