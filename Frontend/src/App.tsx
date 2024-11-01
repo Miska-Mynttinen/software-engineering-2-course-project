@@ -12,6 +12,7 @@ import storage from 'redux-persist/lib/storage' // defaults to localStorage for 
 import { RouterProvider, createBrowserRouter, createHashRouter } from "react-router-dom";
 import PipelineComposer from "./routes/PipeLineComposer";
 import UserPage from "./routes/OverviewPage";
+import AuthPage from "./components/LogIn/AuthPage";
 import { loadState, saveState } from "./redux/browser-storage";
 import { clearTickets } from "./redux/slices/currentSessionTicketSlice";
 
@@ -49,14 +50,19 @@ export type AppDispatch = typeof store.dispatch
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/",  // Route for the AuthPage
+    element: <AuthPage />,
+  },
+  {
+    path: "/home",
     element: <UserPage/>,
 
   },
   {
     path: "/pipeline",
     element: <PipelineComposer/>,
-  }
+  },
+  
 ]);
 
 function ClearTicketsOnLoad() {
