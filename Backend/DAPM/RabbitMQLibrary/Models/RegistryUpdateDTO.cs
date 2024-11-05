@@ -12,5 +12,7 @@ namespace RabbitMQLibrary.Models
         public IEnumerable<RepositoryDTO> Repositories { get; set; }
         public IEnumerable<ResourceDTO> Resources { get; set; }
         public IEnumerable<PipelineDTO> Pipelines { get; set; }
+        public IEnumerable<UserDTO> Users { get; set; }
+        public IEnumerable<UserGroupDTO> UserGroups { get; set; }
     }
 }

@@ -9,6 +9,8 @@ using RabbitMQLibrary.Implementation;
 using RabbitMQLibrary.Messages.ResourceRegistry;
 using DAPM.RepositoryMS.Api.Consumers;
 using RabbitMQLibrary.Messages.Repository;
+using RabbitMQLibrary.Messages.User;
+using RabbitMQLibrary.Messages.UserGroup;
 using Microsoft.EntityFrameworkCore;
 using DAPM.RepositoryMS.Api.Data;
 
@@ -50,6 +52,9 @@ builder.Services.AddQueueing(new QueueingConfigurationSettings
 builder.Services.AddQueueMessageConsumer<PostResourceToRepoConsumer, PostResourceToRepoMessage>();
 builder.Services.AddQueueMessageConsumer<PostOperatorToRepoConsumer, PostOperatorToRepoMessage>();
 builder.Services.AddQueueMessageConsumer<PostRepoToRepoConsumer, PostRepoToRepoMessage>();
+builder.Services.AddQueueMessageConsumer<UpdateUserToRepoConsumer, UpdateUserToRepoMessage>();
+builder.Services.AddQueueMessageConsumer<PostUserToRepoConsumer, PostUserToRepoMessage>();
+builder.Services.AddQueueMessageConsumer<PostUserGroupToRepoConsumer, PostUserGroupToRepoMessage>();
 builder.Services.AddQueueMessageConsumer<PostPipelineToRepoConsumer, PostPipelineToRepoMessage>();
 builder.Services.AddQueueMessageConsumer<GetPipelinesFromRepoConsumer, GetPipelinesFromRepoMessage>();
 builder.Services.AddQueueMessageConsumer<GetResourceFilesFromRepoConsumer, GetResourceFilesFromRepoMessage>();
@@ -60,6 +65,12 @@ builder.Services.AddQueueMessageConsumer<GetOperatorFilesFromRepoConsumer, GetOp
 builder.Services.AddDbContext<RepositoryDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+}
+);
+
+builder.Services.AddDbContext<UserDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("UserDatabaseConnection"));
 }
 );
 
@@ -77,6 +88,7 @@ builder.Services.AddScoped<IResourceService, ResourceService>();
 builder.Services.AddScoped<IRepositoryService, RepositoryService>();
 builder.Services.AddScoped<IPipelineService, PipelineService>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 //Repositories
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
@@ -84,6 +96,7 @@ builder.Services.AddScoped<IRepositoryRepository, RepositoryRepository>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IPipelineRepository, PipelineRepository>();
 builder.Services.AddScoped<IOperatorRepository, OperatorRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 
 builder.Services.Configure<FileStorageDatabaseSettings>(

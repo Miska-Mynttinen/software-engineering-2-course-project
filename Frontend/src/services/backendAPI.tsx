@@ -353,6 +353,83 @@ export async function fetchPipeline(orgId: string, repId: string, pipId: string)
     }
 }
 
+export async function fetchOrganizationUsers(orgId: string) {
+    try {
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/users`);
+        if (!response.ok) {
+            throw new Error('Fecthing reps, Network response was not ok');
+        }
+        const jsonData = await response.json();
+
+        // Fetch additional data recursively
+        const getData = async (ticketId: string): Promise<any> => {
+            const maxRetries = 10;
+            const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+            for (let retries = 0; retries < maxRetries; retries++) {
+                try {
+                    const data = await fetchStatus(ticketId);
+                    if (data.status) {
+                        return data;
+                    }
+                    await delay(1000); // Wait for 1 second before retrying
+                } catch (error) {
+                    if (retries === maxRetries - 1) {
+                        throw new Error('Max retries reached');
+                    }
+                }
+            }
+            throw new Error('Failed to fetch data');
+        };
+
+        // Call getData function with the ticketId obtained from fetchOrganisationsUsers
+        const users = await getData(jsonData.ticketId);
+        console.log('USERS:', users);
+        return users;
+    } catch (error) {
+        console.error('Fecthing reps, Error fetching data:', error);
+        throw error; // Propagate error to the caller
+    }
+}
+
+export async function fetchOrganizationUserGroups(orgId: string) {
+    try {
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/userGroups`);
+        if (!response.ok) {
+            throw new Error('Fecthing reps, Network response was not ok');
+        }
+        const jsonData = await response.json();
+
+        // Fetch additional data recursively
+        const getData = async (ticketId: string): Promise<any> => {
+            const maxRetries = 10;
+            const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+            for (let retries = 0; retries < maxRetries; retries++) {
+                try {
+                    const data = await fetchStatus(ticketId);
+                    if (data.status) {
+                        return data;
+                    }
+                    await delay(1000); // Wait for 1 second before retrying
+                } catch (error) {
+                    if (retries === maxRetries - 1) {
+                        throw new Error('Max retries reached');
+                    }
+                }
+            }
+            throw new Error('Failed to fetch data');
+        };
+
+        // Call getData function with the ticketId obtained from fetchOrganisationsUsers
+        const userGroups = await getData(jsonData.ticketId);
+        return userGroups;
+    } catch (error) {
+        console.error('Fecthing reps, Error fetching data:', error);
+        throw error; // Propagate error to the caller
+    }
+}
+
 export async function putRepository(orgId: string, repositoryName: string) {
     
     const headers = new Headers()
@@ -609,6 +686,109 @@ export async function putOperator(orgId: string, repId: string, formData: FormDa
         return await getData(jsonData.ticketId);
     } catch (error) {
         console.error('put res, Error fetching data:', error);
+        throw error; // Propagate error to the caller
+    }
+}
+
+export async function putUser(orgId: string, userData: { [key: string]: any }) {
+    const headers = new Headers()
+    headers.append("accept", "application/json")
+    headers.append("Content-Type", "application/json")
+    
+    try {
+        const response = await fetch(`http://${path}/organizations/${orgId}/users`, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(userData) // Send the JSON object directly
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Network response was not ok: ${errorText}`);
+            throw new Error(`put res, Network response was not ok: ${errorText}`);
+        }
+
+        const jsonData = await response.json();
+
+        // Fetch additional data recursively (your existing logic)
+        return jsonData; // Return the response data as needed
+    } catch (error) {
+        console.error('put res, Error fetching data:', error);
+        throw error; // Propagate error to the caller
+    }
+}
+
+export async function updateUser(orgId: string, userId: string, userGroups: string[]) {
+    const headers = new Headers();
+    headers.append("accept", "application/json");
+    headers.append("Content-Type", "application/json");
+    
+    try {
+        // Send a PUT request to update user details
+        const response = await fetch(`http://${path}/organizations/${orgId}/users/${userId}`, {
+            method: "PUT",
+            headers: headers,
+            body: JSON.stringify(userGroups) // Send the JSON object with updated user data
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Network response was not ok: ${errorText}`);
+            throw new Error(`updateUser, Network response was not ok: ${errorText}`);
+        }
+
+        const jsonData = await response.json();
+        return jsonData; // Return the updated user data as needed
+    } catch (error) {
+        console.error('updateUser, Error updating data:', error);
+        throw error; // Propagate error to the caller
+    }
+}
+
+
+export async function putUserGroup(orgId: string, userGroup: string) {
+    const headers = new Headers()
+    headers.append("accept", "application/json")
+    headers.append("Content-Type", "application/json")
+    
+    try {
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/userGroups`, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({ name: userGroup })
+        });
+
+        if (!response.ok) {
+            throw new Error('put rep, Network response was not ok');
+        }
+
+        const jsonData = await response.json();
+
+        // Fetch additional data recursively
+        const getData = async (ticketId: string): Promise<any> => {
+            const maxRetries = 10;
+            const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+            for (let retries = 0; retries < maxRetries; retries++) {
+                try {
+                    const data = await fetchStatus(ticketId);
+                    if (data.status) {
+                        return data;
+                    }
+                    await delay(1000); // Wait for 1 second before retrying
+                } catch (error) {
+                    if (retries === maxRetries - 1) {
+                        throw new Error('Max retries reached');
+                    }
+                }
+            }
+            throw new Error('Failed to fetch data');
+        };
+
+        // Call getData function with the ticketId obtained from fetchOrganisations
+        return await getData(jsonData.ticketId);
+    } catch (error) {
+        console.error('put rep, Error fetching data:', error);
         throw error; // Propagate error to the caller
     }
 }
