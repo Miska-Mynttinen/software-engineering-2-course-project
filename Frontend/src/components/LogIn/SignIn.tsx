@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -58,36 +59,47 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignIn({ toggleForm }: SignInProps) {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
+  const navigate = useNavigate();
+
+  const [usernameError, setusernameError] = React.useState(false);
+  const [usernameErrorMessage, setusernameErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (emailError || passwordError) {
+    if (usernameError || passwordError) {
       event.preventDefault();
       return;
     }
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    
+    const username = data.get('username');
+    const password = data.get('password');
+
+    console.log({username: data.get('username'), password: data.get('password')});
+
+    if (username === 'admin' && password === 'admin1!') {
+      navigate('/admin');
+    } else if (username === 'user' && password === 'user1!') {
+      navigate('/user');
+    } else {
+      alert('Invalid username or password');
+    }
   };
 
   const validateInputs = () => {
-    const email = document.getElementById('email') as HTMLInputElement;
+    const username = document.getElementById('username') as HTMLInputElement;
     const password = document.getElementById('password') as HTMLInputElement;
 
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage('Please enter a valid email address.');
+    if (!username.value) {
+      setusernameError(true);
+      setusernameErrorMessage('Please enter a valid username.');
       isValid = false;
     } else {
-      setEmailError(false);
-      setEmailErrorMessage('');
+      setusernameError(false);
+      setusernameErrorMessage('');
     }
 
     if (!password.value || password.value.length < 6 || !/\d/.test(password.value) || !/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) {
@@ -140,20 +152,20 @@ export default function SignIn({ toggleForm }: SignInProps) {
             }}
           >
             <TextField
-              error={emailError}
-              helperText={emailErrorMessage}
-              id="email"
-              type="email"
-              name="email"
-              label="Email"
-              placeholder="your@email.com"
-              autoComplete="email"
+              error={usernameError}
+              helperText={usernameErrorMessage}
+              id="username"
+              type="username"
+              name="username"
+              label="username"
+              placeholder="Username"
+              autoComplete="username"
               autoFocus
               required
               fullWidth
               variant="outlined"
               size="small"
-              color={emailError ? 'error' : 'primary'}
+              color={usernameError ? 'error' : 'primary'}
             />
             <TextField
               error={passwordError}

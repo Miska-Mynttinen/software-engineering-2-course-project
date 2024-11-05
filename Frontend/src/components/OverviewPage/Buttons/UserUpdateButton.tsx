@@ -1,10 +1,10 @@
 import { Box, Button, FormControl, FormLabel, MenuItem, Modal, Select, TextField, Typography } from '@mui/material';
 import React, { ChangeEvent } from 'react';
-import { putUser } from '../../../services/backendAPI';
+import { updateUser } from '../../../services/backendAPI';
 
 export interface UploadButtonProps {
     orgId: string,
-    onUserCreated: () => void;
+    onUserUpdated: () => void;
 }
 
 const style = {
@@ -19,8 +19,7 @@ const style = {
     p: 4,
 };
 
-const UserUploadButton = ({ orgId, onUserCreated }: UploadButtonProps) => {
-
+const UserUpdateButton = ({ orgId, onUserUpdated }: UploadButtonProps) => {
     const [open, setOpen] = React.useState(false);
     const [disabled, setDisabled] = React.useState(false);
 
@@ -30,31 +29,21 @@ const UserUploadButton = ({ orgId, onUserCreated }: UploadButtonProps) => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
     
-        // Disable the submit button to prevent multiple submissions
         setDisabled(true);
     
         const formData = new FormData(event.currentTarget);
-        formData.append("ResourceType", "User");
-        formData.append("UserStatus", "Active");
-        formData.append("UserGroups", JSON.stringify([])); // This should be an empty array
+        const userId = formData.get('UserId') as string;
+        const userGroupsString = formData.get('UserGroups') as string;
+        const userGroups = userGroupsString
+            .split(',')             // Split the string by commas
+            .map(group => group.trim())  // Trim each group
+            .filter(group => group.length > 0); // Filter out any empty strings
     
-        // Build the JSON object
-        const jsonObject = {
-            Username: formData.get('Username') as string, // Make sure to get the value directly
-            Password: formData.get('Password') as string,
-            Email: formData.get('Email') as string,
-            UserStatus: formData.get('UserStatus') as string,
-            ResourceType: formData.get('ResourceType') as string,
-            UserGroups: [], // Send an actual empty array
-            UserType: formData.get('UserType') as string // Ensure this field is correct
-        };
-    
-        console.log('Request Payload:', JSON.stringify(jsonObject)); // Log the payload
     
         try {
-            const result = await putUser(orgId, jsonObject); // Adjust putUser to accept jsonObject
-            console.log('User successfully uploaded:', result);
-            onUserCreated();
+            const result = await updateUser(orgId, userId, userGroups);
+            console.log('User successfully updated:', result);
+            onUserUpdated();
     
             handleClose();
         } catch (error) {
@@ -68,7 +57,7 @@ const UserUploadButton = ({ orgId, onUserCreated }: UploadButtonProps) => {
 
     return (
         <div>
-            <Button sx={{ backgroundColor: "gray", padding: "1px", color: "black" }} onClick={handleOpen}>Add user</Button>
+            <Button sx={{ backgroundColor: "gray", padding: "1px", color: "black" }} onClick={handleOpen}>Update Users User Groups</Button>
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -78,21 +67,15 @@ const UserUploadButton = ({ orgId, onUserCreated }: UploadButtonProps) => {
                 <Box sx={style}>
                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ color: 'white' }}>
-                            Upload User
+                            Update Users User Groups
                         </Typography>
                         <form onSubmit={handleSubmit}>
                             <FormControl fullWidth margin="normal">
-                                <FormLabel>Username</FormLabel>
-                                <input type="string" name="Username" />
+                                <FormLabel>User id</FormLabel>
+                                <input type="string" name="UserId" />
 
-                                <FormLabel>Password</FormLabel>
-                                <input type="string" name="Password" />
-
-                                <FormLabel>Email</FormLabel>
-                                <input type="string" name="Email" />
-
-                                <FormLabel>User type</FormLabel>
-                                <input type="string" name="UserType" />
+                                <FormLabel>User Groups (separate with comma(,))</FormLabel>
+                                <input type="string" name="UserGroups" />
                             </FormControl>
 
                             <Button 
@@ -110,4 +93,4 @@ const UserUploadButton = ({ orgId, onUserCreated }: UploadButtonProps) => {
     );
 }
 
-export default UserUploadButton;
+export default UserUpdateButton;

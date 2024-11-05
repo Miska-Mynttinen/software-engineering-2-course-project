@@ -383,7 +383,9 @@ export async function fetchOrganizationUsers(orgId: string) {
         };
 
         // Call getData function with the ticketId obtained from fetchOrganisationsUsers
-        return await getData(jsonData.ticketId);
+        const users = await getData(jsonData.ticketId);
+        console.log('USERS:', users);
+        return users;
     } catch (error) {
         console.error('Fecthing reps, Error fetching data:', error);
         throw error; // Propagate error to the caller
@@ -420,7 +422,8 @@ export async function fetchOrganizationUserGroups(orgId: string) {
         };
 
         // Call getData function with the ticketId obtained from fetchOrganisationsUsers
-        return await getData(jsonData.ticketId);
+        const userGroups = await getData(jsonData.ticketId);
+        return userGroups;
     } catch (error) {
         console.error('Fecthing reps, Error fetching data:', error);
         throw error; // Propagate error to the caller
@@ -749,7 +752,7 @@ export async function putUserGroup(orgId: string, userGroup: string) {
     headers.append("Content-Type", "application/json")
     
     try {
-        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories`, {
+        const response = await fetch(`http://` + path + `/organizations/${orgId}/userGroups`, {
             method: "POST",
             headers: headers,
             body: JSON.stringify({ name: userGroup })

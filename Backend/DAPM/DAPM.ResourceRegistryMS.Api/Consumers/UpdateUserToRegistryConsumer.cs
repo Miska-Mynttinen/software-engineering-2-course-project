@@ -25,7 +25,6 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
         {
             _logger.LogInformation("UpdateUserToRegistryMessage received");
 
-
             var updatedUser = await _peerService.UpdateUserToOrganization(message.OrganizationId, message.UserId, message.UserGroups);
             if (updatedUser != null)
             {

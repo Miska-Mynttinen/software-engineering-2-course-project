@@ -148,6 +148,9 @@ namespace DAPM.RepositoryMS.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+            
+            migrationBuilder.DropTable(
+                name: "UserGroups");
         }
     }
 }

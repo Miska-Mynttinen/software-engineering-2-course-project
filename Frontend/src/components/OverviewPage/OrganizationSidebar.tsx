@@ -20,6 +20,7 @@ import AddOrganizationButton from './Buttons/AddOrganizationButton';
 import { display } from 'html2canvas/dist/types/css/property-descriptors/display';
 import OperatorUploadButton from './Buttons/OperatorUploadButton';
 import UserUploadButton from './Buttons/UserUploadButton';
+import UserUpdateButton from './Buttons/UserUpdateButton';
 import UserGroupUploadButton from './Buttons/UserGroupUploadButton';
 import { Padding } from '@mui/icons-material';
 
@@ -113,26 +114,45 @@ async function downloadReadableStream(url: string, fileName: string) {
             <div style={{ display: 'flex', alignItems: 'center', paddingInline: '0.5rem' }}>
             </div>
             <>
-              <ListItem sx={{paddingInline: '5px'}}>
-                    <p style={{padding: '0', fontSize: '25px', marginBlock: '10px'}}>Users</p>
-                    {!users ? '' : users.map((user) => (user.organizationId === organization.id ?
-                  <ListItem key={user.userId} sx={{paddingInline: '5px'}}>
-                    <p style={{padding: '0', fontSize: '25px', marginBlock: '10px'}}>{user.username}</p>
-                  </ListItem>
-                 : ""
-              ))}
+              <ListItem sx={{ paddingInline: '5px' }}>
+                <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>Users</p>
               </ListItem>
+              <>
+                {users && users.map((user) =>
+                  user.organizationId === organization.id ? (
+                    <ListItem key={user.userId} sx={{ paddingInline: '5px' }}>
+                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>
+                        Username: {user.username} {user.userId}
+                      </p>
+                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>
+                        UserId: {user.userId}
+                      </p>
+                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>
+                        UserGroups:
+                        {user.userGroups && user.userGroups.map((group, index) => (
+                          <p key={index} style={{ padding: '0', fontSize: '20px', marginBlock: '5px' }}>
+                            {group}
+                          </p>
+                        ))}
+                      </p>
+                    </ListItem>
+                  ) : null
+                )}
+              </>
             </>
             <>
-              <ListItem sx={{paddingInline: '5px'}}>
-                    <p style={{padding: '0', fontSize: '25px', marginBlock: '10px'}}>User Groups</p>
-                    {!userGroups ? '' : userGroups.map((userGroup) => (userGroup.organizationId === organization.id ?
-                  <ListItem key={userGroup.name} sx={{paddingInline: '5px'}}>
-                    <p style={{padding: '0', fontSize: '25px', marginBlock: '10px'}}>{userGroup.name}</p>
-                  </ListItem>
-                 : ""
-              ))}
+              <ListItem sx={{ paddingInline: '5px' }}>
+                <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>User Groups</p>
               </ListItem>
+              <>
+                {userGroups && userGroups.map((userGroup) =>
+                  userGroup.organizationId === organization.id ? (
+                    <ListItem key={userGroup.name} sx={{ paddingInline: '5px' }}>
+                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>{userGroup.name}</p>
+                    </ListItem>
+                  ) : null
+                )}
+              </>
             </>
             {repositories.map((repository) => (repository.organizationId === organization.id ?
               <>
@@ -176,6 +196,11 @@ async function downloadReadableStream(url: string, fileName: string) {
             <ListItem sx={{ justifyContent: 'center' }}>
               <Box sx={{ width: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                 <UserUploadButton orgId={organization.id} onUserCreated={refreshUsers} />
+              </Box>
+            </ListItem>
+            <ListItem sx={{ justifyContent: 'center' }}>
+              <Box sx={{ width: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <UserUpdateButton orgId={organization.id} onUserUpdated={refreshUsers} />
               </Box>
             </ListItem>
             <ListItem sx={{ justifyContent: 'center' }}>

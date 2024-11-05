@@ -23,7 +23,8 @@ namespace DAPM.ResourceRegistryMS.Api.Repositories
         public async Task<User> UpdateUser(User user)
         {
             _context.Users.Update(user);
-            _context.SaveChanges();
+            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
             return user;
         }
 

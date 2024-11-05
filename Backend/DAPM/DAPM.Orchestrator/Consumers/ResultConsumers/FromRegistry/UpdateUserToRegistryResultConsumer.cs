@@ -15,7 +15,7 @@ namespace DAPM.Orchestrator.Consumers.ResultConsumers.FromRegistry
 
         public Task ConsumeAsync(UpdateUserToRegistryResultMessage message)
         {
-            CreateUserProcess process = (CreateUserProcess)_orchestratorEngine.GetProcess(message.ProcessId);
+            UpdateUserProcess process = (UpdateUserProcess)_orchestratorEngine.GetProcess(message.ProcessId);
             process.OnUpdateUserToRegistryResult(message);
 
             return Task.CompletedTask;

@@ -74,7 +74,7 @@ const apiSlice = createSlice({
           })
           .addCase(userGroupThunk.fulfilled, (state, action) => {
             // Add any fetched posts to the array
-            state.users = action.payload
+            state.userGroups = action.payload
           })
           .addCase(userGroupThunk.rejected, (state, action) => {
             console.log("userGroup thunk failed")
@@ -170,14 +170,14 @@ export const userThunk = createAsyncThunk<
 });
 
 export const userGroupThunk = createAsyncThunk<
-  User[],
+  UserGroup[],
   Organization[]
 >("api/fetchUserGroups", async (organizations: Organization[], thunkAPI) => {
   try {
     
     const userGroups = [];
       for (const organization of organizations) {
-        const outputs = await fetchOrganizationUsers(organization.id);
+        const outputs = await fetchOrganizationUserGroups(organization.id);
         userGroups.push(...outputs.result.userGroups);
       }
       return userGroups;

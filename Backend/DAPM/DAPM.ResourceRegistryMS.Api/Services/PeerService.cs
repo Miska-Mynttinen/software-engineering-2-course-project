@@ -90,17 +90,11 @@ namespace DAPM.ResourceRegistryMS.Api.Services
         {
             User user = await _userRepository.GetUserById(organizationId, userId);
 
-            User newUser = new User()
-            {
-                UserId = user.UserId,
-                Username = user.Username,
-                PeerId = organizationId,
-                Password = user.Password,
-                Email = user.Email,
-                UserType = user.UserType,
-                UserStatus = user.UserStatus,
-                UserGroups = userGroups,
-            };
+            _logger.LogWarning("PeerService UpdateUserToOrganization LOG: UserGroups = {UserGroups}", string.Join(", ", user.UserGroups));
+
+            // Update user object with new UserGroups
+            user.PeerId = organizationId;
+            user.UserGroups = userGroups;
 
             return await _userRepository.UpdateUser(user);
         }

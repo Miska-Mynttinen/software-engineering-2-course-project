@@ -152,6 +152,12 @@ namespace DAPM.ResourceRegistryMS.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Peers");
+
+            migrationBuilder.DropTable(
+                name: "Users");
+            
+            migrationBuilder.DropTable(
+                name: "UserGroups");
         }
     }
 }
