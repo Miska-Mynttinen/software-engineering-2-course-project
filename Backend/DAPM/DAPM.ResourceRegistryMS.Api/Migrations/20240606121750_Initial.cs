@@ -88,6 +88,49 @@ namespace DAPM.ResourceRegistryMS.Api.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+            
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PeerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    UserType = table.Column<string>(type: "text", nullable: false),
+                    UserStatus = table.Column<string>(type: "text", nullable: false),
+                    UserGroups = table.Column<string>(type: "jsonb", nullable: false), // Store List<string> as JSONB
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => new { x.PeerId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_Users_Peers_PeerId",
+                        column: x => x.PeerId,
+                        principalTable: "Peers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+            
+            migrationBuilder.CreateTable(
+                name: "UserGroups",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PeerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserGroups", x => new { x.PeerId, x.Id });
+                    table.ForeignKey(
+                        name: "FK_UserGroups_Peers_PeerId",
+                        column: x => x.PeerId,
+                        principalTable: "Peers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Resources_ResourceTypeId",

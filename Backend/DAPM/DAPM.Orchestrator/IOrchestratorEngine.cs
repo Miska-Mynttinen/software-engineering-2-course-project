@@ -10,7 +10,12 @@ namespace DAPM.Orchestrator
         public void DeleteProcess(Guid processId);
         public void StartGetOrganizationProcess(Guid ticketId, Guid? organizationId);
         public void StartGetRepositoriesProcess(Guid ticketId, Guid organizationId, Guid? repositoryId);
+        public void StartGetUsersProcess(Guid ticketId, Guid organizationId, Guid? userId);
+        public void StartGetUserGroupsProcess(Guid ticketId, Guid organizationId, Guid? userGroupId);
         public void StartCreateRepositoryProcess(Guid ticketId, Guid organizationId, string name);
+        public void StartUpdateUserProcess(Guid apiTicketId, Guid organizationId, Guid userId, List<string> userGroups);
+        public void StartCreateUserProcess(Guid ticketId, Guid organizationId, UserDTO user);
+        public void StartCreateUserGroupProcess(Guid ticketId, Guid organizationId, string name);
         public void StartGetResourcesProcess(Guid ticketId, Guid organizationId, Guid repositoryId, Guid? resourceId);
         public void StartGetResourceFilesProcess(Guid ticketId, Guid organizationId, Guid repositoryId, Guid resourceId);
         public void StartPostResourceProcess(Guid ticketId, Guid organizationId, Guid repositoryId, string name, string resourceType,

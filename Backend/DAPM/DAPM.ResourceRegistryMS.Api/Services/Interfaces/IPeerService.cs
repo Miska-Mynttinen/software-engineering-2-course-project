@@ -11,6 +11,11 @@ namespace DAPM.ResourceRegistryMS.Api.Services.Interfaces
 
         Task<Peer> PostPeer(OrganizationDTO organizationDTO);
         Task<IEnumerable<Repository>> GetRepositoriesOfOrganization(Guid organizationId);
+        Task<IEnumerable<User>> GetUsersOfOrganization(Guid organizationId);
+        Task<IEnumerable<UserGroup>> GetUserGroupsOfOrganization(Guid organizationId);
         Task<Repository> PostRepositoryToOrganization(Guid organizationId, RepositoryDTO repository); 
+        Task<User> PostUserToOrganization(Guid organizationId, UserDTO user);
+        Task<User> UpdateUserToOrganization(Guid organizationId, Guid userId, List<string> userGroups);
+        Task<UserGroup> PostUserGroupToOrganization(Guid organizationId, UserGroupDTO userGroup);
     }
 }

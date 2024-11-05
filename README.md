@@ -109,37 +109,6 @@ The program is stated at http://localhost:3000
 
 - Click on the line between the miner and the datasink and set the filename as something you want to store in the data sink
 
-- Deploy (currently deployment does not work)
-
-
-### How to monitor pipelines states from the Backend
-
-![alt text](image-1.png)
-
-- The pipeline goes to the Backend through DAPM.ClientApi
-
-- Then it is sent to DAPM.PipelineOrchestratorMS.Api
-
-- The orchestrator loops through all the pipeline step asynchronously until all steps are complete
-
-- Using the defined C# web sockets send data to the Frontend when pipeline has started and when it has finished
-
-- Have the Frontend Receive these:
-
-useEffect(() => {
-    const socket = new WebSocket('ws://localhost:5000/ws');
-
-    socket.onmessage = (event) => {
-        const message = event.data;
-        setPipelineUpdates((prevUpdates) => [...prevUpdates, message]);
-    };
-
-    socket.onerror = (error) => {
-        console.error('WebSocket Error: ', error);
-    };
-
-    return () => socket.close();
-}, []);
 
 
 ![Containerized DAPM Peer Overview. From Backend thesis](Models/Backend_in_docker_thesis_image.png)

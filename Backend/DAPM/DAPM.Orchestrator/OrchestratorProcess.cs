@@ -7,6 +7,7 @@ using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromPeerApi;
 using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromPipelineOrchestrator;
 using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromRegistry;
 using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromRepo;
+using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromUser;
 
 namespace DAPM.Orchestrator
 {
@@ -41,6 +42,21 @@ namespace DAPM.Orchestrator
             return;
         }
 
+        public virtual void OnUpdateUserToRegistryResult(UpdateUserToRegistryResultMessage message)
+        {
+            return;
+        }
+
+        public virtual void OnPostUserToRegistryResult(PostUserToRegistryResultMessage message)
+        {
+            return;
+        }
+
+        public virtual void OnPostUserGroupToRegistryResult(PostUserGroupToRegistryResultMessage message)
+        {
+            return;
+        }
+
         public virtual void OnAddResourceToRegistryResult()
         {
             return;
@@ -52,6 +68,16 @@ namespace DAPM.Orchestrator
         }
 
         public virtual void OnGetRepositoriesFromRegistryResult(GetRepositoriesResultMessage message)
+        {
+            return;
+        }
+
+        public virtual void OnGetUsersFromRegistryResult(GetUsersResultMessage message)
+        {
+            return;
+        }
+
+        public virtual void OnGetUserGroupsFromRegistryResult(GetUserGroupsResultMessage message)
         {
             return;
         }
@@ -72,6 +98,20 @@ namespace DAPM.Orchestrator
         }
 
         public virtual void OnCreateRepoInRepoResult(PostRepoToRepoResultMessage message)
+        {
+            return;
+        }
+
+        public virtual void OnUpdateUserInRepoResult(UpdateUserToRepoResultMessage message)
+        {
+            return;
+        }
+        public virtual void OnCreateUserInRepoResult(PostUserToRepoResultMessage message)
+        {
+            return;
+        }
+
+        public virtual void OnCreateUserGroupInRepoResult(PostUserGroupToRepoResultMessage message)
         {
             return;
         }
