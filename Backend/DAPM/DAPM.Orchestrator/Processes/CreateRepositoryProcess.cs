@@ -92,13 +92,16 @@ namespace DAPM.Orchestrator.Processes
                 Enumerable.Empty<OrganizationDTO>(),
                 repositoriesList,
                 Enumerable.Empty<ResourceDTO>(),
-                Enumerable.Empty<PipelineDTO>());
+                Enumerable.Empty<PipelineDTO>(),
+                Enumerable.Empty<UserDTO>(),
+                Enumerable.Empty<UserGroupDTO>()
+            );
             
 
         }
 
         private void SendRegistryUpdates(IEnumerable<OrganizationDTO> targetOrganizations, IEnumerable<OrganizationDTO> organizations,
-            IEnumerable<RepositoryDTO> repositories, IEnumerable<ResourceDTO> resources, IEnumerable<PipelineDTO> pipelines)
+            IEnumerable<RepositoryDTO> repositories, IEnumerable<ResourceDTO> resources, IEnumerable<PipelineDTO> pipelines, IEnumerable<UserDTO> users, IEnumerable<UserGroupDTO> userGroups)
         {
 
             var sendRegistryUpdateProducer = _serviceScope.ServiceProvider.GetRequiredService<IQueueProducer<SendRegistryUpdateMessage>>();
@@ -115,6 +118,8 @@ namespace DAPM.Orchestrator.Processes
                 Repositories = repositories,
                 Pipelines = pipelines,
                 Resources = resources,
+                Users = users,
+                UserGroups = userGroups,
             };
 
 

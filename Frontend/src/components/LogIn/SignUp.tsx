@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
+import { fetchOrganisations, putUser } from '../../services/backendAPI';
 
 // Define the SignUpProps interface to include toggleForm
 interface SignUpProps {
@@ -48,8 +49,8 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignUp({ toggleForm }: SignUpProps) {
-  const [nameError, setNameError] = React.useState(false);
-  const [nameErrorMessage, setNameErrorMessage] = React.useState('');
+  const [usernameError, setusernameError] = React.useState(false);
+  const [usernameErrorMessage, setusernameErrorMessage] = React.useState('');
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [organizationError, setOrganizationError] = React.useState(false);
@@ -59,39 +60,65 @@ export default function SignUp({ toggleForm }: SignUpProps) {
   const [confirmPasswordError, setConfirmPasswordError] = React.useState(false);
   const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] = React.useState('');
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const isValid = validateInputs();
     if (!isValid) {
       return;
     }
 
-    const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get('name'),
-      email: data.get('email'),
-      organization: data.get('organization'),
-      password: data.get('password'),
-    });
+    const formData = new FormData(event.currentTarget);
+    formData.append("ResourceType", "User");
+    formData.append("UserStatus", "Active");
+    formData.append("UserGroups", JSON.stringify([])); // This should be an empty array
+
+    const jsonObject = {
+        Username: formData.get('username') as string, // Make sure to get the value directly
+        Password: formData.get('password') as string,
+        Email: formData.get('email') as string,
+        UserStatus: formData.get('UserStatus') as string,
+        ResourceType: formData.get('ResourceType') as string,
+        UserGroups: [],
+        UserType: 'user'
+    };
+
+    console.log('Request Payload:', jsonObject);
+    const organizationName = formData.get('organization') as string;
+
+    try {
+        // Match organization to the organizationName
+        const resultGetOrganizations = await fetchOrganisations();
+        const organizations = resultGetOrganizations?.result?.organizations || [];
+        const organization = organizations.find((org: { name: string; }) => org.name === organizationName);
+
+        const resultPostUser = await putUser(organization.id, jsonObject);
+        console.log('User successfully uploaded:', resultPostUser);
+        alert('User successfully uploaded');
+        
+        toggleForm();
+    } catch (error) {
+        console.error('Error uploading user:', error);
+        alert(`Error uploading user: ${error}`);
+    }
   };
 
   const validateInputs = () => {
     let isValid = true;
 
-    const name = document.getElementById('name') as HTMLInputElement;
+    const username = document.getElementById('username') as HTMLInputElement;
     const email = document.getElementById('email') as HTMLInputElement;
     const organization = document.getElementById('organization') as HTMLInputElement;
     const password = document.getElementById('password') as HTMLInputElement;
     const confirmPassword = document.getElementById('confirmPassword') as HTMLInputElement;
 
-    // Validate Full Name
-    if (!name.value || name.value.trim() === '') {
-      setNameError(true);
-      setNameErrorMessage('Full name is required.');
+    // Validate Full username
+    if (!username.value || username.value.trim() === '') {
+      setusernameError(true);
+      setusernameErrorMessage('Full username is required.');
       isValid = false;
     } else {
-      setNameError(false);
-      setNameErrorMessage('');
+      setusernameError(false);
+      setusernameErrorMessage('');
     }
 
     // Validate Email
@@ -169,17 +196,17 @@ export default function SignUp({ toggleForm }: SignUpProps) {
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
             <TextField
-              error={nameError}
-              helperText={nameErrorMessage}
-              id="name"
-              name="name"
-              label="Full Name"
+              error={usernameError}
+              helperText={usernameErrorMessage}
+              id="username"
+              name="username"
+              label="Full username"
               placeholder="Jon Snow"
               required
               fullWidth
               variant="outlined"
               size="small"
-              color={nameError ? 'error' : 'primary'}
+              color={usernameError ? 'error' : 'primary'}
             />
             <TextField
               error={emailError}

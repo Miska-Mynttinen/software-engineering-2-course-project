@@ -47,9 +47,15 @@ builder.Services.AddQueueing(new QueueingConfigurationSettings
 });
 
 builder.Services.AddQueueMessageConsumer<PostRepositoryToRegistryConsumer, PostRepositoryToRegistryMessage>();
+builder.Services.AddQueueMessageConsumer<UpdateUserToRegistryConsumer, UpdateUserToRegistryMessage>();
+builder.Services.AddQueueMessageConsumer<PostUserToRegistryConsumer, PostUserToRegistryMessage>();
+builder.Services.AddQueueMessageConsumer<PostUserToRegistryConsumer, PostUserToRegistryMessage>();
+builder.Services.AddQueueMessageConsumer<PostUserGroupToRegistryConsumer, PostUserGroupToRegistryMessage>();
 builder.Services.AddQueueMessageConsumer<PostResourceToRegistryConsumer, PostResourceToRegistryMessage>();
 builder.Services.AddQueueMessageConsumer<GetOrganizationsConsumer, GetOrganizationsMessage>();
 builder.Services.AddQueueMessageConsumer<GetRepositoriesConsumer, GetRepositoriesMessage>();
+builder.Services.AddQueueMessageConsumer<GetUsersConsumer, GetUsersMessage>();
+builder.Services.AddQueueMessageConsumer<GetUserGroupsConsumer, GetUserGroupsMessage>();
 builder.Services.AddQueueMessageConsumer<GetResourcesConsumer, GetResourcesMessage>();
 builder.Services.AddQueueMessageConsumer<GetPipelinesConsumer, GetPipelinesMessage>();
 builder.Services.AddQueueMessageConsumer<PostPipelineToRegistryConsumer, PostPipelineToRegistryMessage>();
@@ -70,6 +76,7 @@ builder.Services.AddScoped<IResourceService, ResourceService>();
 builder.Services.AddScoped<IPeerService, PeerService>();
 builder.Services.AddScoped<IRepositoryService, RepositoryService>();
 builder.Services.AddScoped<IPipelineService, PipelineService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 
 // Add Scoped ResourceRegistry
@@ -78,7 +85,7 @@ builder.Services.AddScoped<IRepositoryRepository, RepositoryRepository>();
 builder.Services.AddScoped<IResourceTypeRepository, ResourceTypeRepository>();
 builder.Services.AddScoped<IPeerRepository, PeerRepository>();
 builder.Services.AddScoped<IPipelineRepository, PipelineRepository>();
-
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 
 builder.Services.AddDbContext<ResourceRegistryDbContext>(options =>

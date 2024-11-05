@@ -70,6 +70,30 @@ namespace DAPM.Orchestrator
             createRepositoryProcess.StartProcess();
         }
 
+        public void StartUpdateUserProcess(Guid apiTicketId, Guid organizationId, Guid userId, List<string> userGroups)
+        {
+            var processId = apiTicketId; // Use apiTicketId as processId instead of Guid.NewGuid();
+            var updateUserProcess = new UpdateUserProcess(this, _serviceProvider, apiTicketId, processId, organizationId, userId, userGroups);
+            _processes[processId] = updateUserProcess;
+            updateUserProcess.StartProcess();
+        }
+
+        public void StartCreateUserProcess(Guid apiTicketId, Guid organizationId, UserDTO user)
+        {
+            var processId = apiTicketId; // Use apiTicketId as processId instead of Guid.NewGuid();
+            var createUserProcess = new CreateUserProcess(this, _serviceProvider, apiTicketId, processId, organizationId, user);
+            _processes[processId] = createUserProcess;
+            createUserProcess.StartProcess();
+        }
+
+        public void StartCreateUserGroupProcess(Guid apiTicketId, Guid organizationId, string name)
+        {
+            var processId = apiTicketId; // Use apiTicketId as processId instead of Guid.NewGuid();
+            var createUserGroupProcess = new CreateUserGroupProcess(this, _serviceProvider, apiTicketId, processId, organizationId, name);
+            _processes[processId] = createUserGroupProcess;
+            createUserGroupProcess.StartProcess();
+        }
+
         public void StartGetOrganizationProcess(Guid apiTicketId, Guid? organizationId)
         {
             var processId = apiTicketId; // Use apiTicketId as processId instead of Guid.NewGuid();
@@ -92,6 +116,22 @@ namespace DAPM.Orchestrator
             var getRepositoriesProcess = new GetRepositoriesProcess(this, _serviceProvider, apiTicketId, processId, organizationId, repositoryId);
             _processes[processId] = getRepositoriesProcess;
             getRepositoriesProcess.StartProcess();
+        }
+
+        public void StartGetUsersProcess(Guid apiTicketId, Guid organizationId, Guid? userId)
+        {
+            var processId = apiTicketId; // Use apiTicketId as processId instead of Guid.NewGuid();
+            var getUsersProcess = new GetUsersProcess(this, _serviceProvider, apiTicketId, processId, organizationId, userId);
+            _processes[processId] = getUsersProcess;
+            getUsersProcess.StartProcess();
+        }
+
+        public void StartGetUserGroupsProcess(Guid apiTicketId, Guid organizationId, Guid? userGroupId)
+        {
+            var processId = apiTicketId; // Use apiTicketId as processId instead of Guid.NewGuid();
+            var getUserGroupsProcess = new GetUserGroupsProcess(this, _serviceProvider, apiTicketId, processId, organizationId, userGroupId);
+            _processes[processId] = getUserGroupsProcess;
+            getUserGroupsProcess.StartProcess();
         }
 
         public void StartGetResourceFilesProcess(Guid apiTicketId, Guid organizationId, Guid repositoryId, Guid resourceId)

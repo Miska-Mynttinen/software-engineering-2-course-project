@@ -1,7 +1,9 @@
 export interface ApiState {
     organizations: Organization[],
     repositories: Repository[],
-    resources: Resource[]
+    resources: Resource[],
+    users: User[],
+    userGroups: UserGroup[]
 }
 
 export interface Organization {
@@ -14,7 +16,6 @@ export interface Repository {
     id: string,
     name: string,
     organizationId: string
-
 }
 
 export interface Resource {
@@ -23,5 +24,20 @@ export interface Resource {
     organizationId: string,
     repositoryId: string,
     type: string
+}
 
+export interface User {
+    userId: string,
+    username: string,
+    password: string,
+    email: string,
+    userType: string,
+    userGroups: string[],
+    organizationId: string
+}
+
+export interface UserGroup {
+    id: string,
+    name: string,
+    organizationId: string
 }

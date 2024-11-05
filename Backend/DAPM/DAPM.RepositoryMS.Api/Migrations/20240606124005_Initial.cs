@@ -84,6 +84,37 @@ namespace DAPM.RepositoryMS.Api.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+                // New User Table Creation
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: true),
+                    UserType = table.Column<string>(type: "text", nullable: false),
+                    UserStatus = table.Column<string>(type: "text", nullable: false),
+                    UserGroups = table.Column<string>(type: "jsonb", nullable: false), // Store List<string> as JSONB
+                    OrganizationId = table.Column<Guid>(type: "uuid", nullable: false),
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.UserId);
+                });
+            
+            migrationBuilder.CreateTable(
+                name: "UserGroups",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserGroups", x => x.Id);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Pipelines_RepositoryId",
                 table: "Pipelines",
@@ -114,6 +145,12 @@ namespace DAPM.RepositoryMS.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Repositories");
+
+            migrationBuilder.DropTable(
+                name: "Users");
+            
+            migrationBuilder.DropTable(
+                name: "UserGroups");
         }
     }
 }

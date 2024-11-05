@@ -4,6 +4,7 @@ using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromPeerApi;
 using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromPipelineOrchestrator;
 using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromRegistry;
 using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromRepo;
+using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromUser;
 using RabbitMQLibrary.Messages.PeerApi;
 using RabbitMQLibrary.Messages.Repository;
 
@@ -14,9 +15,15 @@ namespace DAPM.Orchestrator
         public void StartProcess();
         public void EndProcess();
         public void OnPostRepoToRegistryResult(PostRepoToRegistryResultMessage message);
+        public void OnUpdateUserToRegistryResult(UpdateUserToRegistryResultMessage message);
+        public void OnPostUserToRegistryResult(PostUserToRegistryResultMessage message);
+        public void OnPostUserGroupToRegistryResult(PostUserGroupToRegistryResultMessage message);
         public void OnAddResourceToRegistryResult();
         public void OnGetOrganizationsFromRegistryResult(GetOrganizationsResultMessage message);
         public void OnGetRepositoriesFromRegistryResult(GetRepositoriesResultMessage message);
+
+        public void OnGetUsersFromRegistryResult(GetUsersResultMessage message);
+        public void OnGetUserGroupsFromRegistryResult(GetUserGroupsResultMessage message);
         public void OnGetResourcesFromRegistryResult(GetResourcesResultMessage message);
         public void OnGetPipelinesFromRegistryResult(GetPipelinesResultMessage message);
         public void OnGetPipelinesFromRepoResult(GetPipelinesFromRepoResultMessage message);
@@ -26,6 +33,9 @@ namespace DAPM.Orchestrator
         public void OnPostPipelineToRepoResult(PostPipelineToRepoResultMessage message);
         public void OnPostPipelineToRegistryResult(PostPipelineToRegistryResultMessage message);
         public void OnCreateRepoInRepoResult(PostRepoToRepoResultMessage message);
+        public void OnUpdateUserInRepoResult(UpdateUserToRepoResultMessage message);
+        public void OnCreateUserInRepoResult(PostUserToRepoResultMessage message);
+        public void OnCreateUserGroupInRepoResult(PostUserGroupToRepoResultMessage message);
         public void OnGetResourceFilesFromRepoResult(GetResourceFilesFromRepoResultMessage message);
         public void OnGetOperatorFilesFromRepoResult(GetOperatorFilesFromRepoResultMessage message);
         public void OnGetResourceFilesFromOperatorResult(GetExecutionOutputResultMessage message);

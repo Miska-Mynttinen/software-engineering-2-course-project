@@ -1,12 +1,14 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { ApiState, Organization, Repository, Resource } from "../states/apiState";
-import { fetchOrganisationRepositories, fetchOrganisations, fetchRepository, fetchRepositoryResources } from "../../services/backendAPI";
+import { ApiState, Organization, Repository, Resource, User, UserGroup } from "../states/apiState";
+import { fetchOrganisationRepositories, fetchOrganisations, fetchRepository, fetchRepositoryResources, fetchOrganizationUsers, fetchOrganizationUserGroups } from "../../services/backendAPI";
 import { useAppSelector } from "../../hooks";
 import { getOrganizations } from "../selectors/apiSelector";
 
 
 export const initialState: ApiState = {
     organizations: [],
+    users: [],
+    userGroups: [],
     repositories: [{
       organizationId: "",
       name: "Repository 1",
@@ -59,8 +61,25 @@ const apiSlice = createSlice({
           .addCase(resourceThunk.rejected, (state, action) => {
             console.log("resorce thunk failed")
           })
+          .addCase(userThunk.pending, (state, action) => {
+          })
+          .addCase(userThunk.fulfilled, (state, action) => {
+            // Add any fetched posts to the array
+            state.users = action.payload
+          })
+          .addCase(userThunk.rejected, (state, action) => {
+            console.log("user thunk failed")
+          })
+          .addCase(userGroupThunk.pending, (state, action) => {
+          })
+          .addCase(userGroupThunk.fulfilled, (state, action) => {
+            // Add any fetched posts to the array
+            state.userGroups = action.payload
+          })
+          .addCase(userGroupThunk.rejected, (state, action) => {
+            console.log("userGroup thunk failed")
+          })
       }
-    
 })
 
 export default apiSlice.reducer 
@@ -72,6 +91,14 @@ interface FetchOrganizationsResponse {
 
 interface FetchRepositoriesResponse {
   repositories: Repository[]; // Update this type based on your actual organization type
+}
+
+interface FetchUsersResponse {
+  users: User[]; // Update this type based on your actual organization type
+}
+
+interface FetchUserGroupsResponse {
+  userGroups: UserGroup[]; // Update this type based on your actual organization type
 }
 
 // Define the thunk action creator
@@ -125,4 +152,36 @@ export const resourceThunk = createAsyncThunk<
   }
 });
 
+export const userThunk = createAsyncThunk<
+  User[],
+  Organization[]
+>("api/fetchUsers", async (organizations: Organization[], thunkAPI) => {
+  try {
+    
+    const users = [];
+      for (const organization of organizations) {
+        const outputs = await fetchOrganizationUsers(organization.id);
+        users.push(...outputs.result.users);
+      }
+      return users;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error); // Handle error
+  }
+});
 
+export const userGroupThunk = createAsyncThunk<
+  UserGroup[],
+  Organization[]
+>("api/fetchUserGroups", async (organizations: Organization[], thunkAPI) => {
+  try {
+    
+    const userGroups = [];
+      for (const organization of organizations) {
+        const outputs = await fetchOrganizationUserGroups(organization.id);
+        userGroups.push(...outputs.result.userGroups);
+      }
+      return userGroups;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error); // Handle error
+  }
+});

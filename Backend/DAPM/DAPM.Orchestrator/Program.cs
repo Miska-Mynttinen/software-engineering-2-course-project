@@ -6,8 +6,10 @@ using RabbitMQLibrary.Messages.Orchestrator.ProcessRequests;
 using DAPM.Orchestrator;
 using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromRegistry;
 using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromRepo;
+using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromUser;
 using DAPM.Orchestrator.Consumers.ResultConsumers.FromRegistry;
 using DAPM.Orchestrator.Consumers.ResultConsumers.FromRepo;
+using DAPM.Orchestrator.Consumers.ResultConsumers.FromUser;
 using DAPM.Orchestrator.Services;
 using DAPM.Orchestrator.Consumers.ResultConsumers.FromPeerApi;
 using RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromPeerApi;
@@ -49,12 +51,17 @@ builder.Services.AddCors(options =>
 //START PROCESS REQUESTS
 builder.Services.AddQueueMessageConsumer<GetOrganizationsRequestConsumer, GetOrganizationsRequest>();
 builder.Services.AddQueueMessageConsumer<GetRepositoriesRequestConsumer, GetRepositoriesRequest>();
+builder.Services.AddQueueMessageConsumer<GetUsersRequestConsumer, GetUsersRequest>();
+builder.Services.AddQueueMessageConsumer<GetUserGroupsRequestConsumer, GetUserGroupsRequest>();
 builder.Services.AddQueueMessageConsumer<GetResourcesRequestConsumer, GetResourcesRequest>();
 builder.Services.AddQueueMessageConsumer<GetPipelinesRequestConsumer, GetPipelinesRequest>();
 builder.Services.AddQueueMessageConsumer<PostResourceRequestConsumer, PostResourceRequest>();
 builder.Services.AddQueueMessageConsumer<PostResourceFromPeerRequestConsumer, PostResourceFromPeerRequest>();
 builder.Services.AddQueueMessageConsumer<PostOperatorRequestConsumer, PostOperatorRequest>();
 builder.Services.AddQueueMessageConsumer<PostRepositoryRequestConsumer, PostRepositoryRequest>();
+builder.Services.AddQueueMessageConsumer<UpdateUserRequestConsumer, UpdateUserRequest>();
+builder.Services.AddQueueMessageConsumer<PostUserRequestConsumer, PostUserRequest>();
+builder.Services.AddQueueMessageConsumer<PostUserGroupRequestConsumer, PostUserGroupRequest>();
 builder.Services.AddQueueMessageConsumer<PostPipelineRequestConsumer, PostPipelineRequest>();
 builder.Services.AddQueueMessageConsumer<GetResourceFilesRequestConsumer, GetResourceFilesRequest>();
 
@@ -76,12 +83,20 @@ builder.Services.AddQueueMessageConsumer<GetPipelineExecutionStatusRequestConsum
 //SERVICE RESULTS
 builder.Services.AddQueueMessageConsumer<GetOrgsFromRegistryResultConsumer, GetOrganizationsResultMessage>();
 builder.Services.AddQueueMessageConsumer<GetReposFromRegistryResultConsumer, GetRepositoriesResultMessage>();
+builder.Services.AddQueueMessageConsumer<GetUsersFromRegistryResultConsumer, GetUsersResultMessage>();
+builder.Services.AddQueueMessageConsumer<GetUserGroupsFromRegistryResultConsumer, GetUserGroupsResultMessage>();
 builder.Services.AddQueueMessageConsumer<GetResourcesFromRegistryResultConsumer, GetResourcesResultMessage>();
 builder.Services.AddQueueMessageConsumer<PostResourceToRepoResultConsumer, PostResourceToRepoResultMessage>();
 builder.Services.AddQueueMessageConsumer<PostResourceToOperatorResultConsumer, PostInputResourceResultMessage>();
 builder.Services.AddQueueMessageConsumer<PostResourceToRegistryResultConsumer, PostResourceToRegistryResultMessage>();
 builder.Services.AddQueueMessageConsumer<PostRepoToRepoResultConsumer, PostRepoToRepoResultMessage>();
+builder.Services.AddQueueMessageConsumer<UpdateUserToRepoResultConsumer, UpdateUserToRepoResultMessage>();
+builder.Services.AddQueueMessageConsumer<PostUserToRepoResultConsumer, PostUserToRepoResultMessage>();
+builder.Services.AddQueueMessageConsumer<PostUserGroupToRepoResultConsumer, PostUserGroupToRepoResultMessage>();
 builder.Services.AddQueueMessageConsumer<PostRepoToRegistryResultConsumer, PostRepoToRegistryResultMessage>();
+builder.Services.AddQueueMessageConsumer<UpdateUserToRegistryResultConsumer, UpdateUserToRegistryResultMessage>();
+builder.Services.AddQueueMessageConsumer<PostUserToRegistryResultConsumer, PostUserToRegistryResultMessage>();
+builder.Services.AddQueueMessageConsumer<PostUserGroupToRegistryResultConsumer, PostUserGroupToRegistryResultMessage>();
 builder.Services.AddQueueMessageConsumer<PostPipelineToRepoResultConsumer, PostPipelineToRepoResultMessage>();
 builder.Services.AddQueueMessageConsumer<GetPipelinesFromRepoResultConsumer, GetPipelinesFromRepoResultMessage>();
 builder.Services.AddQueueMessageConsumer<PostPipelineToRegistryResultConsumer, PostPipelineToRegistryResultMessage>();
