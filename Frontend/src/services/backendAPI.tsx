@@ -384,7 +384,6 @@ export async function fetchOrganizationUsers(orgId: string) {
 
         // Call getData function with the ticketId obtained from fetchOrganisationsUsers
         const users = await getData(jsonData.ticketId);
-        console.log('USERS:', users);
         return users;
     } catch (error) {
         console.error('Fecthing reps, Error fetching data:', error);

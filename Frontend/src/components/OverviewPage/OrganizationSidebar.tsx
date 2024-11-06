@@ -14,14 +14,11 @@ import { Organization, Repository, Resource, User, UserGroup } from '../../redux
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { Box } from '@mui/material';
 import ResourceUploadButton from './Buttons/ResourceUploadButton';
-import { downloadResource, fetchOrganisation, fetchOrganisationRepositories, fetchOrganisations, fetchPipeline, fetchRepositoryPipelines, fetchRepositoryResources, fetchResource, putPipeline, putRepository } from '../../services/backendAPI';
+import { downloadResource } from '../../services/backendAPI';
 import CreateRepositoryButton from './Buttons/CreateRepositoryButton';
 import AddOrganizationButton from './Buttons/AddOrganizationButton';
 import { display } from 'html2canvas/dist/types/css/property-descriptors/display';
 import OperatorUploadButton from './Buttons/OperatorUploadButton';
-import UserUploadButton from './Buttons/UserUploadButton';
-import UserUpdateButton from './Buttons/UserUpdateButton';
-import UserGroupUploadButton from './Buttons/UserGroupUploadButton';
 import { Padding } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -36,21 +33,10 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 export default function PersistentDrawerLeft() {
-
   const dispatch = useAppDispatch()
   const organizations: Organization[] = useAppSelector(getOrganizations)
-  const users: User[] = useAppSelector(getUsers)
-  const userGroups: UserGroup[] = useAppSelector(getUserGroups)
   const repositories: Repository[] = useAppSelector(getRepositories)
   const resources = useSelector(getResources)
-
-  const refreshUsers = () => {
-    dispatch(userThunk(organizations));
-  };
-
-  const refreshUserGroups = () => {
-    dispatch(userGroupThunk(organizations));
-  };
 
   const refreshRepositories = () => {
     dispatch(repositoryThunk(organizations));
@@ -113,47 +99,6 @@ async function downloadReadableStream(url: string, fileName: string) {
             </ListItem>
             <div style={{ display: 'flex', alignItems: 'center', paddingInline: '0.5rem' }}>
             </div>
-            <>
-              <ListItem sx={{ paddingInline: '5px' }}>
-                <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>Users</p>
-              </ListItem>
-              <>
-                {users && users.map((user) =>
-                  user.organizationId === organization.id ? (
-                    <ListItem key={user.userId} sx={{ paddingInline: '5px' }}>
-                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>
-                        Username: {user.username} {user.userId}
-                      </p>
-                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>
-                        UserId: {user.userId}
-                      </p>
-                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>
-                        UserGroups:
-                        {user.userGroups && user.userGroups.map((group, index) => (
-                          <p key={index} style={{ padding: '0', fontSize: '20px', marginBlock: '5px' }}>
-                            {group}
-                          </p>
-                        ))}
-                      </p>
-                    </ListItem>
-                  ) : null
-                )}
-              </>
-            </>
-            <>
-              <ListItem sx={{ paddingInline: '5px' }}>
-                <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>User Groups</p>
-              </ListItem>
-              <>
-                {userGroups && userGroups.map((userGroup) =>
-                  userGroup.organizationId === organization.id ? (
-                    <ListItem key={userGroup.name} sx={{ paddingInline: '5px' }}>
-                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>{userGroup.name}</p>
-                    </ListItem>
-                  ) : null
-                )}
-              </>
-            </>
             {repositories.map((repository) => (repository.organizationId === organization.id ?
               <>
                 <ListItem key={repository.id} sx={{paddingInline: '5px'}}>
@@ -175,7 +120,6 @@ async function downloadReadableStream(url: string, fileName: string) {
                     </ListItem>
                   </> : ""
                 ))}
-
                 <div style={{ display: 'flex', alignItems: 'center', paddingInline: '0.5rem' }}>
                   <p style={{fontSize: '0.9rem'}}>Operators</p>
                   <Box sx={{ marginLeft: 'auto' }}>
@@ -193,21 +137,6 @@ async function downloadReadableStream(url: string, fileName: string) {
                 ))}
               </> : ""
             ))}
-            <ListItem sx={{ justifyContent: 'center' }}>
-              <Box sx={{ width: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <UserUploadButton orgId={organization.id} onUserCreated={refreshUsers} />
-              </Box>
-            </ListItem>
-            <ListItem sx={{ justifyContent: 'center' }}>
-              <Box sx={{ width: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <UserUpdateButton orgId={organization.id} onUserUpdated={refreshUsers} />
-              </Box>
-            </ListItem>
-            <ListItem sx={{ justifyContent: 'center' }}>
-              <Box sx={{ width: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <UserGroupUploadButton orgId={organization.id} onUserGroupCreated={refreshUserGroups} />
-              </Box>
-            </ListItem>
             <ListItem sx={{ justifyContent: 'center' }}>
               <Box sx={{ width: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                 <CreateRepositoryButton orgId={organization.id} onRepositoryCreated={refreshRepositories} />

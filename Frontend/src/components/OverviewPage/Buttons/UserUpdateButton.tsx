@@ -1,9 +1,13 @@
-import { Box, Button, FormControl, FormLabel, MenuItem, Modal, Select, TextField, Typography } from '@mui/material';
+import { Box, Button, FormControl, FormLabel, MenuItem, Modal, Select, TextField, Typography, Checkbox, ListItemText, InputLabel } from '@mui/material';
 import React, { ChangeEvent } from 'react';
 import { updateUser } from '../../../services/backendAPI';
+import { UserGroup } from '../../../redux/states/apiState';
+import { SelectChangeEvent } from '@mui/material';
 
 export interface UploadButtonProps {
     orgId: string,
+    userId: string,
+    userGroups: UserGroup[]
     onUserUpdated: () => void;
 }
 
@@ -19,12 +23,20 @@ const style = {
     p: 4,
 };
 
-const UserUpdateButton = ({ orgId, onUserUpdated }: UploadButtonProps) => {
+const UserUpdateButton = ({ orgId, userId, userGroups, onUserUpdated }: UploadButtonProps) => {
     const [open, setOpen] = React.useState(false);
+    const [selectedUserGroups, setSelectedUserGroups] = React.useState<string[]>([]);
     const [disabled, setDisabled] = React.useState(false);
+
+    const availableUserGroups = userGroups.filter(userGroup => userGroup.organizationId === orgId).map(userGroup => userGroup.name);
+
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+
+    const handleSelect = (event: SelectChangeEvent<string[]>) => {
+        setSelectedUserGroups(event.target.value as string[]);
+    };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -32,16 +44,9 @@ const UserUpdateButton = ({ orgId, onUserUpdated }: UploadButtonProps) => {
         setDisabled(true);
     
         const formData = new FormData(event.currentTarget);
-        const userId = formData.get('UserId') as string;
-        const userGroupsString = formData.get('UserGroups') as string;
-        const userGroups = userGroupsString
-            .split(',')             // Split the string by commas
-            .map(group => group.trim())  // Trim each group
-            .filter(group => group.length > 0); // Filter out any empty strings
-    
-    
+
         try {
-            const result = await updateUser(orgId, userId, userGroups);
+            const result = await updateUser(orgId, userId, selectedUserGroups);
             console.log('User successfully updated:', result);
             onUserUpdated();
     
@@ -71,13 +76,21 @@ const UserUpdateButton = ({ orgId, onUserUpdated }: UploadButtonProps) => {
                         </Typography>
                         <form onSubmit={handleSubmit}>
                             <FormControl fullWidth margin="normal">
-                                <FormLabel>User id</FormLabel>
-                                <input type="string" name="UserId" />
-
                                 <FormLabel>User Groups (separate with comma(,))</FormLabel>
-                                <input type="string" name="UserGroups" />
+                                <Select
+                                    multiple
+                                    value={selectedUserGroups}
+                                    onChange={handleSelect}
+                                    renderValue={(selected) => selected.join(', ')} // displays selected values as comma-separated string
+                                >
+                                    {availableUserGroups.map((group) => (
+                                        <MenuItem key={group} value={group}>
+                                            <Checkbox checked={selectedUserGroups.includes(group)} />
+                                            <ListItemText primary={group} />
+                                        </MenuItem>
+                                    ))}
+                                </Select>
                             </FormControl>
-
                             <Button 
                                 disabled={disabled}
                                 type="submit" 
