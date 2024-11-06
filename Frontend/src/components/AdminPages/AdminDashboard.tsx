@@ -2,17 +2,18 @@ import React, { useState } from 'react';
 import { Box, CssBaseline, Toolbar, AppBar, Typography, Drawer, List, ListItem, ListItemText, Button, Divider } from '@mui/material';
 import PendingRequest from './PendingRequest';
 import AllUser from './AllUser';
-
-interface User {
-  userId: string;
-  username: string;
-  userType: string;
-  userStatus: string;
-}
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { getOrganizations, getUsers, getUserGroups } from '../../redux/selectors/apiSelector';
+import { organizationThunk, userThunk, userGroupThunk } from '../../redux/slices/apiSlice';
+import { Organization, User, UserGroup } from '../../redux/states/apiState';
+import { useAppDispatch, useAppSelector } from '../../hooks';
+import UserUploadButton from '../OverviewPage/Buttons/UserUploadButton';
+import UserGroupUploadButton from '../OverviewPage/Buttons/UserGroupUploadButton';
 
 const drawerWidth = 240;
 
-const rows: User[] = [
+/* const rows: User[] = [
   { userId: '1', username: 'JohnDoe', userType: 'USER', userStatus: 'ACTIVE' },
   { userId: '2', username: 'JaneSmith', userType: 'USER', userStatus: 'PENDING' },
   { userId: '3', username: 'AliceJohnson', userType: 'USER', userStatus: 'DEACTIVATED' },
@@ -28,14 +29,32 @@ const rows: User[] = [
   { userId: '13', username: 'JackWright', userType: 'USER', userStatus: 'ACTIVE' },
   { userId: '14', username: 'KateMartin', userType: 'USER', userStatus: 'PENDING' },
   { userId: '15', username: 'LeoGarcia', userType: 'USER', userStatus: 'ACTIVE' },
-];
+]; */
 
 const AdminDashboard: React.FC = () => {
-  const [selectedPage, setSelectedPage] = useState('PendingRequest'); // Track selected page
+  const dispatch = useAppDispatch()
+  const [selectedPage, setSelectedPage] = useState('AllUser'); // Track selected page
+  const organizations: Organization[] = useAppSelector(getOrganizations)
+  const users: User[] = useAppSelector(getUsers)
+  const userGroups: UserGroup[] = useAppSelector(getUserGroups)
+
+  const refreshUsers = () => {
+    dispatch(userThunk(organizations));
+  };
+
+  const refreshUserGroups = () => {
+    dispatch(userGroupThunk(organizations));
+  };
+
+  useEffect(() => {
+    dispatch(organizationThunk())
+    dispatch(userThunk(organizations));
+    dispatch(userGroupThunk(organizations));
+  }, [dispatch]);
 
   // Sidebar menu options
   const menuItems = [
-    { text: 'Pending Requests', page: 'PendingRequest' },
+    /*{ text: 'Pending Requests', page: 'PendingRequest' },*/
     { text: 'All Users', page: 'AllUser' },
   ];
 
@@ -93,6 +112,39 @@ const AdminDashboard: React.FC = () => {
                 <ListItemText primary={item.text} />
               </ListItem>
             ))}
+            {organizations.map((organization) => (
+            <>
+              <ListItem sx={{ justifyContent: 'center' }} key={organization.id} disablePadding>
+                <p style={{marginBlock: '0rem', fontSize: '25px'}}>{organization.name}</p>
+              </ListItem>
+              <div style={{ display: 'flex', alignItems: 'center', paddingInline: '0.5rem' }}>
+              </div>
+              <ListItem sx={{ justifyContent: 'center' }}>
+                <Box sx={{ width: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                  <UserUploadButton orgId={organization.id} onUserCreated={refreshUsers} />
+                </Box>
+              </ListItem>
+              <ListItem sx={{ justifyContent: 'center' }}>
+                <Box sx={{ width: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                  <UserGroupUploadButton orgId={organization.id} onUserGroupCreated={refreshUserGroups} />
+                </Box>
+              </ListItem>
+              <>
+              <ListItem sx={{ paddingInline: '5px' }}>
+                <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>User Groups of {organization.name}</p>
+              </ListItem>
+              <>
+                {userGroups && userGroups.map((userGroup) =>
+                  userGroup.organizationId === organization.id ? (
+                    <ListItem key={userGroup.name} sx={{ paddingInline: '5px' }}>
+                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>{userGroup.name}</p>
+                    </ListItem>
+                  ) : null
+                )}
+              </>
+              </>
+            </>
+            ))}
           </List>
         </Box>
       </Drawer>
@@ -100,11 +152,55 @@ const AdminDashboard: React.FC = () => {
       {/* Main Content */}
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        {selectedPage === 'PendingRequest' && <PendingRequest rows={rows} />}
-        {selectedPage === 'AllUser' && <AllUser rows={rows} />}
+        {/*selectedPage === 'PendingRequest' && <PendingRequest rows={rows} />*/}
+        {selectedPage === 'AllUser' && <AllUser rows={users} userGroups={userGroups} onUserUpdated={refreshUsers}/>}
       </Box>
     </Box>
   );
 };
 
 export default AdminDashboard;
+
+/*
+<>
+              <ListItem sx={{ paddingInline: '5px' }}>
+                <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>Users</p>
+              </ListItem>
+              <>
+                {users && users.map((user) =>
+                  user.organizationId === organization.id ? (
+                    <ListItem key={user.userId} sx={{ paddingInline: '5px' }}>
+                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>
+                        Username: {user.username} {user.userId}
+                      </p>
+                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>
+                        UserId: {user.userId}
+                      </p>
+                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>
+                        UserGroups:
+                        {user.userGroups && user.userGroups.map((group, index) => (
+                          <p key={index} style={{ padding: '0', fontSize: '20px', marginBlock: '5px' }}>
+                            {group}
+                          </p>
+                        ))}
+                      </p>
+                    </ListItem>
+                  ) : null
+                )}
+              </>
+            </>
+            <>
+              <ListItem sx={{ paddingInline: '5px' }}>
+                <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>User Groups</p>
+              </ListItem>
+              <>
+                {userGroups && userGroups.map((userGroup) =>
+                  userGroup.organizationId === organization.id ? (
+                    <ListItem key={userGroup.name} sx={{ paddingInline: '5px' }}>
+                      <p style={{ padding: '0', fontSize: '25px', marginBlock: '10px' }}>{userGroup.name}</p>
+                    </ListItem>
+                  ) : null
+                )}
+              </>
+            </>
+*/

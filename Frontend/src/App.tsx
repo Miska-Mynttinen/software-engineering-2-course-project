@@ -12,7 +12,6 @@ import storage from 'redux-persist/lib/storage' // defaults to localStorage for 
 import { RouterProvider, createBrowserRouter, createHashRouter } from "react-router-dom";
 import PipelineComposer from "./routes/PipeLineComposer";
 import UserPage from "./routes/OverviewPage";
-import AdminPage from "./routes/AdminOverviewPage";
 import AuthPage from "./components/LogIn/AuthPage";
 import { loadState, saveState } from "./redux/browser-storage";
 import { clearTickets } from "./redux/slices/currentSessionTicketSlice";
@@ -61,7 +60,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    element: <AdminPage/>,
+    element: <AdminDashboard/>,
   },
   {
     path: "/pipeline",

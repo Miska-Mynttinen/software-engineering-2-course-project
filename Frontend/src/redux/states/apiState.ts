@@ -32,6 +32,7 @@ export interface User {
     password: string,
     email: string,
     userType: string,
+    userStatus: string,
     userGroups: string[],
     organizationId: string
 }

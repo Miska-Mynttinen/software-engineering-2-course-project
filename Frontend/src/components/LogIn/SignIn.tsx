@@ -76,8 +76,6 @@ export default function SignIn({ toggleForm }: SignInProps) {
     const username = data.get('username');
     const password = data.get('password');
 
-    console.log({username: data.get('username'), password: data.get('password')});
-
     if (username === 'admin' && password === 'admin1!') {
       navigate('/admin');
     } else if (username === 'user' && password === 'user1!') {
