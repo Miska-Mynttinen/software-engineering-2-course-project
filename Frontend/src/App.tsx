@@ -1,15 +1,12 @@
 import { ThemeProvider, createTheme } from "@mui/material";
-
 import { useEffect } from 'react';
-
 import "./index.css";
-import { Provider, useDispatch  } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import rootReducer from "./redux/slices";
-
-import { persistReducer } from 'redux-persist'
-import storage from 'redux-persist/lib/storage' // defaults to localStorage for web
-import { RouterProvider, createBrowserRouter, createHashRouter } from "react-router-dom";
+import { persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+import { RouterProvider, createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import PipelineComposer from "./routes/PipeLineComposer";
 import UserPage from "./routes/OverviewPage";
 import AuthPage from "./components/LogIn/AuthPage";
@@ -22,7 +19,6 @@ const persistConfig = {
   key: 'root',
   storage,
 };
-
 const persistedReducer = persistReducer<ReturnType<typeof rootReducer>>(persistConfig, rootReducer);
 
 const darkTheme = createTheme({
@@ -34,21 +30,28 @@ const darkTheme = createTheme({
 const store = configureStore({
   reducer: persistedReducer,
   preloadedState: loadState(),
-})
+});
 
-// here we subscribe to the store changes
-store.subscribe(
-  // we use debounce to save the state once each 800ms
-  // for better performances in case multiple changes occur in a short time
-  () => saveState(store.getState())
-);
+// Subscribe to save the store state periodically
+store.subscribe(() => saveState(store.getState()));
+
+// Helper function to check for the token in localStorage
+const checkToken = () => {
+  const token = localStorage.getItem("token");
+  return !!token; // Return true if token exists, otherwise false
+};
+
+// Protected Route Wrapper
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const isAuthenticated = checkToken();
+  return isAuthenticated ? children : <Navigate to="/" />;
+};
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>
-export type AppDispatch = typeof store.dispatch
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
-
-
+// Define Routes
 const router = createBrowserRouter([
   {
     path: "/",  // Route for the AuthPage
@@ -56,18 +59,31 @@ const router = createBrowserRouter([
   },
   {
     path: "/user",
-    element: <UserPage/>,
+    element: (
+      <ProtectedRoute>
+        <UserPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/admin",
-    element: <AdminDashboard/>,
+    element: (
+      <ProtectedRoute>
+        <AdminDashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/pipeline",
-    element: <PipelineComposer/>,
+    element: (
+      <ProtectedRoute>
+        <PipelineComposer />
+      </ProtectedRoute>
+    ),
   },
 ]);
 
+// Component to clear tickets on app load
 function ClearTicketsOnLoad() {
   const dispatch = useDispatch();
 
@@ -78,7 +94,14 @@ function ClearTicketsOnLoad() {
   return null;
 }
 
+// Main App Component
 export default function App() {
+  useEffect(() => {
+    const isAuthenticated = checkToken();
+    if (!isAuthenticated) {
+      router.navigate("/"); // Redirect to login if no token
+    }
+  }, []);
 
   return (
     <ThemeProvider theme={darkTheme}>

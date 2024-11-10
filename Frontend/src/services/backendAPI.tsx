@@ -688,6 +688,95 @@ export async function putOperator(orgId: string, repId: string, formData: FormDa
         throw error; // Propagate error to the caller
     }
 }
+export async function loginUser(username: string, password: string) {
+    console.log("Username:",username)
+    console.log("Password:",password)
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    
+    try {
+        const response = await fetch(`http://${path}/authentication/login`, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({ username, password })
+           
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Login failed: ${errorText}`);
+        }
+
+        const jsonData = await response.json();
+        
+        // Store the JWT token in localStorage
+        localStorage.setItem("token", jsonData.token);
+        console.log("Token",jsonData.token)
+        return jsonData;
+    } catch (error) {
+        console.error("Error during login:", error);
+        throw error;
+    }
+}
+
+export async function logoutUser() {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        throw new Error("No token found in localStorage.");
+    }
+
+    const headers = new Headers();
+    headers.append("Authorization", `Bearer ${token}`);
+
+    try {
+        const response = await fetch(`http://${path}/authentication/logout`, {
+            method: "DELETE",
+            headers: headers
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Logout failed: ${errorText}`);
+        }
+
+        // Remove the token from localStorage
+        localStorage.removeItem("token");
+
+        return response.status;
+    } catch (error) {
+        console.error("Error during logout:", error);
+        throw error;
+    }
+}
+export async function checkToken() {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        return false; // Token does not exist in localStorage
+    }
+
+    const headers = new Headers();
+    headers.append("Authorization", `Bearer ${token}`);
+
+    try {
+        const response = await fetch(`http://${path}/authentication/checkToken`, {
+            method: "GET",
+            headers: headers
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Token validation failed:", errorText);
+            return false; // Token is invalid or not related to the current user
+        }
+
+        return true; // Token is valid
+    } catch (error) {
+        console.error("Error checking token:", error);
+        return false;
+    }
+}
 
 export async function putUser(orgId: string, userData: { [key: string]: any }) {
     const headers = new Headers()
