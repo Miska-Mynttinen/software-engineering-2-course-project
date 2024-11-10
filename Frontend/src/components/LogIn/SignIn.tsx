@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
+import { loginUser } from '../../services/backendAPI'; // Import the loginUser function
 
 // Define the toggleForm prop type
 interface SignInProps {
@@ -66,22 +67,32 @@ export default function SignIn({ toggleForm }: SignInProps) {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (usernameError || passwordError) {
-      event.preventDefault();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevent default form submission
+
+    // Validate inputs first
+    if (!validateInputs()) {
       return;
     }
-    const data = new FormData(event.currentTarget);
-    
-    const username = data.get('username');
-    const password = data.get('password');
 
-    if (username === 'admin' && password === 'admin1!') {
-      navigate('/admin');
-    } else if (username === 'user' && password === 'user1!') {
-      navigate('/user');
-    } else {
-      alert('Invalid username or password');
+    const data = new FormData(event.currentTarget);
+    const username = data.get('username') as string;
+    const password = data.get('password') as string;
+
+    try {
+      // Call login API and store the token if successful
+      const response = await loginUser(username, password);
+      
+      if (response && response.token) {
+        // Navigate based on user role
+        if (username === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/user');
+        }
+      }
+    } catch (error) {
+      alert('Login failed. Please check your username and password.');
     }
   };
 
@@ -155,7 +166,7 @@ export default function SignIn({ toggleForm }: SignInProps) {
               id="username"
               type="username"
               name="username"
-              label="username"
+              label="Username"
               placeholder="Username"
               autoComplete="username"
               autoFocus
@@ -215,4 +226,3 @@ export default function SignIn({ toggleForm }: SignInProps) {
     </ThemeProvider>
   );
 }
-
