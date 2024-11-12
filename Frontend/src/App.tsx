@@ -55,7 +55,7 @@ export type AppDispatch = typeof store.dispatch;
 const router = createBrowserRouter([
   {
     path: "/",  // Route for the AuthPage
-    element: <AuthPage />,
+    element: <UserPage />,
   },
   {
     path: "/user",
