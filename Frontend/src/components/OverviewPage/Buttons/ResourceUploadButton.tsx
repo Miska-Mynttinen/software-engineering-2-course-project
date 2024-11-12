@@ -22,7 +22,8 @@ const style = {
 
 const ResourceUploadButton = ({ orgId, repId, onResourceCreated }: UploadButtonProps) => {
 
-    const dataTypes = ["eventLog", "bpmnModel", "petriNet"]
+    const dataTypes = ["eventLog", "bpmnModel", "petriNet"];
+    const ownerTypes = ["user", "userGroup"];
 
     const [open, setOpen] = React.useState(false);
     const [disabled, setDisabled] = React.useState(false);
@@ -88,6 +89,35 @@ const ResourceUploadButton = ({ orgId, repId, onResourceCreated }: UploadButtonP
                                     sx={{ width: '100%' }}>
                                     {dataTypes.map((resource) => <MenuItem value={resource}>{resource}</MenuItem>)}
                                 </Select>
+
+                               
+                                <FormLabel>Owner </FormLabel>
+                                <TextField
+                                    name="owner"
+                                    placeholder="Enter User.Id or UserGroup.Id"
+                                    fullWidth
+                                />
+
+                               
+                                <FormLabel>Owner Type</FormLabel>
+                                <Select
+                                    name="ownerType"
+                                    labelId="ownerType-select-label"
+                                    id="ownerType-select"
+                                    sx={{ width: '100%' }}
+                                >
+                                    {ownerTypes.map((type) => (
+                                        <MenuItem key={type} value={type}>{type}</MenuItem>
+                                    ))}
+                                </Select>
+
+                               
+                                <FormLabel>User Group</FormLabel>
+                                <TextField
+                                    name="userGroup"
+                                    placeholder="Enter UserGroup.Id "
+                                    fullWidth
+                                />
 
                                 <FormLabel>Upload File</FormLabel>
                                 <input type="file" name="ResourceFile" />

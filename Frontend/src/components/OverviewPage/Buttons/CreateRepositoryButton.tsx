@@ -1,4 +1,4 @@
-import { Box, Button, FormControl, FormLabel, Modal, TextField, Typography } from '@mui/material';
+import { Button, Box, Modal, Typography, FormControl, FormLabel, TextField, Select, MenuItem } from '@mui/material';
 import React from 'react';
 import { putRepository } from '../../../services/backendAPI';
 
@@ -23,6 +23,8 @@ const style = {
 const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositoryButtonProps) => {
     const [open, setOpen] = React.useState(false);
     const [disabled, setDisabled] = React.useState(false);
+
+    const ownerTypes = ["user", "userGroup"];
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -78,10 +80,39 @@ const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositor
                                 <TextField name="Name" />
                             </FormControl>
 
+                            <FormLabel>Owner </FormLabel>
+                                <TextField
+                                    name="owner"
+                                    placeholder="Enter User.Id or UserGroup.Id"
+                                    fullWidth
+                                />
+
+                               
+                                <FormLabel>Owner Type</FormLabel>
+                                <Select
+                                    name="ownerType"
+                                    labelId="ownerType-select-label"
+                                    id="ownerType-select"
+                                    sx={{ width: '100%' }}
+                                >
+                                    {ownerTypes.map((type) => (
+                                        <MenuItem key={type} value={type}>{type}</MenuItem>
+                                    ))}
+                                </Select>
+
+                               
+                                <FormLabel>User Group</FormLabel>
+                                <TextField
+                                    name="userGroup"
+                                    placeholder="Enter UserGroup.Id "
+                                    sx={{ padding: "1px",  }}
+                                    fullWidth
+                                />
+
                             <Button 
                                 disabled={disabled} 
                                 type="submit" 
-                                sx={{ backgroundColor: "gray", padding: "1px", color: disabled ? "lightgray" : "black" }}
+                                sx={{ backgroundColor: "gray", padding: "1px", color: disabled ? "lightgray" : "black",mt: 2 }}
                             >
                                 {disabled ? 'Submitting...' : 'Submit'}
                             </Button>

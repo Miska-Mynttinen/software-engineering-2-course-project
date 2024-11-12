@@ -21,6 +21,7 @@ const style = {
 };
 
 const OperatorUploadButton = ({ orgId, repId, onOperatorCreated }: UploadButtonProps) => {
+    const ownerTypes = ["user", "userGroup"];
 
     const [open, setOpen] = React.useState(false);
     const [disabled, setDisabled] = React.useState(false);
@@ -78,6 +79,34 @@ const OperatorUploadButton = ({ orgId, repId, onOperatorCreated }: UploadButtonP
                             <FormControl fullWidth margin="normal">
                                 <FormLabel>Operator name</FormLabel>
                                 <TextField name="Name" />
+
+                                <FormLabel>Owner </FormLabel>
+                                <TextField
+                                    name="owner"
+                                    placeholder="Enter User.Id or UserGroup.Id"
+                                    fullWidth
+                                />
+
+                               
+                                <FormLabel>Owner Type</FormLabel>
+                                <Select
+                                    name="ownerType"
+                                    labelId="ownerType-select-label"
+                                    id="ownerType-select"
+                                    sx={{ width: '100%' }}
+                                >
+                                    {ownerTypes.map((type) => (
+                                        <MenuItem key={type} value={type}>{type}</MenuItem>
+                                    ))}
+                                </Select>
+
+                               
+                                <FormLabel>User Group</FormLabel>
+                                <TextField
+                                    name="userGroup"
+                                    placeholder="Enter UserGroup.Id "
+                                    fullWidth
+                                />
 
                                 <FormLabel>Upload source code</FormLabel>
                                 <input type="file" name="SourceCodeFile" />
