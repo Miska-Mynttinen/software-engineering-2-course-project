@@ -7,7 +7,11 @@ const localPath = `localhost:5000`
 
 let path = localPath
 
-if (process.env.IS_VM) {
+let isVM = false;
+
+// isVM = true;
+
+if (isVM) {
     path = vmPath
 }
 
