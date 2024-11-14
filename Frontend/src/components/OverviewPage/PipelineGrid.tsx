@@ -1,9 +1,10 @@
+import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import PipelineCard from './PipelineCard';
-import { Button } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,15 +26,21 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export default function AutoGrid() {
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
+  const pipelines = useSelector(getPipelines);
 
-  const pipelines = useSelector(getPipelines)
+  const [username, setUsername] = useState(''); // State for username
+
+  useEffect(() => {
+    // Fetch username from localStorage
+    const storedUsername = localStorage.getItem('username') || 'Guest';
+    setUsername(storedUsername);
+  }, []);
 
   const createNewPipeline = () => {
     dispatch(addNewPipeline({ id: `pipeline-${uuidv4()}`, flowData: { nodes: [], edges: [] } }));
     { navigate("/pipeline") }
-  }
+  };
 
   pipelines.map(({ pipeline: flowData, id, name }) => {
     const nodes = flowData.nodes;
@@ -50,9 +57,8 @@ export default function AutoGrid() {
       <FlowDiagram nodes={nodes} edges={edges} />,
       container,
       () => {
-
-        const width = 800
-        const height = 600
+        const width = 800;
+        const height = 600;
 
         const nodesBounds = getNodesBounds(nodes!);
         const { x, y, zoom } = getViewportForBounds(nodesBounds, width, height, 0.5, 2, 1);
@@ -75,11 +81,33 @@ export default function AutoGrid() {
   });
 
   return (
-    <Box sx={{ flexGrow: 1, flexBasis: "100%" }} >
-      <Button variant="contained" startIcon={<AddIcon />} onClick={() => createNewPipeline()}
-        sx={{ backgroundColor: "#bbb", "&:hover": { backgroundColor: "#eee" }, marginBlockStart: "10px" }}>
+    <Box sx={{ flexGrow: 1, flexBasis: "100%", position: 'relative' }}>
+  {/* Username Display */}
+  <Box sx={{ position: 'absolute', top: '10px', right: '10px' }}>
+    <Typography
+      variant="body1"
+      sx={{
+        color: '#000', // Text color to match the "Create New" button hover effect
+        backgroundColor: '#bbb', // Same background as the "Create New" button
+        padding: '5px 10px', // Padding for spacing
+        borderRadius: '5px', // Rounded corners
+      }}
+    >
+      Username: {username}
+    </Typography>
+  </Box>
+
+  {/* Create New Pipeline Button */}
+  <Button
+    variant="contained"
+    startIcon={<AddIcon />}
+    onClick={() => createNewPipeline()}
+    sx={{ backgroundColor: "#bbb", "&:hover": { backgroundColor: "#eee" }, marginBlockStart: "10px" }}
+  >
         Create New
       </Button>
+
+      {/* Grid Display of Pipelines */}
       <Grid container spacing={{ xs: 1, md: 1 }} sx={{ padding: "10px" }}>
         {pipelines.map(({ id, name, imgData }) => (
           <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>

@@ -37,6 +37,8 @@ const AdminDashboard: React.FC = () => {
   const organizations: Organization[] = useAppSelector(getOrganizations)
   const users: User[] = useAppSelector(getUsers)
   const userGroups: UserGroup[] = useAppSelector(getUserGroups)
+  const [username, setUsername] = useState(''); // State for username
+
 
   const refreshUsers = () => {
     dispatch(userThunk(organizations));
@@ -52,6 +54,13 @@ const AdminDashboard: React.FC = () => {
     dispatch(userGroupThunk(organizations));
   }, [dispatch]);
 
+  useEffect(() => {
+    // Fetch username from localStorage
+    const storedUsername = localStorage.getItem('username') || 'Guest';
+    setUsername(storedUsername);
+  }, []);
+  
+
   // Sidebar menu options
   const menuItems = [
     /*{ text: 'Pending Requests', page: 'PendingRequest' },*/
@@ -64,6 +73,10 @@ const AdminDashboard: React.FC = () => {
       {/* Top AppBar */}
       <AppBar position="fixed" sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}>
         <Toolbar>
+           {/* Display Username */}
+          <Typography variant="body1" style={{ marginRight: '16px' }}>
+            Username: {username}
+          </Typography>
           <Button
             color="inherit"
             sx={{
