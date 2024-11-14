@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, TextField, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, TextField, Toolbar, Typography,Dialog,DialogActions,DialogContent,DialogTitle,MenuItem } from "@mui/material";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,7 +36,12 @@ export default function PipelineAppBar() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [statuses, setStatuses] = useState<PipelineStatus[]>([]); // State for pipeline statuses
-
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    owner: "",
+    ownerType: "",
+    userGroup: "",
+  });
   // Get current session tickets at the top level of the component
   const tickets = useSelector(getCurrentSessionTickets);
   
@@ -165,6 +170,23 @@ export default function PipelineAppBar() {
 
   const flowData = useSelector(getActiveFlowData);
 
+  const handleDialogOpen = () => setDialogOpen(true);
+  const handleDialogClose = () => setDialogOpen(false);
+
+  const handleFormChange = (e: { target: { name: any; value: any; }; }) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFormSubmit = async () => {
+    if (!formData.owner || !formData.ownerType) {
+      alert("Please fill in the required fields.");
+      return;
+    }
+    setDialogOpen(false);
+    await generateJson();
+  };
+
   const generateJson = async () => {
     var edges = flowData!.edges.map(edge => {
       return { sourceHandle: edge.sourceHandle, targetHandle: edge.targetHandle };
@@ -202,6 +224,9 @@ export default function PipelineAppBar() {
 
     const requestData = {
       name: pipelineName,
+      owner: formData.owner,
+      ownerType: formData.ownerType,
+      userGroup: formData.userGroup,
       pipeline: {
         nodes: flowData?.nodes?.filter(node => node.type === 'dataSource').map(node => node as Node<DataSourceNodeData>).map(node => {
           return {
@@ -270,32 +295,90 @@ export default function PipelineAppBar() {
   };
 
   return (
-    <AppBar position="fixed">
-      <Toolbar sx={{ flexGrow: 1 }}>
-        <Button onClick={() => navigate('/')}>
-          <ArrowBackIosNewIcon sx={{ color: "white" }} />
-        </Button>
-        <Box sx={{ width: '100%', textAlign: 'center' }}>
-          {isEditing ? (
-            <TextField
-              value={pipelineName}
-              onChange={(event) => setPipelineName(event?.target.value as string)}
-              autoFocus
-              onBlur={handleFinishEditing}
-              inputProps={{ style: { textAlign: 'center', width: 'auto' } }}
-            />
-          ) : (
-            <Box onClick={handleStartEditing} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', width: '100%' }}>
-              <Typography>{pipelineName}</Typography>
-              <EditIcon sx={{ paddingLeft: '10px' }} />
-            </Box>
-          )}
-        </Box>
-        <PipelineStatusDialogBox statuses={statuses} /> {/* Pass the statuses */}
-        <Button onClick={() => generateJson()}>
-          <Typography variant="body1" sx={{ color: "white" }}>Deploy pipeline</Typography>
-        </Button>
-      </Toolbar>
-    </AppBar>
+    <>
+      <AppBar position="fixed">
+        <Toolbar sx={{ flexGrow: 1 }}>
+          <Button onClick={() => navigate("/")}>
+            <ArrowBackIosNewIcon sx={{ color: "white" }} />
+          </Button>
+          <Box sx={{ width: "100%", textAlign: "center" }}>
+            {isEditing ? (
+              <TextField
+                value={pipelineName}
+                onChange={(e) => setPipelineName(e.target.value)}
+                autoFocus
+                onBlur={handleFinishEditing}
+                inputProps={{ style: { textAlign: "center", width: "auto" } }}
+              />
+            ) : (
+              <Box
+                onClick={handleStartEditing}
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  width: "100%",
+                }}
+              >
+                <Typography>{pipelineName}</Typography>
+                <EditIcon sx={{ paddingLeft: "10px" }} />
+              </Box>
+            )}
+          </Box>
+          <PipelineStatusDialogBox statuses={statuses} />
+          <Button onClick={handleDialogOpen}>
+            <Typography variant="body1" sx={{ color: "white" }}>
+              Deploy pipeline
+            </Typography>
+          </Button>
+        </Toolbar>
+      </AppBar>
+
+      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>Deploy Pipeline</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Owner"
+            name="owner"
+            value={formData.owner}
+            onChange={handleFormChange}
+            required
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Owner Type"
+            name="ownerType"
+            value={formData.ownerType}
+            onChange={handleFormChange}
+            select
+            required
+          >
+            <MenuItem value="user">User</MenuItem>
+            <MenuItem value="userGroup">User Group</MenuItem>
+          </TextField>
+          <TextField
+            fullWidth
+            margin="dense"
+            label="User Group"
+            name="userGroup"
+            value={formData.userGroup}
+            onChange={handleFormChange}
+            helperText="Leave empty if not applicable"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleFormSubmit} color="primary">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
+
 }
