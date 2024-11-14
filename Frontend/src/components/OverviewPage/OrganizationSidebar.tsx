@@ -39,12 +39,6 @@ export default function PersistentDrawerLeft() {
     dispatch(resourceThunk({ organizations, repositories }));
   };
 
-  const handleLogout = () => {
-    // Clear any necessary data, e.g., session tokens
-    localStorage.removeItem('username'); // Example: Clear username
-    navigate('/login'); // Redirect to the login page
-  };
-
   useEffect(() => {
     dispatch(organizationThunk());
     dispatch(repositoryThunk(organizations));
@@ -149,26 +143,6 @@ export default function PersistentDrawerLeft() {
           </>
         ))}
       </List>
-      {/* Logout Button at Bottom Left */}
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          padding: '10px',
-        }}
-      >
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: '#bbb', "&:hover": { backgroundColor: '#eee' } }}
-          onClick={handleLogout}
-        >
-          Logout
-        </Button>
-      </Box>
     </Drawer>
   );
 }

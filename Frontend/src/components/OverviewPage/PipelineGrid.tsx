@@ -33,9 +33,16 @@ export default function AutoGrid() {
 
   useEffect(() => {
     // Fetch username from localStorage
-    const storedUsername = localStorage.getItem('username') || 'Guest';
+    const storedUsername = localStorage.getItem('username') || 'User';
     setUsername(storedUsername);
   }, []);
+
+  const handleLogout = () => {
+    // Clear any necessary data, e.g., session tokens
+    localStorage.removeItem('username'); // Example: Clear username
+    localStorage.removeItem("token");
+    navigate('/'); // Redirect to the login page
+  };
 
   const createNewPipeline = () => {
     dispatch(addNewPipeline({ id: `pipeline-${uuidv4()}`, flowData: { nodes: [], edges: [] } }));
@@ -81,31 +88,34 @@ export default function AutoGrid() {
   });
 
   return (
-    <Box sx={{ flexGrow: 1, flexBasis: "100%", position: 'relative' }}>
-  {/* Username Display */}
-  <Box sx={{ position: 'absolute', top: '10px', right: '10px' }}>
-    <Typography
-      variant="body1"
-      sx={{
-        color: '#000', // Text color to match the "Create New" button hover effect
-        backgroundColor: '#bbb', // Same background as the "Create New" button
-        padding: '5px 10px', // Padding for spacing
-        borderRadius: '5px', // Rounded corners
-      }}
-    >
-      Username: {username}
-    </Typography>
-  </Box>
-
-  {/* Create New Pipeline Button */}
-  <Button
-    variant="contained"
-    startIcon={<AddIcon />}
-    onClick={() => createNewPipeline()}
-    sx={{ backgroundColor: "#bbb", "&:hover": { backgroundColor: "#eee" }, marginBlockStart: "10px" }}
-  >
+    <Box sx={{flexGrow: 1, flexBasis: "100%", position: 'relative' }}>
+      {/* Create New Pipeline Button */}
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => createNewPipeline()}
+        sx={{ backgroundColor: "#bbb", "&:hover": { backgroundColor: "#eee" }, marginBlockStart: "10px" }}
+      >
         Create New
       </Button>
+
+      {/* Username Display and Logout Button */}
+      <Box sx={{ display: 'flex', alignItems: 'center', position: 'absolute', gap: '8px', top: '10px', right: '10px' }}>
+        <Typography variant="body1" style={{ marginRight: '16px', color: 'white' }}>
+          Username: {username}
+        </Typography>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: '#bbb', "&:hover": { backgroundColor: '#eee' } }}
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
+      </Box>
+
+      
+
+      
 
       {/* Grid Display of Pipelines */}
       <Grid container spacing={{ xs: 1, md: 1 }} sx={{ padding: "10px" }}>
