@@ -1,7 +1,8 @@
 import { Stream } from "stream";
 import { json } from "stream/consumers";
 
-const vmPath = `dapm1.compute.dtu.dk:5000`
+// const vmPath = `dapm1.compute.dtu.dk:5000`
+const vmPath = `se2-f.compute.dtu.dk:5000`
 const localPath = `localhost:5000`
 
 let path = localPath

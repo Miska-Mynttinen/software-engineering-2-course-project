@@ -3,6 +3,7 @@ import { Box, CssBaseline, Toolbar, AppBar, Typography, Drawer, List, ListItem, 
 import PendingRequest from './PendingRequest';
 import AllUser from './AllUser';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getOrganizations, getUsers, getUserGroups } from '../../redux/selectors/apiSelector';
 import { organizationThunk, userThunk, userGroupThunk } from '../../redux/slices/apiSlice';
@@ -33,6 +34,8 @@ const drawerWidth = 240;
 
 const AdminDashboard: React.FC = () => {
   const dispatch = useAppDispatch()
+  const navigate = useNavigate();
+
   const [selectedPage, setSelectedPage] = useState('AllUser'); // Track selected page
   const organizations: Organization[] = useAppSelector(getOrganizations)
   const users: User[] = useAppSelector(getUsers)
@@ -56,10 +59,16 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     // Fetch username from localStorage
-    const storedUsername = localStorage.getItem('username') || 'Guest';
+    const storedUsername = localStorage.getItem('username') || 'Admin';
     setUsername(storedUsername);
   }, []);
   
+  const handleLogout = () => {
+    // Clear any necessary data, e.g., session tokens
+    localStorage.removeItem('username'); // Example: Clear username
+    localStorage.removeItem("token");
+    navigate('/'); // Redirect to the login page
+  };
 
   // Sidebar menu options
   const menuItems = [
@@ -74,20 +83,23 @@ const AdminDashboard: React.FC = () => {
       <AppBar position="fixed" sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}>
         <Toolbar>
            {/* Display Username */}
-          <Typography variant="body1" style={{ marginRight: '16px' }}>
-            Username: {username}
-          </Typography>
-          <Button
-            color="inherit"
-            sx={{
-              marginLeft: 'auto',
-              border: '1px solid white', // Adds a white border to the button
-              borderRadius: '5px', // Optional: Adds rounded corners to the button
-              padding: '5px 15px', // Adjust padding for a better look
-            }}
-          >
-            Logout
-          </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', position: 'absolute', gap: '8px', top: '10px', right: '10px' }}>
+            <Typography variant="body1" style={{ marginRight: '16px' }}>
+              Username: {username}
+            </Typography>
+            <Button
+              color="inherit"
+              sx={{
+                marginLeft: 'auto',
+                border: '1px solid white', // Adds a white border to the button
+                borderRadius: '5px', // Optional: Adds rounded corners to the button
+                padding: '5px 15px', // Adjust padding for a better look
+              }}
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
 
