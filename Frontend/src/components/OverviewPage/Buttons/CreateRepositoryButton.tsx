@@ -37,10 +37,14 @@ const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositor
 
         const formData = new FormData(event.currentTarget);
         const repositoryName = formData.get("Name") as string;
+        const formEntries = Object.fromEntries(formData.entries());
+
+        console.log('Form Data:', formEntries);
+
 
         if (repositoryName) {
             try {
-                const result = await putRepository(orgId, repositoryName);
+                const result = await putRepository(orgId, repositoryName, formData);
                 console.log('Repository successfully created:', result);
                  // Call the callback function to refresh the page
                 onRepositoryCreated();

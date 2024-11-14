@@ -434,18 +434,18 @@ export async function fetchOrganizationUserGroups(orgId: string) {
     }
 }
 
-export async function putRepository(orgId: string, repositoryName: string) {
+export async function putRepository(orgId: string, repositoryName: string, formData: FormData) {
     
-    const headers = new Headers()
-    headers.append("accept", "application/json")
-    headers.append("Content-Type", "application/json")
+   
     
 
     try {
+
+        formData.append("name", repositoryName);
+
         const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories`, {
             method: "POST",
-            headers: headers,
-            body: JSON.stringify({ name: repositoryName })
+            body: formData,
         });
 
         if (!response.ok) {
