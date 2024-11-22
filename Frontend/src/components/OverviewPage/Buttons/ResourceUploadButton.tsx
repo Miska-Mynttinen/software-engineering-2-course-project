@@ -96,20 +96,17 @@ const ResourceUploadButton = ({ orgId, repId, onResourceCreated }: UploadButtonP
                                     name="owner"
                                     placeholder="Enter User.Id or UserGroup.Id"
                                     fullWidth
+                                    required
                                 />
 
                                
                                 <FormLabel>Owner Type</FormLabel>
-                                <Select
-                                    name="ownerType"
-                                    labelId="ownerType-select-label"
-                                    id="ownerType-select"
-                                    sx={{ width: '100%' }}
-                                >
-                                    {ownerTypes.map((type) => (
-                                        <MenuItem key={type} value={type}>{type}</MenuItem>
-                                    ))}
-                                </Select>
+                                <TextField
+                                    name="owner"
+                                    placeholder="Enter type of User or UserGroup"
+                                    fullWidth
+                                    required
+                                />
 
                                
                                 <FormLabel>User Group</FormLabel>
