@@ -3,6 +3,7 @@ import React from 'react';
 import { putRepository } from '../../../services/backendAPI';
 
 
+
 export interface CreateRepositoryButtonProps {
     orgId: string,
     onRepositoryCreated: () => void;
@@ -24,6 +25,7 @@ const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositor
     const [open, setOpen] = React.useState(false);
     const [disabled, setDisabled] = React.useState(false);
 
+    
     const ownerTypes = ["user", "userGroup"];
 
     const handleOpen = () => setOpen(true);
@@ -89,22 +91,11 @@ const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositor
                                     name="owner"
                                     placeholder="Enter User.Id or UserGroup.Id"
                                     fullWidth
+                                    required
                                 />
 
-                               
-                                <FormLabel>Owner Type</FormLabel>
-                                <Select
-                                    name="ownerType"
-                                    labelId="ownerType-select-label"
-                                    id="ownerType-select"
-                                    sx={{ width: '100%' }}
-                                >
-                                    {ownerTypes.map((type) => (
-                                        <MenuItem key={type} value={type}>{type}</MenuItem>
-                                    ))}
-                                </Select>
+                            
 
-                               
                                 <FormLabel>User Group</FormLabel>
                                 <TextField
                                     name="userGroup"

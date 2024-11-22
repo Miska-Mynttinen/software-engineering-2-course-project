@@ -353,11 +353,8 @@ export default function PipelineAppBar() {
             name="ownerType"
             value={formData.ownerType}
             onChange={handleFormChange}
-            select
             required
           >
-            <MenuItem value="user">User</MenuItem>
-            <MenuItem value="userGroup">User Group</MenuItem>
           </TextField>
           <TextField
             fullWidth
