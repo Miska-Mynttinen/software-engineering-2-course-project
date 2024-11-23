@@ -1,6 +1,8 @@
 import { Button, Box, Modal, Typography, FormControl, FormLabel, TextField, Select, MenuItem } from '@mui/material';
 import React from 'react';
 import { putRepository } from '../../../services/backendAPI';
+import { useAppSelector } from '../../../hooks';
+import { getUserGroups, getUsers } from '../../../redux/selectors/apiSelector';
 
 
 
@@ -24,12 +26,22 @@ const style = {
 const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositoryButtonProps) => {
     const [open, setOpen] = React.useState(false);
     const [disabled, setDisabled] = React.useState(false);
+    const [ownerError, setOwnerError] = React.useState<string | null>(null);
+    const [groupError, setGroupError] = React.useState<string | null>(null);
+    const [ownerTypeError, setownerTypeError] = React.useState<string | null>(null);
 
+    const users = useAppSelector(getUsers); // List of users
+    const userGroups = useAppSelector(getUserGroups); // List of user groups
     
     const ownerTypes = ["user", "userGroup"];
 
     const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const handleClose = () => {
+        setOpen(false);
+        setOwnerError(null);
+        setGroupError(null);
+        setownerTypeError(null); // Reset error on modal close
+    };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -40,9 +52,54 @@ const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositor
         const formData = new FormData(event.currentTarget);
         const repositoryName = formData.get("Name") as string;
         const formEntries = Object.fromEntries(formData.entries());
+        const owner = formData.get("owner") as string;
+        const userGroup = formData.get("userGroup") as string;
+        const ownerType = formData.get("ownerType") as string;
 
         console.log('Form Data:', formEntries);
 
+        const validUserGroups = userGroups
+            .filter(group => group.organizationId === orgId)
+            .map(group => group.name);
+
+        const validUsers = users
+            .filter(user => user.organizationId === orgId)
+            .map(user => user.userId);
+
+            // Validate owner: check if it exists in validUsers (userId) or validUserGroups (name)
+        const isOwnerTypeValid = validUsers.includes(ownerType) || validUserGroups.includes(ownerType);
+    
+        // Validate owner: check if it exists in validUsers (userId) or validUserGroups (name)
+        const isOwnerValid = validUsers.includes(owner) || validUserGroups.includes(owner);
+
+        // Validate userGroup: check if it exists in validUserGroups
+        const isUserGroupValid = !userGroup || validUserGroups.includes(userGroup); // userGroup is optional
+
+        
+
+        if (!isOwnerTypeValid) {
+            setOwnerError('The entered owner type does not exist in the organization.');
+        } else {
+            setownerTypeError(null);
+        }
+
+        if (!isOwnerValid) {
+            setOwnerError('The entered owner does not exist in the organization.');
+        } else {
+            setOwnerError(null);
+        }
+
+        if (!isUserGroupValid) {
+            setGroupError('The entered user group does not exist in the organization.');
+        } else {
+            setGroupError(null);
+        }
+
+        // Stop submission if any error exists
+        if (!isOwnerValid || !isUserGroupValid || !isOwnerTypeValid) {
+            setDisabled(false);
+            return;
+        }
 
         if (repositoryName) {
             try {
@@ -86,23 +143,49 @@ const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositor
                                 <TextField name="Name" />
                             </FormControl>
 
-                            <FormLabel>Owner </FormLabel>
+                            <FormControl fullWidth margin="normal">
+                                <FormLabel>Owner name</FormLabel>
                                 <TextField
                                     name="owner"
                                     placeholder="Enter User.Id or UserGroup.Id"
                                     fullWidth
                                     required
                                 />
+                                {ownerError && (
+                                    <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                                        {ownerError}
+                                    </Typography>
+                                )}
+                            </FormControl>
 
-                            
+                            <FormControl fullWidth margin="normal">
+                                <FormLabel>Owner Type</FormLabel>
+                                <TextField
+                                    name="ownerType"
+                                    placeholder="Enter User.Id or UserGroup.Id"
+                                    fullWidth
+                                    required
+                                />
+                                {ownerTypeError && (
+                                    <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                                        {ownerTypeError}
+                                    </Typography>
+                                )}
+                            </FormControl>
 
-                                <FormLabel>User Group</FormLabel>
+                            <FormControl fullWidth margin="normal">
+                                <FormLabel>User Group name</FormLabel>
                                 <TextField
                                     name="userGroup"
-                                    placeholder="Enter UserGroup.Id "
-                                    sx={{ padding: "1px",  }}
+                                    placeholder="Enter UserGroup.Id"
                                     fullWidth
                                 />
+                                {groupError && (
+                                    <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                                        {groupError}
+                                    </Typography>
+                                )}
+                            </FormControl>
 
                             <Button 
                                 disabled={disabled} 
