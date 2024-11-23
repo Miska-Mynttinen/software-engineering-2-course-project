@@ -10,9 +10,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Node } from "reactflow";
 import { DataSinkNodeData, DataSourceNodeData, OperatorNodeData } from "../../redux/states/pipelineState";
 import { putCommandStart, putExecution, putPipeline, fetchPipelineExecutionStatus, fetchStatus } from "../../services/backendAPI";
-import { getOrganizations, getRepositories } from "../../redux/selectors/apiSelector";
+import { getOrganizations, getRepositories, getUserGroups, getUsers } from "../../redux/selectors/apiSelector";
 import { getHandleId, getNodeId } from "./Flow";
 import PipelineStatusDialogBox from "./PipelineStatusDialogBox";
+import { useAppSelector } from "../../hooks";
+import React from "react";
 
 interface Step {
   executionTime: string;
@@ -163,6 +165,12 @@ export default function PipelineAppBar() {
   const organizations = useSelector(getOrganizations);
   const repositories = useSelector(getRepositories);
   const pipelineName = useSelector(getActivePipeline)?.name;
+  const [ownerError, setOwnerError] = React.useState<string | null>(null);
+  const [groupError, setGroupError] = React.useState<string | null>(null);
+  const [ownerTypeError, setownerTypeError] = React.useState<string | null>(null);
+
+    const users = useAppSelector(getUsers); // List of users
+    const userGroups = useAppSelector(getUserGroups); // List of user groups
 
   const setPipelineName = (name: string) => {
     dispatch(updatePipelineName(name));
@@ -171,21 +179,66 @@ export default function PipelineAppBar() {
   const flowData = useSelector(getActiveFlowData);
 
   const handleDialogOpen = () => setDialogOpen(true);
-  const handleDialogClose = () => setDialogOpen(false);
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setErrors({ owner: '', ownerType: '', userGroup: '' }); // Reset errors
+  };
+
 
   const handleFormChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const [errors, setErrors] = useState({
+    owner: '',
+    ownerType: '',
+    userGroup: '',
+  });
+
+
+ const selectedOrg = organizations[0];
+
   const handleFormSubmit = async () => {
-    if (!formData.owner || !formData.ownerType) {
-      alert("Please fill in the required fields.");
-      return;
+    const { owner, ownerType, userGroup } = formData;
+
+    // Reset error state before validation
+    const newErrors = { owner: '', ownerType: '', userGroup: '' };
+
+    const validUserGroups = userGroups
+        .filter(group => group.organizationId === selectedOrg?.id)
+        .map(group => group.name);
+    const validUsers = users
+        .filter(user => user.organizationId === selectedOrg?.id)
+        .map(user => user.userId);
+
+    // Validate owner
+    if (!owner || !(validUsers.includes(owner) || validUserGroups.includes(owner))) {
+        newErrors.owner = 'Invalid owner. It must match a valid user or user group ID.';
     }
+
+    // Validate ownerType
+    if (!ownerType || (ownerType !== 'user' && ownerType !== 'userGroup')) {
+        newErrors.ownerType = 'Owner type must be either "user" or "userGroup".';
+    }
+
+    // Validate userGroup
+    if (userGroup && !validUserGroups.includes(userGroup)) {
+        newErrors.userGroup = 'Invalid user group. It must match a valid group ID.';
+    }
+
+    setErrors(newErrors);
+
+    // Stop submission if any errors are present
+    if (Object.values(newErrors).some(error => error)) {
+        alert('Please correct the errors in the form before submitting.');
+        return;
+    }
+
     setDialogOpen(false);
-    await generateJson();
-  };
+    await generateJson(); // Proceed if no validation errors
+};
+
 
   const generateJson = async () => {
     var edges = flowData!.edges.map(edge => {
@@ -338,33 +391,40 @@ export default function PipelineAppBar() {
         <DialogTitle>Deploy Pipeline</DialogTitle>
         <DialogContent>
           <TextField
-            fullWidth
-            margin="dense"
-            label="Owner"
-            name="owner"
-            value={formData.owner}
-            onChange={handleFormChange}
-            required
-          />
-          <TextField
-            fullWidth
-            margin="dense"
-            label="Owner Type"
-            name="ownerType"
-            value={formData.ownerType}
-            onChange={handleFormChange}
-            required
-          >
-          </TextField>
-          <TextField
-            fullWidth
-            margin="dense"
-            label="User Group"
-            name="userGroup"
-            value={formData.userGroup}
-            onChange={handleFormChange}
-            helperText="Leave empty if not applicable"
-          />
+          fullWidth
+          margin="dense"
+          label="Owner"
+          name="owner"
+          value={formData.owner}
+          onChange={handleFormChange}
+          required
+          error={!!errors.owner}
+          helperText={errors.owner}
+        />
+
+        <TextField
+        fullWidth
+        margin="dense"
+        label="Owner Type"
+        name="ownerType"
+        value={formData.ownerType}
+        onChange={handleFormChange}
+        required
+        error={!!errors.ownerType}
+        helperText={errors.ownerType}
+        />
+
+      <TextField
+        fullWidth
+        margin="dense"
+        label="User Group"
+        name="userGroup"
+        value={formData.userGroup}
+        onChange={handleFormChange}
+        helperText={errors.userGroup || 'Leave empty if not applicable'}
+        error={!!errors.userGroup}
+        />
+
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogClose} color="secondary">
