@@ -65,6 +65,8 @@ builder.Services.AddQueueMessageConsumer<PostUserGroupRequestConsumer, PostUserG
 builder.Services.AddQueueMessageConsumer<PostPipelineRequestConsumer, PostPipelineRequest>();
 builder.Services.AddQueueMessageConsumer<GetResourceFilesRequestConsumer, GetResourceFilesRequest>();
 
+builder.Services.AddQueueMessageConsumer<LoginRequestConsumer, LoginRequest>();
+
 //Handshake
 builder.Services.AddQueueMessageConsumer<CollabHandshakeRequestConsumer, CollabHandshakeRequest>();
 builder.Services.AddQueueMessageConsumer<HandshakeRequestConsumer, HandshakeRequestMessage>();
@@ -106,7 +108,7 @@ builder.Services.AddQueueMessageConsumer<GetOperatorFilesFromRepoResultConsumer,
 builder.Services.AddQueueMessageConsumer<GetResourceFilesFromOperatorResultConsumer, GetExecutionOutputResultMessage>();
 builder.Services.AddQueueMessageConsumer<SendResourceToPeerResultConsumer, SendResourceToPeerResultMessage>();
 builder.Services.AddQueueMessageConsumer<ExecuteOperatorResultConsumer, ExecuteOperatorResultMessage>();
-
+builder.Services.AddQueueMessageConsumer<LoginProcessResultConsumer, LoginProcessResultMessage>();
 
 
 // Handshake

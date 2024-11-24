@@ -55,6 +55,7 @@ builder.Services.AddQueueMessageConsumer<PostResourceToRegistryConsumer, PostRes
 builder.Services.AddQueueMessageConsumer<GetOrganizationsConsumer, GetOrganizationsMessage>();
 builder.Services.AddQueueMessageConsumer<GetRepositoriesConsumer, GetRepositoriesMessage>();
 builder.Services.AddQueueMessageConsumer<GetUsersConsumer, GetUsersMessage>();
+builder.Services.AddQueueMessageConsumer<LoginConsumer, LoginMessage>();
 builder.Services.AddQueueMessageConsumer<GetUserGroupsConsumer, GetUserGroupsMessage>();
 builder.Services.AddQueueMessageConsumer<GetResourcesConsumer, GetResourcesMessage>();
 builder.Services.AddQueueMessageConsumer<GetPipelinesConsumer, GetPipelinesMessage>();

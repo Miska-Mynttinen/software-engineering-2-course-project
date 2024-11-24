@@ -693,18 +693,19 @@ export async function putOperator(orgId: string, repId: string, formData: FormDa
         throw error; // Propagate error to the caller
     }
 }
-export async function loginUser(username: string, password: string) {
-    console.log("Username:",username)
-    console.log("Password:",password)
+export async function loginUser(username: string, password: string, organizationId: string) {
+    console.log("Username:", username);
+    console.log("Password:", password);
+    console.log("Organization ID:", organizationId);  // Log the organization ID
+
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
-    
+
     try {
         const response = await fetch(`http://${path}/authentication/login`, {
             method: "POST",
             headers: headers,
-            body: JSON.stringify({ username, password })
-           
+            body: JSON.stringify({ username, password, organizationId }) // Include organizationId
         });
 
         if (!response.ok) {
@@ -713,16 +714,17 @@ export async function loginUser(username: string, password: string) {
         }
 
         const jsonData = await response.json();
-        
+
         // Store the JWT token in localStorage
         localStorage.setItem("token", jsonData.token);
-        console.log("Token",jsonData.token)
+        console.log("Token", jsonData.token);
         return jsonData;
     } catch (error) {
         console.error("Error during login:", error);
         throw error;
     }
 }
+
 
 export async function logoutUser() {
     const token = localStorage.getItem("token");

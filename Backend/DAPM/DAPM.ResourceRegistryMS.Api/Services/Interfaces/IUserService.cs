@@ -6,6 +6,7 @@ namespace DAPM.ResourceRegistryMS.Api.Services.Interfaces
     public interface IUserService
     {
         Task<User> GetUserById(Guid organizationId, Guid userId);
+        Task<User> UserLogin(Guid orgId, string userName, string password);
         Task<IEnumerable<User>> GetAllUsers();
         Task<bool> DisableUser(Guid organizationId, Guid userId);
         Task<UserGroup> GetUserGroupById(Guid organizationId, Guid id);

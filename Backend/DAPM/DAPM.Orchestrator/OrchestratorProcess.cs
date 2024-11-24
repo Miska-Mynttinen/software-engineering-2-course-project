@@ -71,12 +71,16 @@ namespace DAPM.Orchestrator
         {
             return;
         }
+        public virtual void OnLoginResult(LoginProcessResultMessage message)
+        {
+            return;
+        }
 
         public virtual void OnGetUsersFromRegistryResult(GetUsersResultMessage message)
         {
             return;
         }
-
+ 
         public virtual void OnGetUserGroupsFromRegistryResult(GetUserGroupsResultMessage message)
         {
             return;
@@ -215,5 +219,7 @@ namespace DAPM.Orchestrator
         {
             return;
         }
+
+       
     }
 }
