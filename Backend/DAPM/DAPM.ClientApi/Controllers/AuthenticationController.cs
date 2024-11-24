@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using DAPM.ClientApi.Services.Interfaces;
 using DAPM.ClientApi.Models.DTOs;
 using DAPM.ClientApi.Services;
+using RabbitMQLibrary.Models;
 
 namespace DAPM.ClientApi.Controllers
 {
@@ -11,26 +12,22 @@ namespace DAPM.ClientApi.Controllers
     {
         private readonly IAuthenticationService _authenticationService;
 
-        public AuthenticationController(IAuthenticationService authenticationService)
+        private readonly ILogger<AuthenticationService> _logger;
+
+        public AuthenticationController(ILogger<AuthenticationService> logger, IAuthenticationService authenticationService)
         {
+            _logger = logger;
             _authenticationService = authenticationService;
         }
-private readonly ILogger<AuthenticationService> _logger;
+
         // Login endpoint to authenticate and generate JWT token
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
+
             try
             {
-                //_logger.LogInformation($"--------------------Initiating login from controller for user: {request.Username}-------------------------");
-               // Ensure OrgId is a string before attempting to parse it
-                string orgIdString = request.OrgId.ToString(); // Convert to string if it's a different type
-                
-                if (!Guid.TryParse(orgIdString, out Guid gOrgid))
-                {
-                    return BadRequest(new { message = "Invalid Organization ID format." });
-                }
-                var token = _authenticationService.Login(request.Username, request.Password, gOrgid);
+                var token = _authenticationService.Login(request.Username, request.Password, request.OrganizationId);
                 return Ok(new { Token = token });
             }
             catch (UnauthorizedAccessException ex)

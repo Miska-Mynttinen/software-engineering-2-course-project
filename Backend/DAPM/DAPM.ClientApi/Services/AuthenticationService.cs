@@ -52,7 +52,6 @@ namespace DAPM.ClientApi.Services
 
             // Step 3: Publish the message to Resource Registry for validation
             _validateUserProducer.PublishMessage(validateUserMessage);
-            _logger.LogInformation($"=================ValidateUserRequest published for user: {username}====================");
 
             // Step 4: Wait for the response
             var validationResponse = _ticketService.WaitForResponse<LoginRequest>(ticketId, TimeSpan.FromMinutes(1));
@@ -63,7 +62,6 @@ namespace DAPM.ClientApi.Services
             }
 
             // Step 5: Generate JWT token for successful login
-            _logger.LogInformation($"Login successful for user: {username}");
             return GenerateJwtToken(username,orgId);
         }
 

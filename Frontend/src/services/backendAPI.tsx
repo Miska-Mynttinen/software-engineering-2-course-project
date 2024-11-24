@@ -715,9 +715,33 @@ export async function loginUser(username: string, password: string, organization
 
         const jsonData = await response.json();
 
+        // Fetch additional data recursively
+        const getData = async (ticketId: string): Promise<any> => {
+            const maxRetries = 10;
+            const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+            for (let retries = 0; retries < maxRetries; retries++) {
+                try {
+                    const data = await fetchStatus(ticketId);
+                    if (data.status) {
+                        return data;
+                    }
+                    await delay(1000); // Wait for 1 second before retrying
+                } catch (error) {
+                    if (retries === maxRetries - 1) {
+                        throw new Error('Max retries reached');
+                    }
+                }
+            }
+            throw new Error('Failed to fetch data');
+        };
+
+        // Call getData function with the ticketId obtained from fetchOrganisations
+        const data = getData(jsonData.ticketId);
+
         // Store the JWT token in localStorage
-        localStorage.setItem("token", jsonData.token);
-        console.log("Token", jsonData.token);
+        // localStorage.setItem("token", data);
+        console.log("Token", data);
         return jsonData;
     } catch (error) {
         console.error("Error during login:", error);

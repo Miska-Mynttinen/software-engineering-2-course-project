@@ -68,6 +68,7 @@ builder.Services.AddQueueMessageConsumer<GetResourceFilesProcessResultConsumer, 
 builder.Services.AddQueueMessageConsumer<CollabHandshakeProcessResultConsumer, CollabHandshakeProcessResult>();
 builder.Services.AddQueueMessageConsumer<PostPipelineCommandProcessResultConsumer, PostPipelineCommandProcessResult>();
 builder.Services.AddQueueMessageConsumer<GetPipelineExecutionStatusProcessResultConsumer, GetPipelineExecutionStatusRequestResult>();
+builder.Services.AddQueueMessageConsumer<LoginProcessResultConsumer, LoginProcessResult>();
 
 // Add your services
 builder.Services.AddScoped<IResourceService, ResourceService>();

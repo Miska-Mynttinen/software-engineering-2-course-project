@@ -5,7 +5,6 @@ namespace DAPM.ClientApi.Models.DTOs
     {
         public string Username { get; set; }
         public string Password { get; set; }
-        public Guid OrgId {get; set;}
+        public Guid OrganizationId {get; set;}
     }
-
 }
