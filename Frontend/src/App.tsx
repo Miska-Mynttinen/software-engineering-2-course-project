@@ -13,6 +13,7 @@ import AuthPage from "./components/LogIn/AuthPage";
 import { loadState, saveState } from "./redux/browser-storage";
 import { clearTickets } from "./redux/slices/currentSessionTicketSlice";
 import AdminDashboard from "./components/AdminPages/AdminDashboard";
+import { deletePipelineTickets } from './redux/slices/currentSessionTicketSlice';
 
 // Configure redux-persist
 const persistConfig = {
@@ -88,7 +89,15 @@ function ClearTicketsOnLoad() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(clearTickets());  // Clear tickets on initial load
+
+    // Define the pipelineIdentifier
+    const pipelineIdentifier = {
+      id: "pipeline-id-to-clear", // Should Replaces with actual pipeline ID
+      name: "Yahya", // Replace with actual pipeline name
+    };
+
+    // Dispatch the action to delete tickets for the specific pipeline
+    dispatch(deletePipelineTickets(pipelineIdentifier));  // Clear tickets on initial load
   }, [dispatch]);
 
   return null;

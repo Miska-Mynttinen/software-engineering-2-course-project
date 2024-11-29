@@ -39,15 +39,32 @@ const currentSessionTicketSlice = createSlice({
       state.startedTickets = [];
       state.finishedTickets = [];
     },
+
+    // New reducer: Delete tickets by pipeline ID or name
+    deletePipelineTickets: (
+      state,
+      action: PayloadAction<{ id?: string; name?: string }>
+    ) => {
+      const { id, name } = action.payload;
+
+      const filterTickets = (tickets: Ticket[]) =>
+        tickets.filter(ticket => !(ticket.pipeId === id || ticket.pipeName === name));
+
+      state.notStartedTickets = filterTickets(state.notStartedTickets);
+      state.startedTickets = filterTickets(state.startedTickets);
+      state.finishedTickets = filterTickets(state.finishedTickets);
+    },
   },
 });
 
+  
 export const { 
   addNewNotStartedTicket, 
   addNewStartedTicket,
   addNewFinishedTicket,
   deleteTicket,
-  clearTickets
+  clearTickets,
+  deletePipelineTickets, // Export the new reducer
 } = currentSessionTicketSlice.actions;
 
 export default currentSessionTicketSlice.reducer;

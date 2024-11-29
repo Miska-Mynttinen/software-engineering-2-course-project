@@ -14,3 +14,21 @@ export interface CurrentSessionTicketState {
   startedTickets: Ticket[];
   finishedTickets: Ticket[];
 }
+
+// Function to delete tickets based on pipeline ID or name
+export const deletePipelineTickets = (
+  state: CurrentSessionTicketState,
+  pipelineIdentifier: { id?: string; name?: string }
+): CurrentSessionTicketState => {
+  const { id, name } = pipelineIdentifier;
+
+  const filterTickets = (tickets: Ticket[]) =>
+    tickets.filter((ticket) => !(ticket.pipeId === id || ticket.pipeName === name));
+
+  return {
+    ...state,
+    notStartedTickets: filterTickets(state.notStartedTickets),
+    startedTickets: filterTickets(state.startedTickets),
+    finishedTickets: filterTickets(state.finishedTickets),
+  };
+};
