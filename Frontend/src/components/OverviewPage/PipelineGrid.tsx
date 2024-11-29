@@ -41,7 +41,7 @@ export default function AutoGrid() {
     // Clear any necessary data, e.g., session tokens
     localStorage.removeItem('username'); // Example: Clear username
     localStorage.removeItem("token");
-    navigate('/'); // Redirect to the login page
+    navigate('/user'); // Redirect to the user page
   };
 
   const createNewPipeline = () => {
