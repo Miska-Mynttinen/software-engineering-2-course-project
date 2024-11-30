@@ -1,8 +1,10 @@
 import { Button, Box, Modal, Typography, FormControl, FormLabel, TextField, Select, MenuItem } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { putRepository } from '../../../services/backendAPI';
-import { useAppSelector } from '../../../hooks';
-import { getUserGroups, getUsers } from '../../../redux/selectors/apiSelector';
+import { useAppDispatch, useAppSelector } from '../../../hooks';
+import { getOrganizations, getUserGroups, getUsers } from '../../../redux/selectors/apiSelector';
+import { organizationThunk, userGroupThunk, userThunk } from '../../../redux/slices/apiSlice';
+import { Organization } from '../../../redux/states/apiState';
 
 
 
@@ -29,6 +31,15 @@ const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositor
     const [ownerError, setOwnerError] = React.useState<string | null>(null);
     const [groupError, setGroupError] = React.useState<string | null>(null);
     const [ownerTypeError, setownerTypeError] = React.useState<string | null>(null);
+
+    const dispatch = useAppDispatch()
+    const organizations: Organization[] = useAppSelector(getOrganizations)
+
+    useEffect(() => {
+      dispatch(organizationThunk())
+      dispatch(userThunk(organizations));
+      dispatch(userGroupThunk(organizations));
+    }, [dispatch]);
 
     const users = useAppSelector(getUsers); // List of users
     const userGroups = useAppSelector(getUserGroups); // List of user groups

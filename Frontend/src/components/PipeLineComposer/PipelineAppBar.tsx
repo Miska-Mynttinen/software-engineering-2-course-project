@@ -13,8 +13,10 @@ import { putCommandStart, putExecution, putPipeline, fetchPipelineExecutionStatu
 import { getOrganizations, getRepositories, getUserGroups, getUsers } from "../../redux/selectors/apiSelector";
 import { getHandleId, getNodeId } from "./Flow";
 import PipelineStatusDialogBox from "./PipelineStatusDialogBox";
-import { useAppSelector } from "../../hooks";
+import { useAppDispatch, useAppSelector } from "../../hooks";
 import React from "react";
+import { Organization } from "../../redux/states/apiState";
+import { organizationThunk, userGroupThunk, userThunk } from "../../redux/slices/apiSlice";
 
 interface Step {
   executionTime: string;
@@ -169,6 +171,8 @@ export default function PipelineAppBar() {
   const [groupError, setGroupError] = React.useState<string | null>(null);
   const [ownerTypeError, setownerTypeError] = React.useState<string | null>(null);
 
+ 
+
     const users = useAppSelector(getUsers); // List of users
     const userGroups = useAppSelector(getUserGroups); // List of user groups
 
@@ -201,6 +205,15 @@ export default function PipelineAppBar() {
 
   const handleFormSubmit = async () => {
     const { owner, ownerType, userGroup } = formData;
+
+    const dispatch = useAppDispatch()
+    const organizations: Organization[] = useAppSelector(getOrganizations)
+
+    useEffect(() => {
+      dispatch(organizationThunk())
+      dispatch(userThunk(organizations));
+      dispatch(userGroupThunk(organizations));
+    }, [dispatch]);
 
     // Reset error state before validation
     const newErrors = { owner: '', ownerType: '', userGroup: '' };
