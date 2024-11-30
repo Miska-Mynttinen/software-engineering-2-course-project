@@ -1,8 +1,10 @@
 import { Box, Button, FormControl, FormLabel, MenuItem, Modal, Select, TextField, Typography } from '@mui/material';
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useEffect } from 'react';
 import { putOperator, putResource } from '../../../services/backendAPI';
-import { getUserGroups, getUsers } from '../../../redux/selectors/apiSelector';
-import { useAppSelector } from '../../../hooks';
+import { getOrganizations, getUserGroups, getUsers } from '../../../redux/selectors/apiSelector';
+import { useAppDispatch, useAppSelector } from '../../../hooks';
+import { Organization } from '../../../redux/states/apiState';
+import { organizationThunk, userGroupThunk, userThunk } from '../../../redux/slices/apiSlice';
 
 export interface UploadButtonProps {
     orgId: string,
@@ -31,6 +33,15 @@ const OperatorUploadButton = ({ orgId, repId, onOperatorCreated }: UploadButtonP
     const [ownerError, setOwnerError] = React.useState<string | null>(null);
     const [groupError, setGroupError] = React.useState<string | null>(null);
     const [ownerTypeError, setownerTypeError] = React.useState<string | null>(null);
+
+    const dispatch = useAppDispatch()
+    const organizations: Organization[] = useAppSelector(getOrganizations)
+
+    useEffect(() => {
+      dispatch(organizationThunk())
+      dispatch(userThunk(organizations));
+      dispatch(userGroupThunk(organizations));
+    }, [dispatch]);
 
     const users = useAppSelector(getUsers); // List of users
     const userGroups = useAppSelector(getUserGroups); // List of user groups

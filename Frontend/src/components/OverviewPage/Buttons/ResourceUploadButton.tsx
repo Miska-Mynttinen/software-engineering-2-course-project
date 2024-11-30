@@ -1,8 +1,10 @@
 import { Box, Button, FormControl, FormLabel, MenuItem, Modal, Select, TextField, Typography } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { putResource } from '../../../services/backendAPI';
-import { getUserGroups, getUsers } from '../../../redux/selectors/apiSelector';
-import { useAppSelector } from '../../../hooks';
+import { getOrganizations, getUserGroups, getUsers } from '../../../redux/selectors/apiSelector';
+import { useAppDispatch, useAppSelector } from '../../../hooks';
+import { Organization } from '../../../redux/states/apiState';
+import { organizationThunk, userGroupThunk, userThunk } from '../../../redux/slices/apiSlice';
 
 export interface UploadButtonProps {
     orgId: string,
@@ -35,6 +37,15 @@ const ResourceUploadButton = ({ orgId, repId, onResourceCreated }: UploadButtonP
 
     const [open, setOpen] = React.useState(false);
     const [disabled, setDisabled] = React.useState(false);
+
+    const dispatch = useAppDispatch()
+    const organizations: Organization[] = useAppSelector(getOrganizations)
+
+    useEffect(() => {
+      dispatch(organizationThunk())
+      dispatch(userThunk(organizations));
+      dispatch(userGroupThunk(organizations));
+    }, [dispatch]);
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
