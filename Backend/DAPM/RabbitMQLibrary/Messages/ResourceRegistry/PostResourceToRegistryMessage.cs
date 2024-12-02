@@ -13,6 +13,6 @@ namespace RabbitMQLibrary.Messages.ResourceRegistry
         public Guid MessageId { get; set; }
         public Guid ProcessId { get; set; }
         public TimeSpan TimeToLive { get; set; }
-        public ResourceDTO Resource { get; set; }
+        public ResourceDTO? Resource { get; set; }
     }
 }

@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 
 namespace DAPM.ClientApi.Services
 {
-
     public enum TicketStatus
     {
         NotCompleted = 0,
@@ -25,13 +24,21 @@ namespace DAPM.ClientApi.Services
         private Dictionary<Guid, TicketStatus> _ticketStatus;
         private Dictionary<Guid, TicketResolutionType> _ticketResolutionType;
 
-        public TicketService(ILogger<ITicketService> logger) 
+        private Dictionary<Guid, Guid> _ticketOwners;
+        private Dictionary<Guid, string> _ticketOwnerTypes;
+        private Dictionary<Guid, Guid?> _ticketUserGroups;
+
+        public TicketService(ILogger<ITicketService> logger)
         {
             _logger = logger;
             _ticketStatus = new Dictionary<Guid, TicketStatus>();
             _ticketResolutions = new Dictionary<Guid, JToken>();
             _ticketResolutionType = new Dictionary<Guid, TicketResolutionType>();
+            _ticketOwners = new Dictionary<Guid, Guid>();
+            _ticketOwnerTypes = new Dictionary<Guid, string>();
+            _ticketUserGroups = new Dictionary<Guid, Guid?>();
         }
+
         public JToken GetTicketResolution(Guid ticketId)
         {
             JToken resolution = new JObject();
@@ -58,6 +65,10 @@ namespace DAPM.ClientApi.Services
                         resolution["result"] = null;
                         break;
                 }
+
+                resolution["owner"] = _ticketOwners[ticketId];
+                resolution["ownerType"] = _ticketOwnerTypes[ticketId];
+                resolution["userGroup"] = _ticketUserGroups[ticketId];
             }
             else
             {
@@ -71,13 +82,14 @@ namespace DAPM.ClientApi.Services
 
         public void UpdateTicketStatus(Guid ticketId, TicketStatus ticketStatus)
         {
-            if(_ticketStatus.ContainsKey(ticketId))
+            if (_ticketStatus.ContainsKey(ticketId))
             {
                 _ticketStatus[ticketId] = ticketStatus;
+                _logger.LogInformation($"Ticket {ticketId} status updated to {ticketStatus}");
             }
             else
             {
-                _logger.LogInformation($"A ticket status was updated for ticket {ticketId} but it didn't exist");
+                _logger.LogInformation($"A ticket status update was attempted for ticket {ticketId} but it didn't exist");
                 return;
             }
         }
@@ -102,23 +114,24 @@ namespace DAPM.ClientApi.Services
             Guid guid = Guid.NewGuid();
             _ticketStatus[guid] = TicketStatus.NotCompleted;
             _ticketResolutionType[guid] = resolutionType;
-            _logger.LogInformation($"A new ticket has been created");
+
+            _logger.LogInformation($"A new ticket has been created with ID {guid}.");
             return guid;
         }
 
         public void UpdateTicketResolution(Guid ticketId, JToken requestResult)
         {
-            if(_ticketStatus.ContainsKey(ticketId))
+            if (_ticketStatus.ContainsKey(ticketId))
             {
                 UpdateTicketStatus(ticketId, TicketStatus.Completed);
                 _ticketResolutions[ticketId] = requestResult;
             }
             else
             {
-                _logger.LogInformation($"A ticket resolution was updated for ticket {ticketId} but it didn't exist");
+                _logger.LogInformation($"A ticket resolution update was attempted for ticket {ticketId} but it didn't exist");
                 return;
             }
-            _logger.LogInformation($"Ticket resolution of ticket {ticketId} has been updated");
+            _logger.LogInformation($"Ticket resolution for ticket {ticketId} has been updated");
         }
     }
 }

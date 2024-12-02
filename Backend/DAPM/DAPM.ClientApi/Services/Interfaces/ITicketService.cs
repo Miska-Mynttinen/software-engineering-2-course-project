@@ -10,4 +10,6 @@ namespace DAPM.ClientApi.Services.Interfaces
         public Guid CreateNewTicket(TicketResolutionType resolutionType);
         public void UpdateTicketResolution(Guid ticketId, JToken resolution);
     }
+
+    
 }

@@ -2,21 +2,24 @@
 using RabbitMQLibrary.Interfaces;
 using RabbitMQLibrary.Messages.Orchestrator.ProcessRequests;
 using RabbitMQLibrary.Messages.ResourceRegistry;
-using System.Globalization;
-using System.Resources;
+using Microsoft.Extensions.Logging;
+using ResourceRegistryRequest = RabbitMQLibrary.Messages.ResourceRegistry.GetResourceFilesRequest; // Alias
+using OrchestratorRequest = RabbitMQLibrary.Messages.Orchestrator.ProcessRequests.GetResourceFilesRequest; // Alias
 
 namespace DAPM.ClientApi.Services
 {
     public class ResourceService : IResourceService
     {
         private readonly ILogger<ResourceService> _logger;
-        private ITicketService _ticketService;
+        private readonly ITicketService _ticketService;
 
-        private IQueueProducer<GetResourcesRequest> _getResourcesRequestProducer;
-        private IQueueProducer<GetResourceFilesRequest> _getResourceFilesRequestProducer;
+        private readonly IQueueProducer<OrchestratorRequest> _getResourceFilesRequestProducer;
+        private readonly IQueueProducer<GetResourcesRequest> _getResourcesRequestProducer;
 
-        public ResourceService(ILogger<ResourceService> logger, ITicketService ticketService,
-            IQueueProducer<GetResourceFilesRequest> getResourceFilesProducer,
+        public ResourceService(
+            ILogger<ResourceService> logger,
+            ITicketService ticketService,
+            IQueueProducer<OrchestratorRequest> getResourceFilesProducer,
             IQueueProducer<GetResourcesRequest> getResourcesProducer)
         {
             _logger = logger;
@@ -25,7 +28,7 @@ namespace DAPM.ClientApi.Services
             _getResourcesRequestProducer = getResourcesProducer;
         }
 
-        public Guid GetResourceById(Guid organizationId, Guid repositoryId, Guid resourceId)
+        public Guid GetResourceById(Guid organizationId, Guid repositoryId, Guid resourceId, Guid owner, string ownerType, Guid? userGroup)
         {
             var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
@@ -35,27 +38,32 @@ namespace DAPM.ClientApi.Services
                 TicketId = ticketId,
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
-                ResourceId = resourceId
+                ResourceId = resourceId,
+                Owner = owner,
+                OwnerType = ownerType,
+                UserGroup = userGroup
             };
 
             _getResourcesRequestProducer.PublishMessage(message);
-
             _logger.LogDebug("GetResourcesRequest Enqueued");
 
             return ticketId;
         }
 
-        public Guid GetResourceFileById(Guid organizationId, Guid repositoryId, Guid resourceId)
+        public Guid GetResourceFileById(Guid organizationId, Guid repositoryId, Guid resourceId, Guid owner, string ownerType, Guid? userGroup)
         {
             var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.File);
 
-            var message = new GetResourceFilesRequest
+            var message = new OrchestratorRequest
             {
                 TimeToLive = TimeSpan.FromMinutes(1),
                 TicketId = ticketId,
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
-                ResourceId = resourceId
+                ResourceId = resourceId,
+                Owner = owner,
+                OwnerType = ownerType,
+                UserGroup = userGroup
             };
 
             _getResourceFilesRequestProducer.PublishMessage(message);

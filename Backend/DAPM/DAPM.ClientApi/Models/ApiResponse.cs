@@ -4,7 +4,7 @@ namespace DAPM.ClientApi.Models
 {
     public class ApiResponse
     {
-        public string RequestName { get; set; }
+        public string? RequestName { get; set; }
         public Guid TicketId { get; set; }
     }
 }

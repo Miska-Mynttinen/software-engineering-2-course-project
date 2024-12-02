@@ -2,6 +2,6 @@
 {
     public class CollabHandshakeDto
     {
-        public string TargetPeerDomain { get; set; }
+        public string? TargetPeerDomain { get; set; }
     }
 }

@@ -27,8 +27,7 @@ namespace DAPM.ClientApi.Services
             {
                 TimeToLive = TimeSpan.FromMinutes(1),
                 TicketId = ticketId,
-                RequestedPeerDomain = targetPeerDomain,
-     
+                RequestedPeerDomain = targetPeerDomain
             };
 
             _collabHandshakeRequestProducer.PublishMessage(message);

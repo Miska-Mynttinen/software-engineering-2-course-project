@@ -10,6 +10,6 @@ namespace DAPM.ClientApi.Services.Interfaces
         public Guid UpdateUser(Guid organizationId, Guid userId, List<string> userGroups);
         public Guid GetUserGroupsOfOrganization(Guid organizationId);
         public Guid PostUser(Guid organizationId, User user);
-        public Guid PostUserGroup(Guid organizationId, string userGroup);
+        public Guid PostUserGroup(Guid organizationId, string userGroupName);
     }
 }

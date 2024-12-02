@@ -10,14 +10,18 @@ namespace RabbitMQLibrary.Messages.Orchestrator.ProcessRequests
 {
     public class PostOperatorRequest : IQueueMessage
     {
+        public Guid Owner;
+        public string? OwnerType;
+        public Guid? UserGroup;
+
         public Guid MessageId { get; set; }
         public Guid TicketId { get; set; }
         public TimeSpan TimeToLive { get; set; }
         public Guid OrganizationId { get; set; }
         public Guid RepositoryId { get; set; }
-        public string Name { get; set; }
-        public string ResourceType { get; set; }
-        public FileDTO SourceCodeFile { get; set; }
-        public FileDTO DockerfileFile { get; set; }
+        public string? Name { get; set; }
+        public string? ResourceType { get; set; }
+        public FileDTO? SourceCodeFile { get; set; }
+        public FileDTO? DockerfileFile { get; set; }
     }
 }

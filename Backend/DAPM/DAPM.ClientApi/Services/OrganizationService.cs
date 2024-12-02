@@ -2,6 +2,7 @@
 using RabbitMQLibrary.Interfaces;
 using RabbitMQLibrary.Messages.Orchestrator.ProcessRequests;
 using RabbitMQLibrary.Messages.ResourceRegistry;
+using Microsoft.Extensions.Logging;
 
 namespace DAPM.ClientApi.Services
 {
@@ -13,19 +14,18 @@ namespace DAPM.ClientApi.Services
         private readonly IQueueProducer<PostRepositoryRequest> _postRepositoryRequestProducer;
         private readonly ITicketService _ticketService;
 
-        public OrganizationService(ILogger<OrganizationService> logger, 
-            IQueueProducer<GetOrganizationsMessage> getOrgsProducer, 
-            IQueueProducer<GetOrganizationsMessage> getOrgByIdProducer,
+        public OrganizationService(
+            ILogger<OrganizationService> logger,
             IQueueProducer<GetRepositoriesRequest> getRepositoriesRequestProducer,
             IQueueProducer<GetOrganizationsRequest> getOrganizationsRequestProducer,
             IQueueProducer<PostRepositoryRequest> postRepositoryRequestProducer,
             ITicketService ticketService)
         {
             _logger = logger;
-            _ticketService = ticketService;
             _getRepositoriesRequestProducer = getRepositoriesRequestProducer;
             _getOrganizationsRequestProducer = getOrganizationsRequestProducer;
             _postRepositoryRequestProducer = postRepositoryRequestProducer;
+            _ticketService = ticketService;
         }
 
         public Guid GetOrganizationById(Guid organizationId)
@@ -48,7 +48,6 @@ namespace DAPM.ClientApi.Services
 
         public Guid GetOrganizations()
         {
-       
             var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
             var message = new GetOrganizationsRequest
@@ -63,7 +62,6 @@ namespace DAPM.ClientApi.Services
             _logger.LogDebug("GetOrganizationsMessage Enqueued");
 
             return ticketId;
-
         }
 
         public Guid GetRepositoriesOfOrganization(Guid organizationId)
@@ -85,7 +83,7 @@ namespace DAPM.ClientApi.Services
             return ticketId;
         }
 
-        public Guid PostRepositoryToOrganization(Guid organizationId, string name)
+        public Guid PostRepositoryToOrganization(Guid organizationId, string name, Guid owner, string ownerType, Guid? userGroup)
         {
             var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
@@ -95,6 +93,9 @@ namespace DAPM.ClientApi.Services
                 TicketId = ticketId,
                 OrganizationId = organizationId,
                 Name = name,
+                Owner = owner,
+                OwnerType = ownerType,
+                UserGroup = userGroup
             };
 
             _postRepositoryRequestProducer.PublishMessage(message);

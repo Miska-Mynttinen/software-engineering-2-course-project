@@ -14,7 +14,7 @@ namespace RabbitMQLibrary.Messages.ResourceRegistry
         public Guid ProcessId { get; set; }
         public TimeSpan TimeToLive { get; set; }
         public Guid UserId { get; set; }
-        public List<string> UserGroups { get; set; }
+        public List<string>? UserGroups { get; set; }
         public Guid OrganizationId { get; set; }
     }
 }

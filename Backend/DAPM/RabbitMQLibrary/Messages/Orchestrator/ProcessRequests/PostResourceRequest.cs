@@ -15,8 +15,12 @@ namespace RabbitMQLibrary.Messages.Orchestrator.ProcessRequests
         public TimeSpan TimeToLive { get; set; }
         public Guid OrganizationId { get; set; }
         public Guid RepositoryId { get; set; }
-        public string Name { get; set; }
-        public string ResourceType { get; set; }
-        public FileDTO File { get; set; }
+        public string? Name { get; set; }
+        public string? ResourceType { get; set; }
+        public FileDTO? File { get; set; }
+
+        public Guid Owner { get; set; }
+        public string? OwnerType { get; set; } 
+        public Guid? UserGroup { get; set; } 
     }
 }

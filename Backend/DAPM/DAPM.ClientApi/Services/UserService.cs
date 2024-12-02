@@ -121,7 +121,7 @@ namespace DAPM.ClientApi.Services
         {
             Guid ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
-            var newUser = new UserDTO()
+            var newUser = new UserDTO
             {
                 UserId = user.UserId,
                 Username = user.Username,
@@ -130,7 +130,7 @@ namespace DAPM.ClientApi.Services
                 UserType = user.UserType,
                 UserStatus = user.UserStatus,
                 UserGroups = user.UserGroups,
-                OrganizationId = organizationId
+                OrganizationId = organizationId,
             };
 
             var message = new PostUserRequest
@@ -142,11 +142,11 @@ namespace DAPM.ClientApi.Services
             };
 
             _postUserRequestProducer.PublishMessage(message);
-
             _logger.LogDebug("PostUsersRequest Enqueued");
 
             return ticketId;
         }
+
 
         public Guid PostUserGroup(Guid organizationId, string usergroup)
         {

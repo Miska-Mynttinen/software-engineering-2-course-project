@@ -3,6 +3,8 @@ using RabbitMQLibrary.Interfaces;
 using RabbitMQLibrary.Messages.Orchestrator.ProcessRequests;
 using RabbitMQLibrary.Messages.PipelineOrchestrator;
 using RabbitMQLibrary.Messages.ResourceRegistry;
+using Microsoft.Extensions.Logging;
+using System;
 
 namespace DAPM.ClientApi.Services
 {
@@ -14,6 +16,7 @@ namespace DAPM.ClientApi.Services
         private readonly IQueueProducer<CreatePipelineExecutionRequest> _createInstanceProducer;
         private readonly IQueueProducer<PipelineStartCommandRequest> _pipelineStartCommandProducer;
         private readonly IQueueProducer<GetPipelineExecutionStatusRequest> _getPipelineExecutionStatusProducer;
+
         public PipelineService(
             ILogger<PipelineService> logger,
             ITicketService ticketService,
@@ -30,18 +33,20 @@ namespace DAPM.ClientApi.Services
             _getPipelineExecutionStatusProducer = getPipelineExecutionStatusProducer;
         }
 
-        public Guid CreatePipelineExecution(Guid organizationId, Guid repositoryId, Guid pipelineId)
+        public Guid CreatePipelineExecution(Guid organizationId, Guid repositoryId, Guid pipelineId, Guid owner, string ownerType, Guid? userGroup)
         {
-            Guid ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
+            var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
-            var message = new CreatePipelineExecutionRequest()
+            var message = new CreatePipelineExecutionRequest
             {
                 TicketId = ticketId,
                 TimeToLive = TimeSpan.FromMinutes(1),
-
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
-                PipelineId = pipelineId
+                PipelineId = pipelineId,
+                Owner = owner,
+                OwnerType = ownerType,
+                UserGroup = userGroup
             };
 
             _createInstanceProducer.PublishMessage(message);
@@ -50,15 +55,18 @@ namespace DAPM.ClientApi.Services
             return ticketId;
         }
 
-        public Guid GetExecutionStatus(Guid organizationId, Guid repositoryId, Guid pipelineId, Guid executionId)
+        public Guid GetExecutionStatus(Guid organizationId, Guid repositoryId, Guid pipelineId, Guid executionId, Guid owner, string ownerType, Guid? userGroup)
         {
-            Guid ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
+            var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
             var message = new GetPipelineExecutionStatusRequest
             {
                 TimeToLive = TimeSpan.FromMinutes(1),
                 TicketId = ticketId,
-                ExecutionId = executionId
+                ExecutionId = executionId,
+                Owner = owner,
+                OwnerType = ownerType,
+                UserGroup = userGroup
             };
 
             _getPipelineExecutionStatusProducer.PublishMessage(message);
@@ -68,9 +76,9 @@ namespace DAPM.ClientApi.Services
             return ticketId;
         }
 
-        public Guid GetPipelineById(Guid organizationId, Guid repositoryId, Guid pipelineId)
+        public Guid GetPipelineById(Guid organizationId, Guid repositoryId, Guid pipelineId, Guid owner, string ownerType, Guid? userGroup)
         {
-            Guid ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
+            var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
             var message = new GetPipelinesRequest
             {
@@ -78,7 +86,10 @@ namespace DAPM.ClientApi.Services
                 TicketId = ticketId,
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
-                PipelineId = pipelineId
+                PipelineId = pipelineId,
+                Owner = owner,
+                OwnerType = ownerType,
+                UserGroup = userGroup
             };
 
             _getPipelinesRequestProducer.PublishMessage(message);
@@ -88,9 +99,9 @@ namespace DAPM.ClientApi.Services
             return ticketId;
         }
 
-        public Guid PostStartCommand(Guid organizationId, Guid repositoryId, Guid pipelineId, Guid executionId)
+        public Guid PostStartCommand(Guid organizationId, Guid repositoryId, Guid pipelineId, Guid executionId, Guid owner, string ownerType, Guid? userGroup)
         {
-            Guid ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
+            var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
             var message = new PipelineStartCommandRequest
             {
@@ -99,12 +110,15 @@ namespace DAPM.ClientApi.Services
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
                 PipelineId = pipelineId,
-                ExecutionId = executionId
+                ExecutionId = executionId,
+                Owner = owner,
+                OwnerType = ownerType,
+                UserGroup = userGroup
             };
 
             _pipelineStartCommandProducer.PublishMessage(message);
 
-            _logger.LogDebug("PipelineStartCommandRequest Enqueued" + message);
+            _logger.LogDebug("PipelineStartCommandRequest Enqueued");
 
             return ticketId;
         }

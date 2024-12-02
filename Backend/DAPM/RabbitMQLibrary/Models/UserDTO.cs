@@ -11,16 +11,21 @@ namespace RabbitMQLibrary.Models
         public Guid OrganizationId { get; set; }
         public Guid UserId { get; set; }
 
-        public string Username { get; set; }
+        public string? Username { get; set; }
 
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
-        public string UserType { get; set; }
+        public string? UserType { get; set; }
 
-        public string UserStatus { get; set; }
+        public string? UserStatus { get; set; }
 
-        public List<string> UserGroups { get; set; }
+        public List<string>? UserGroups { get; set; }
+
+        // Add the new fields
+        public Guid Owner { get; set; } // GUID for User or UserGroup ID
+        public string? OwnerType { get; set; } // "User" or "UserGroup"
+        public Guid? UserGroup { get; set; } // Nullable GUID for UserGroup ID
     }
 }
