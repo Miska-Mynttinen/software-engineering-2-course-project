@@ -14,6 +14,7 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
 import { loginUser, fetchOrganisations } from '../../services/backendAPI';
+import { LoginRequest } from '../../redux/states/apiState';
 
 interface SignInProps {
   toggleForm: () => void;
@@ -87,33 +88,47 @@ export default function SignIn({ toggleForm }: SignInProps) {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+  
     if (!validateInputs()) return;
-
+  
     const formData = new FormData(event.currentTarget);
     const username = formData.get('username') as string;
     const password = formData.get('password') as string;
-
+  
     try {
       const selectedOrg = organizations.find((org) => org.name === selectedOrganization);
-
+  
       if (!selectedOrg) {
         setOrganizationError(true);
         setOrganizationErrorMessage('Please select a valid organization.');
         return;
       }
-
-      const response = await loginUser(username, password, selectedOrg.id);
-
+  
+      const loginRequest: LoginRequest = {
+        username,
+        password,
+        organizationId: selectedOrg.id,
+      };
+  
+      const response = await loginUser(loginRequest); // Pass the entire loginRequest
+  
       if (response && response.token) {
         // Navigate based on the role or other conditions
-        navigate('/dashboard'); // Example destination
         localStorage.setItem('token', response.token);
+        // if(response.userType==="user"){
+        //   navigate('/user');
+        // }
+        // if(response.userType==="admin"){
+        //   navigate('/admin');
+        // }     
+        navigate('/user');
+        return;
       }
     } catch (error) {
       alert('Login failed. Please check your credentials and try again.');
     }
   };
+  
 
   const validateInputs = () => {
     let isValid = true;
@@ -236,7 +251,6 @@ export default function SignIn({ toggleForm }: SignInProps) {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
               sx={{
                 bgcolor: '#1a73e8',
                 color: 'white',

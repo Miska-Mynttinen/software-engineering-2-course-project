@@ -4,13 +4,12 @@ import { User, UserGroup } from '../../redux/states/apiState';
 import UserUpdateButton from '../OverviewPage/Buttons/UserUpdateButton';
 
 interface AllUserProps {
-  rows: User[];
-  userGroups: UserGroup[];
-  onUserUpdated: () => void;
+  rows: User[]; // User rows for the table
+  userGroups: UserGroup[]; // User groups to be shown for each user
+  onUserUpdated: () => void; // Callback when a user is updated
 }
 
-const AllUser: React.FC<AllUserProps> = ({ rows, userGroups, onUserUpdated }) => {
-  // const nonPendingRows = rows.filter((row) => row.userStatus !== 'PENDING');
+const AllUser: React.FC<AllUserProps> = ({ rows = [], userGroups, onUserUpdated }) => {
   // State for pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -43,35 +42,36 @@ const AllUser: React.FC<AllUserProps> = ({ rows, userGroups, onUserUpdated }) =>
             </TableRow>
           </TableHead>
           <TableBody>
+            {/* Mapping over rows with pagination */}
             {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
               <TableRow key={row.userId}>
                 <TableCell>{row.username}</TableCell>
                 <TableCell>{row.userId}</TableCell>
                 <TableCell>{row.userType}</TableCell>
                 <TableCell>
-                  {row.userGroups && row.userGroups.map((userGroup) => 
-                    (
-                      <p style={{ padding: '0', fontSize: '15px', marginBlock: '5px' }}>{userGroup}</p>
-                    )
-                  )}
+                  {/* Displaying user groups */}
+                  {row.userGroups && row.userGroups.map((userGroup) => (
+                    <p style={{ padding: '0', fontSize: '15px', marginBlock: '5px' }} key={userGroup}>
+                      {userGroup}
+                    </p>
+                  ))}
                 </TableCell>
                 <TableCell>
                   <UserUpdateButton orgId={row.organizationId} userId={row.userId} userGroups={userGroups} onUserUpdated={onUserUpdated} />
                 </TableCell>
                 <TableCell>{row.userStatus}</TableCell>
                 <TableCell>
+                  {/* Suspend user button */}
                   <Button variant="contained" color="secondary" onClick={() => console.log(`Suspended user: ${row.userId}`)}>
                     Suspend
                   </Button>
-                  {/*<Button variant="outlined" color="error" onClick={() => console.log(`Deleted user: ${row.userId}`)} sx={{ ml: 1 }}>
-                    Delete
-                  </Button>*/}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+      {/* Table Pagination */}
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"

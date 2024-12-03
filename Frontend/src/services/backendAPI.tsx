@@ -1,5 +1,6 @@
 import { Stream } from "stream";
 import { json } from "stream/consumers";
+import { LoginRequest, LoginResponse } from "../redux/states/apiState";
 
 // const vmPath = `dapm1.compute.dtu.dk:5000`
 const vmPath = `se2-f.compute.dtu.dk:5000`
@@ -693,63 +694,76 @@ export async function putOperator(orgId: string, repId: string, formData: FormDa
         throw error; // Propagate error to the caller
     }
 }
-export async function loginUser(username: string, password: string, organizationId: string) {
-    console.log("Username:", username);
-    console.log("Password:", password);
-    console.log("Organization ID:", organizationId);  // Log the organization ID
+// export async function loginUser(username: string, password: string, organizationId: string) {
+//     console.log("Username:", username);
+//     console.log("Password:", password);
+//     console.log("Organization ID:", organizationId);      
+    // const headers = new Headers();
+    // headers.append("Content-Type", "application/json");
 
-    const headers = new Headers();
-    headers.append("Content-Type", "application/json");
+    // try {
+    //     // Sending login request
+    //     console.log("Path",path);
+    //     const response = await fetch(`http://${path}/authentication/login`, {
+    //         method: "POST",
+    //         headers: headers,
+    //         body: JSON.stringify({ username, password, organizationId }) // Include organizationId
+    //     });
 
+    //     if (!response.ok) {
+    //         const errorText = await response.text();
+    //         throw new Error(`Login failed: ${errorText}`);
+    //     }
+
+    //     const jsonData = await response.json();
+    //     console.log("Login Response:", jsonData);
+
+    //     // Handle case where token and ticketId are present
+    //     const { token, ticketId } = jsonData;
+    //     if (!token || !ticketId) {
+    //         throw new Error('Token or TicketId is missing in the login response');
+    //     }
+
+    //     // Optionally store the token and ticketId in localStorage for later use
+    //     localStorage.setItem("token", token);
+    //     localStorage.setItem("ticketId", ticketId);
+    //     console.log("Token:", token, "Ticket ID:", ticketId);
+
+    //     return jsonData; // Returning the login response with both token and ticketId
+
+    // } catch (error) {
+    //     console.error("Error during login:", error);
+    //     throw error; // Propagate the error to be handled by the caller
+    // }
+// }
+export async function loginUser(loginRequest: LoginRequest) {
+    console.log("Login Request:", loginRequest);
+  
     try {
-        const response = await fetch(`http://${path}/authentication/login`, {
-            method: "POST",
-            headers: headers,
-            body: JSON.stringify({ username, password, organizationId }) // Include organizationId
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Login failed: ${errorText}`);
-        }
-
-        const jsonData = await response.json();
-
-        // Fetch additional data recursively
-        const getData = async (ticketId: string): Promise<any> => {
-            const maxRetries = 10;
-            const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-            for (let retries = 0; retries < maxRetries; retries++) {
-                try {
-                    const data = await fetchStatus(ticketId);
-                    if (data.status) {
-                        return data;
-                    }
-                    await delay(1000); // Wait for 1 second before retrying
-                } catch (error) {
-                    if (retries === maxRetries - 1) {
-                        throw new Error('Max retries reached');
-                    }
-                }
-            }
-            throw new Error('Failed to fetch data');
-        };
-
-        // Call getData function with the ticketId obtained from fetchOrganisations
-        const data = getData(jsonData.ticketId);
-
-        // Store the JWT token in localStorage
-        // localStorage.setItem("token", data);
-        console.log("Token", data);
-        return jsonData;
+      // Prepare the request options for fetch
+      const response = await fetch(`http://${path}/authentication/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginRequest), // Convert the request body to a JSON string
+      });
+  
+      if (!response.ok) {
+        // Handle non-2xx status codes
+        throw new Error(`Login failed with status: ${response.status}`);
+      }
+  
+      // Parse the response JSON
+      const data: LoginResponse = await response.json();
+      console.log("Data: ",data)
+      return data;
     } catch (error) {
-        console.error("Error during login:", error);
-        throw error;
+      console.error('Login error', error);
+      throw error;
     }
-}
-
-
+  }
+  
 export async function logoutUser() {
     const token = localStorage.getItem("token");
 

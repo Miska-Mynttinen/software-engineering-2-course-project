@@ -17,6 +17,7 @@ namespace RabbitMQLibrary.Messages.Orchestrator.ServiceResults.FromRegistry
         public bool Succeeded { get; set; }
         public string Message { get; set; }
         public string Username { get; set; }
+        public string UserType { get; set; }
     }
 
 }

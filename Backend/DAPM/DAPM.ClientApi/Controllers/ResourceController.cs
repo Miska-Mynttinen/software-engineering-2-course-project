@@ -11,6 +11,7 @@ namespace DAPM.ClientApi.Controllers
     [ApiController]
     [EnableCors("AllowAll")]
     [Route("organizations/")]
+    
     public class ResourceController : ControllerBase
     {
 

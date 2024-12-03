@@ -28,7 +28,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
 
         public async Task ConsumeAsync(LoginMessage message)
         {
-            _logger.LogInformation($"Processing LoginMessage for username: {message.Username}");
+            _logger.LogInformation($"Processing Login Message for username: {message.Username}");
             bool success = false;
             var users = Enumerable.Empty<User>();
 
@@ -36,20 +36,22 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             {
                 var user = await _userService.UserLogin((Guid)message.OrgId, message.Username,message.Password);
                 users = users.Append(user);
+                
             }
             else
             {
                 users = await _peerService.GetUsersOfOrganization(message.OrgId);
             }
 
-
+            //var usertype = "";
             foreach (var user in users)
             {
                 if(user.Username== message.Username && user.Password == message.Password && user.PeerId == (Guid)message.OrgId){
                     success = true;
+                    //usertype = user.UserType;
                 }
             }
-
+            _logger.LogInformation($"--------------------Processing Login Message for username: {message.Username}-------------------------------------");
             // Prepare the result message
             var resultMessage = new LoginProcessResultMessage
             {
@@ -58,6 +60,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
                 Username = message.Username,
                 OrgId = message.OrgId,
                 Message = success ? "Login successful" : "Invalid username or password",
+                //UserType = usertype,
                 TimeToLive = TimeSpan.FromMinutes(1)
             };
 

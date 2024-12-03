@@ -7,6 +7,7 @@ using RabbitMQLibrary.Messages.ResourceRegistry;
 using RabbitMQLibrary.Models;
 using System.IO;
 using System.Xml.Linq;
+using BCrypt.Net;
 
 namespace DAPM.ClientApi.Services
 {
@@ -120,12 +121,14 @@ namespace DAPM.ClientApi.Services
         public Guid PostUser(Guid organizationId, User user)
         {
             Guid ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
+            // Hash the user's password
+            //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
             var newUser = new UserDTO()
             {
                 UserId = user.UserId,
                 Username = user.Username,
-                Password = user.Password,
+                Password = user.Password,//hashedPassword,
                 Email = user.Email,
                 UserType = user.UserType,
                 UserStatus = user.UserStatus,

@@ -42,3 +42,15 @@ export interface UserGroup {
     name: string,
     organizationId: string
 }
+// Define the LoginRequest interface
+export interface LoginRequest {
+    username: string;
+    password: string;
+    organizationId: string; // Or use `Guid` if that's the type of organizationId in the backend
+  }
+
+export interface LoginResponse {
+    token: string;
+    ticketId: string;
+    userType: string;
+}  
