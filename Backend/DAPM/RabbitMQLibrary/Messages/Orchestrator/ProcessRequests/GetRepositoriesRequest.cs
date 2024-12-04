@@ -9,10 +9,6 @@ namespace RabbitMQLibrary.Messages.Orchestrator.ProcessRequests
 {
     public class GetRepositoriesRequest : IQueueMessage
     {
-        public Guid Owner;
-        public string? OwnerType;
-        public Guid? UserGroup;
-
         public Guid MessageId { get; set; }
         public Guid TicketId { get; set; }
         public TimeSpan TimeToLive { get; set; }

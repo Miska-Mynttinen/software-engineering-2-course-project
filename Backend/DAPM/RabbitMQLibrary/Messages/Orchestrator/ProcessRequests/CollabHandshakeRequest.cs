@@ -14,9 +14,5 @@ namespace RabbitMQLibrary.Messages.Orchestrator.ProcessRequests
         public TimeSpan TimeToLive { get; set; }
         public string? RequestedPeerDomain { get; set; }
 
-        public Guid? Owner { get; set; } // 
-        public string? OwnerType { get; set; } 
-        public Guid? UserGroup { get; set; } 
-
     }
 }

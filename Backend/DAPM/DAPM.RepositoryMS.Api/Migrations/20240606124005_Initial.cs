@@ -30,7 +30,10 @@ namespace DAPM.RepositoryMS.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Owner = table.Column<Guid>(type: "uuid", nullable: false),          // New column
+                    OwnerType = table.Column<string>(type: "text", nullable: false),    // New column
+                    UserGroup = table.Column<Guid>(type: "uuid", nullable: true)        // New column
                 },
                 constraints: table =>
                 {
@@ -44,7 +47,10 @@ namespace DAPM.RepositoryMS.Api.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     RepositoryId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    PipelineJson = table.Column<string>(type: "text", nullable: false)
+                    PipelineJson = table.Column<string>(type: "text", nullable: false),
+                    Owner = table.Column<Guid>(type: "uuid", nullable: false),          // New column
+                    OwnerType = table.Column<string>(type: "text", nullable: false),    // New column
+                    UserGroup = table.Column<Guid>(type: "uuid", nullable: true)        // New column
                 },
                 constraints: table =>
                 {
@@ -65,7 +71,10 @@ namespace DAPM.RepositoryMS.Api.Migrations
                     RepositoryId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     FileId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false)
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    Owner = table.Column<Guid>(type: "uuid", nullable: false),          // New column
+                    OwnerType = table.Column<string>(type: "text", nullable: false),    // New column
+                    UserGroup = table.Column<Guid>(type: "uuid", nullable: true)        // New column
                 },
                 constraints: table =>
                 {

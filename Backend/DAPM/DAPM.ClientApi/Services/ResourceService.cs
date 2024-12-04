@@ -3,8 +3,8 @@ using RabbitMQLibrary.Interfaces;
 using RabbitMQLibrary.Messages.Orchestrator.ProcessRequests;
 using RabbitMQLibrary.Messages.ResourceRegistry;
 using Microsoft.Extensions.Logging;
-using ResourceRegistryRequest = RabbitMQLibrary.Messages.ResourceRegistry.GetResourceFilesRequest; // Alias
-using OrchestratorRequest = RabbitMQLibrary.Messages.Orchestrator.ProcessRequests.GetResourceFilesRequest; // Alias
+using ResourceRegistryRequest = RabbitMQLibrary.Messages.ResourceRegistry.GetResourceFilesRequest; 
+using OrchestratorRequest = RabbitMQLibrary.Messages.Orchestrator.ProcessRequests.GetResourceFilesRequest; 
 
 namespace DAPM.ClientApi.Services
 {
@@ -28,7 +28,7 @@ namespace DAPM.ClientApi.Services
             _getResourcesRequestProducer = getResourcesProducer;
         }
 
-        public Guid GetResourceById(Guid organizationId, Guid repositoryId, Guid resourceId, Guid owner, string ownerType, Guid? userGroup)
+        public Guid GetResourceById(Guid organizationId, Guid repositoryId, Guid resourceId)
         {
             var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
@@ -39,9 +39,6 @@ namespace DAPM.ClientApi.Services
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
                 ResourceId = resourceId,
-                Owner = owner,
-                OwnerType = ownerType,
-                UserGroup = userGroup
             };
 
             _getResourcesRequestProducer.PublishMessage(message);
@@ -50,7 +47,7 @@ namespace DAPM.ClientApi.Services
             return ticketId;
         }
 
-        public Guid GetResourceFileById(Guid organizationId, Guid repositoryId, Guid resourceId, Guid owner, string ownerType, Guid? userGroup)
+        public Guid GetResourceFileById(Guid organizationId, Guid repositoryId, Guid resourceId)
         {
             var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.File);
 
@@ -61,9 +58,6 @@ namespace DAPM.ClientApi.Services
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
                 ResourceId = resourceId,
-                Owner = owner,
-                OwnerType = ownerType,
-                UserGroup = userGroup
             };
 
             _getResourceFilesRequestProducer.PublishMessage(message);

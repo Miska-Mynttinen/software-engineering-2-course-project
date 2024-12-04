@@ -44,7 +44,7 @@ namespace DAPM.ClientApi.Services
             _postOperatorRequestProducer = postOperatorRequestProducer;
         }
 
-        public Guid GetRepositoryById(Guid organizationId, Guid repositoryId, Guid owner, string ownerType, Guid? userGroup)
+        public Guid GetRepositoryById(Guid organizationId, Guid repositoryId)
         {
             var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
@@ -54,9 +54,6 @@ namespace DAPM.ClientApi.Services
                 TicketId = ticketId,
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
-                Owner = owner,
-                OwnerType = ownerType,
-                UserGroup = userGroup
             };
 
             _getRepositoriesRequestProducer.PublishMessage(message);
@@ -66,7 +63,7 @@ namespace DAPM.ClientApi.Services
             return ticketId;
         }
 
-        public Guid GetResourcesOfRepository(Guid organizationId, Guid repositoryId, Guid owner, string ownerType, Guid? userGroup)
+        public Guid GetResourcesOfRepository(Guid organizationId, Guid repositoryId)
         {
             var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
@@ -76,9 +73,6 @@ namespace DAPM.ClientApi.Services
                 TicketId = ticketId,
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
-                Owner = owner,
-                OwnerType = ownerType,
-                UserGroup = userGroup
             };
 
             _getResourcesRequestProducer.PublishMessage(message);
@@ -88,7 +82,7 @@ namespace DAPM.ClientApi.Services
             return ticketId;
         }
 
-        public Guid GetPipelinesOfRepository(Guid organizationId, Guid repositoryId, Guid owner, string ownerType, Guid? userGroup)
+        public Guid GetPipelinesOfRepository(Guid organizationId, Guid repositoryId)
         {
             var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
@@ -98,9 +92,6 @@ namespace DAPM.ClientApi.Services
                 TicketId = ticketId,
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
-                Owner = owner,
-                OwnerType = ownerType,
-                UserGroup = userGroup
             };
 
             _getPipelinesRequestProducer.PublishMessage(message);

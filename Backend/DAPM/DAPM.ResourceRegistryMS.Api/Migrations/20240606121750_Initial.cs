@@ -43,7 +43,10 @@ namespace DAPM.ResourceRegistryMS.Api.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PeerId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Owner = table.Column<Guid>(type: "uuid", nullable: false),          // New column
+                    OwnerType = table.Column<string>(type: "text", nullable: false),    // New column
+                    UserGroup = table.Column<Guid>(type: "uuid", nullable: true)        // New column
                 },
                 constraints: table =>
                 {
@@ -64,7 +67,10 @@ namespace DAPM.ResourceRegistryMS.Api.Migrations
                     PeerId = table.Column<Guid>(type: "uuid", nullable: false),
                     RepositoryId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    ResourceTypeId = table.Column<Guid>(type: "uuid", nullable: false)
+                    ResourceTypeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Owner = table.Column<Guid>(type: "uuid", nullable: false),          // New column
+                    OwnerType = table.Column<string>(type: "text", nullable: false),    // New column
+                    UserGroup = table.Column<Guid>(type: "uuid", nullable: true)        // New column
                 },
                 constraints: table =>
                 {

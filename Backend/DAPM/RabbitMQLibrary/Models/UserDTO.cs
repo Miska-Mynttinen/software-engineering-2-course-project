@@ -22,10 +22,5 @@ namespace RabbitMQLibrary.Models
         public string? UserStatus { get; set; }
 
         public List<string>? UserGroups { get; set; }
-
-        // Add the new fields
-        public Guid Owner { get; set; } // GUID for User or UserGroup ID
-        public string? OwnerType { get; set; } // "User" or "UserGroup"
-        public Guid? UserGroup { get; set; } // Nullable GUID for UserGroup ID
     }
 }

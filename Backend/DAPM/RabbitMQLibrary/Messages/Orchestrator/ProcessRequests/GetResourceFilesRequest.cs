@@ -9,8 +9,6 @@ namespace RabbitMQLibrary.Messages.Orchestrator.ProcessRequests
 {
     public class GetResourceFilesRequest : IQueueMessage
     {
-        public Guid? UserGroup;
-
         public Guid MessageId { get; set; }
         public Guid TicketId { get; set; }
         public TimeSpan TimeToLive { get; set; }
@@ -18,7 +16,5 @@ namespace RabbitMQLibrary.Messages.Orchestrator.ProcessRequests
         public Guid OrganizationId { get; set; }
         public Guid RepositoryId { get; set; }
         public Guid ResourceId { get; set; }
-        public Guid Owner { get; set; }
-        public string? OwnerType { get; set; }
     }
 }

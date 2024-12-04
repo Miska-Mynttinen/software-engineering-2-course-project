@@ -55,7 +55,7 @@ namespace DAPM.ClientApi.Services
             return ticketId;
         }
 
-        public Guid GetExecutionStatus(Guid organizationId, Guid repositoryId, Guid pipelineId, Guid executionId, Guid owner, string ownerType, Guid? userGroup)
+        public Guid GetExecutionStatus(Guid organizationId, Guid repositoryId, Guid pipelineId, Guid executionId)
         {
             var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
@@ -64,9 +64,7 @@ namespace DAPM.ClientApi.Services
                 TimeToLive = TimeSpan.FromMinutes(1),
                 TicketId = ticketId,
                 ExecutionId = executionId,
-                Owner = owner,
-                OwnerType = ownerType,
-                UserGroup = userGroup
+                
             };
 
             _getPipelineExecutionStatusProducer.PublishMessage(message);
@@ -76,7 +74,7 @@ namespace DAPM.ClientApi.Services
             return ticketId;
         }
 
-        public Guid GetPipelineById(Guid organizationId, Guid repositoryId, Guid pipelineId, Guid owner, string ownerType, Guid? userGroup)
+        public Guid GetPipelineById(Guid organizationId, Guid repositoryId, Guid pipelineId)
         {
             var ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
 
@@ -87,9 +85,6 @@ namespace DAPM.ClientApi.Services
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
                 PipelineId = pipelineId,
-                Owner = owner,
-                OwnerType = ownerType,
-                UserGroup = userGroup
             };
 
             _getPipelinesRequestProducer.PublishMessage(message);

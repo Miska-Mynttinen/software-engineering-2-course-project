@@ -24,19 +24,12 @@ namespace DAPM.ClientApi.Services
         private Dictionary<Guid, TicketStatus> _ticketStatus;
         private Dictionary<Guid, TicketResolutionType> _ticketResolutionType;
 
-        private Dictionary<Guid, Guid> _ticketOwners;
-        private Dictionary<Guid, string> _ticketOwnerTypes;
-        private Dictionary<Guid, Guid?> _ticketUserGroups;
-
         public TicketService(ILogger<ITicketService> logger)
         {
             _logger = logger;
             _ticketStatus = new Dictionary<Guid, TicketStatus>();
             _ticketResolutions = new Dictionary<Guid, JToken>();
             _ticketResolutionType = new Dictionary<Guid, TicketResolutionType>();
-            _ticketOwners = new Dictionary<Guid, Guid>();
-            _ticketOwnerTypes = new Dictionary<Guid, string>();
-            _ticketUserGroups = new Dictionary<Guid, Guid?>();
         }
 
         public JToken GetTicketResolution(Guid ticketId)
@@ -65,10 +58,6 @@ namespace DAPM.ClientApi.Services
                         resolution["result"] = null;
                         break;
                 }
-
-                resolution["owner"] = _ticketOwners[ticketId];
-                resolution["ownerType"] = _ticketOwnerTypes[ticketId];
-                resolution["userGroup"] = _ticketUserGroups[ticketId];
             }
             else
             {
