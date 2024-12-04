@@ -38,7 +38,7 @@ namespace DAPM.ClientApi.Services
                 TicketId = ticketId,
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
-                ResourceId = resourceId,
+                ResourceId = resourceId
             };
 
             _getResourcesRequestProducer.PublishMessage(message);
@@ -57,7 +57,7 @@ namespace DAPM.ClientApi.Services
                 TicketId = ticketId,
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
-                ResourceId = resourceId,
+                ResourceId = resourceId
             };
 
             _getResourceFilesRequestProducer.PublishMessage(message);

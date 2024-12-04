@@ -2,6 +2,7 @@
 {
     public interface IOrganizationService
     {
+        public Guid GetOrganizations();
         public Guid GetOrganizationById(Guid organizationId);
         public Guid GetRepositoriesOfOrganization(Guid organizationId); 
         public Guid PostRepositoryToOrganization(Guid organizationId, string name, Guid owner, string ownerType, Guid? userGroup);

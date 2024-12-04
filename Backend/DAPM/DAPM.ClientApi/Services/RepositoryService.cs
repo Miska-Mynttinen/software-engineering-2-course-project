@@ -17,12 +17,12 @@ namespace DAPM.ClientApi.Services
         private readonly ILogger<RepositoryService> _logger;
         private readonly ITicketService _ticketService;
 
-        private readonly IQueueProducer<GetRepositoriesRequest> _getRepositoriesRequestProducer;
-        private readonly IQueueProducer<GetResourcesRequest> _getResourcesRequestProducer;
-        private readonly IQueueProducer<PostResourceRequest> _postResourceRequestProducer;
-        private readonly IQueueProducer<PostOperatorRequest> _postOperatorRequestProducer;
-        private readonly IQueueProducer<PostPipelineRequest> _postPipelineRequestProducer;
-        private readonly IQueueProducer<GetPipelinesRequest> _getPipelinesRequestProducer;
+        IQueueProducer<GetRepositoriesRequest> _getRepositoriesRequestProducer;
+        IQueueProducer<GetResourcesRequest> _getResourcesRequestProducer;
+        IQueueProducer<PostResourceRequest> _postResourceRequestProducer;
+        IQueueProducer<PostOperatorRequest> _postOperatorRequestProducer;
+        IQueueProducer<PostPipelineRequest> _postPipelineRequestProducer;
+        IQueueProducer<GetPipelinesRequest> _getPipelinesRequestProducer;
 
         public RepositoryService(
             ILogger<RepositoryService> logger,
@@ -53,7 +53,7 @@ namespace DAPM.ClientApi.Services
                 TimeToLive = TimeSpan.FromMinutes(1),
                 TicketId = ticketId,
                 OrganizationId = organizationId,
-                RepositoryId = repositoryId,
+                RepositoryId = repositoryId
             };
 
             _getRepositoriesRequestProducer.PublishMessage(message);
@@ -72,7 +72,7 @@ namespace DAPM.ClientApi.Services
                 TimeToLive = TimeSpan.FromMinutes(1),
                 TicketId = ticketId,
                 OrganizationId = organizationId,
-                RepositoryId = repositoryId,
+                RepositoryId = repositoryId
             };
 
             _getResourcesRequestProducer.PublishMessage(message);
@@ -91,7 +91,7 @@ namespace DAPM.ClientApi.Services
                 TimeToLive = TimeSpan.FromMinutes(1),
                 TicketId = ticketId,
                 OrganizationId = organizationId,
-                RepositoryId = repositoryId,
+                RepositoryId = repositoryId
             };
 
             _getPipelinesRequestProducer.PublishMessage(message);

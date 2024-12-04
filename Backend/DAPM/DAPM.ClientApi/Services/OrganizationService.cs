@@ -14,8 +14,12 @@ namespace DAPM.ClientApi.Services
         private readonly IQueueProducer<PostRepositoryRequest> _postRepositoryRequestProducer;
         private readonly ITicketService _ticketService;
 
+        
+
         public OrganizationService(
             ILogger<OrganizationService> logger,
+            IQueueProducer<GetOrganizationsMessage> getOrgsProducer, 
+            IQueueProducer<GetOrganizationsMessage> getOrgByIdProducer,
             IQueueProducer<GetRepositoriesRequest> getRepositoriesRequestProducer,
             IQueueProducer<GetOrganizationsRequest> getOrganizationsRequestProducer,
             IQueueProducer<PostRepositoryRequest> postRepositoryRequestProducer,

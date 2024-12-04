@@ -63,7 +63,7 @@ namespace DAPM.ClientApi.Services
             {
                 TimeToLive = TimeSpan.FromMinutes(1),
                 TicketId = ticketId,
-                ExecutionId = executionId,
+                ExecutionId = executionId
                 
             };
 
@@ -84,7 +84,7 @@ namespace DAPM.ClientApi.Services
                 TicketId = ticketId,
                 OrganizationId = organizationId,
                 RepositoryId = repositoryId,
-                PipelineId = pipelineId,
+                PipelineId = pipelineId
             };
 
             _getPipelinesRequestProducer.PublishMessage(message);
