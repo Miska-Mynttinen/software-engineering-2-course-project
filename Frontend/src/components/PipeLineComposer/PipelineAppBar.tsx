@@ -272,7 +272,7 @@ export default function PipelineAppBar() {
   return (
     <AppBar position="fixed">
       <Toolbar sx={{ flexGrow: 1 }}>
-        <Button onClick={() => navigate('/')}>
+        <Button onClick={() => navigate('/user')}>
           <ArrowBackIosNewIcon sx={{ color: "white" }} />
         </Button>
         <Box sx={{ width: '100%', textAlign: 'center' }}>

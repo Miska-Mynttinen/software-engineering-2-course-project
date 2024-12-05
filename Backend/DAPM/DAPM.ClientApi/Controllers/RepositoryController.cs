@@ -2,6 +2,7 @@
 using DAPM.ClientApi.Models.DTOs;
 using DAPM.ClientApi.Services;
 using DAPM.ClientApi.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using RabbitMQLibrary.Models;
@@ -33,55 +34,179 @@ namespace DAPM.ClientApi.Controllers
         }
 
         [HttpGet("{organizationId}/repositories/{repositoryId}/resources")]
+        [Authorize]
         [SwaggerOperation(Description = "Gets the resources in a repository by id. The result of this endpoint " +
             "does not include the resource files. You need to have a collaboration agreement to retrieve this information.")]
-        public async Task<ActionResult<Guid>> GetResourcesOfRepository(Guid organizationId, Guid repositoryId)
+        public async Task<IActionResult> GetResourcesOfRepository(Guid organizationId, Guid repositoryId)
         {
-            Guid id = _repositoryService.GetResourcesOfRepository(organizationId, repositoryId);
-            return Ok(new ApiResponse { RequestName = "GetResourcesOfRepository", TicketId = id});
+            try
+            {
+                // Validate input
+                if (organizationId == Guid.Empty || repositoryId == Guid.Empty)
+                {
+                    return BadRequest(new { message = "Invalid IDs provided." });
+                }
+
+                // Call service to get resources
+                Guid ticketId = _repositoryService.GetResourcesOfRepository(organizationId, repositoryId);
+
+                // Return success response
+                return Ok(new ApiResponse
+                {
+                    RequestName = "GetResourcesOfRepository",
+                    TicketId = ticketId
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing the request.", error = ex.Message });
+            }
         }
 
+
         [HttpGet("{organizationId}/repositories/{repositoryId}/pipelines")]
+        [Authorize]
         [SwaggerOperation(Description = "Gets the pipelines of a repository by id. The result of this endpoint " +
             "does not include the JSON models of the pipelines. You need to have a collaboration agreement to retrieve this information.")]
-        public async Task<ActionResult<Guid>> GetPipelinesOfRepository(Guid organizationId, Guid repositoryId)
+        public async Task<IActionResult> GetPipelinesOfRepository(Guid organizationId, Guid repositoryId)
         {
-            Guid id = _repositoryService.GetPipelinesOfRepository(organizationId, repositoryId);
-            return Ok(new ApiResponse { RequestName = "GetPipelinesOfRepository", TicketId = id });
+            try
+            {
+                // Validate input
+                if (organizationId == Guid.Empty || repositoryId == Guid.Empty)
+                {
+                    return BadRequest(new { message = "Invalid IDs provided." });
+                }
+
+                // Call service to get pipelines
+                Guid ticketId = _repositoryService.GetPipelinesOfRepository(organizationId, repositoryId);
+
+                // Return success response
+                return Ok(new ApiResponse
+                {
+                    RequestName = "GetPipelinesOfRepository",
+                    TicketId = ticketId
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing the request.", error = ex.Message });
+            }
         }
 
         [HttpPost("{organizationId}/repositories/{repositoryId}/resources")]
+        [Authorize]
         [SwaggerOperation(Description = "Posts a new resource into a repository by id.")]
-        public async Task<ActionResult<Guid>> PostResourceToRepository(Guid organizationId, Guid repositoryId, [FromForm]ResourceForm resourceForm)
+        public async Task<IActionResult> PostResourceToRepository(Guid organizationId, Guid repositoryId, [FromForm] ResourceForm resourceForm)
         {
-            if (resourceForm.Name == null || resourceForm.ResourceFile == null)
-                return BadRequest();
+            try
+            {
+                if (resourceForm.Name == null || resourceForm.ResourceFile == null)
+                {
+                    return BadRequest(new { message = "Resource name and file are required." });
+                }
 
-            Guid id = _repositoryService.PostResourceToRepository(organizationId, repositoryId, resourceForm.Name, resourceForm.ResourceFile, resourceForm.ResourceType);
-            return Ok(new ApiResponse { RequestName = "PostResourceToRepository", TicketId = id });
+                // Call service to post resource to repository
+                Guid ticketId = _repositoryService.PostResourceToRepository(organizationId, repositoryId, resourceForm.Name, resourceForm.ResourceFile, resourceForm.ResourceType);
+
+                // Return success response
+                return Ok(new ApiResponse
+                {
+                    RequestName = "PostResourceToRepository",
+                    TicketId = ticketId
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing the request.", error = ex.Message });
+            }
         }
+
 
         [HttpPost("{organizationId}/repositories/{repositoryId}/resources/operators")]
+        [Authorize]
         [SwaggerOperation(Description = "Posts a new operator resource into a repository by id. In this endpoint you have to provide the source code for the operator and a " +
             "Dockerfile to build it and execute it.")]
-        public async Task<ActionResult<Guid>> PostOperatorToRepository(Guid organizationId, Guid repositoryId, [FromForm] OperatorForm resourceForm)
+        public async Task<IActionResult> PostOperatorToRepository(Guid organizationId, Guid repositoryId, [FromForm] OperatorForm resourceForm)
         {
-            if (resourceForm.Name == null || resourceForm.SourceCodeFile == null)
-                return BadRequest();
+            try
+            {
+                if (resourceForm.Name == null || resourceForm.SourceCodeFile == null)
+                {
+                    return BadRequest(new { message = "Operator name and source code file are required." });
+                }
 
-            Guid id = _repositoryService.PostOperatorToRepository(organizationId, repositoryId, resourceForm.Name, 
-                resourceForm.SourceCodeFile, resourceForm.DockerfileFile, resourceForm.ResourceType);
-            return Ok(new ApiResponse { RequestName = "PostOperatorToRepository", TicketId = id });
+                // Call service to post operator to repository
+                Guid ticketId = _repositoryService.PostOperatorToRepository(organizationId, repositoryId, resourceForm.Name, 
+                    resourceForm.SourceCodeFile, resourceForm.DockerfileFile, resourceForm.ResourceType);
+
+                // Return success response
+                return Ok(new ApiResponse
+                {
+                    RequestName = "PostOperatorToRepository",
+                    TicketId = ticketId
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing the request.", error = ex.Message });
+            }
         }
-
         [HttpPost("{organizationId}/repositories/{repositoryId}/pipelines")]
+        [Authorize]
         [SwaggerOperation(Description = "Posts a new pipeline into a repository by id. In this endpoint you have to provide the JSON model of the pipeline based on the model" +
             " we agreed on.")]
-        public async Task<ActionResult<Guid>> PostPipelineToRepository(Guid organizationId, Guid repositoryId, [FromBody]PipelineApiDto pipelineApiDto)
+        public async Task<IActionResult> PostPipelineToRepository(Guid organizationId, Guid repositoryId, [FromBody] PipelineApiDto pipelineApiDto)
         {
-            Guid id = _repositoryService.PostPipelineToRepository(organizationId, repositoryId, pipelineApiDto);
-            return Ok(new ApiResponse { RequestName = "PostPipelineToRepository", TicketId = id });
-        }
+            try
+            {
+                if (pipelineApiDto == null)
+                {
+                    return BadRequest(new { message = "Pipeline data is required." });
+                }
 
+                // Call service to post pipeline to repository
+                Guid ticketId = _repositoryService.PostPipelineToRepository(organizationId, repositoryId, pipelineApiDto);
+
+                // Return success response
+                return Ok(new ApiResponse
+                {
+                    RequestName = "PostPipelineToRepository",
+                    TicketId = ticketId
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing the request.", error = ex.Message });
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@
 using DAPM.ClientApi.Models.DTOs;
 using DAPM.ClientApi.Services;
 using DAPM.ClientApi.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -17,11 +18,13 @@ namespace DAPM.ClientApi.Controllers
 
         private readonly ILogger<OrganizationController> _logger;
         private readonly IOrganizationService _organizationService;
+        private readonly IAuthenticationService _authenticationService;
 
-        public OrganizationController(ILogger<OrganizationController> logger, IOrganizationService organizationService)
+        public OrganizationController(ILogger<OrganizationController> logger, IOrganizationService organizationService, IAuthenticationService authenticationService)
         {
             _logger = logger;
             _organizationService = organizationService;
+            _authenticationService = authenticationService;
         }
 
         [HttpGet]
@@ -43,20 +46,80 @@ namespace DAPM.ClientApi.Controllers
         }
 
         [HttpGet("{organizationId}/repositories")]
+        [Authorize]
         [SwaggerOperation(Description = "Gets all the repositories of an organization by id. You need to have a collaboration agreement to retrieve this information.")]
         public async Task<ActionResult<Guid>> GetRepositoriesOfOrganization(Guid organizationId)
         {
-            Guid id = _organizationService.GetRepositoriesOfOrganization(organizationId);
-            return Ok(new ApiResponse {RequestName = "GetRepositoriesOfOrganization", TicketId = id });
+            try
+            {
+                if (organizationId == Guid.Empty)
+                {
+                    return BadRequest(new { message = "Invalid organization ID." });
+                }
+
+                // Call the service to get the repositories
+                Guid ticketId = _organizationService.GetRepositoriesOfOrganization(organizationId);
+
+                return Ok(new ApiResponse
+                {
+                    RequestName = "GetRepositoriesOfOrganization",
+                    TicketId = ticketId
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // Handle specific cases like organization not found
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // Handle unauthorized access
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Handle all other exceptions
+                return StatusCode(500, new { message = "An error occurred while processing the request.", error = ex.Message });
+            }
         }
 
         [HttpPost("{organizationId}/repositories")]
+        [Authorize]
         [SwaggerOperation(Description = "Creates a new repository for an organization by id. Right now you can create repositories for any organizations, but ideally you would " +
             "only be able to create repositories for your own organization.")]
         public async Task<ActionResult<Guid>> PostRepositoryToOrganization(Guid organizationId, [FromBody] RepositoryApiDto repositoryDto)
         {
-            Guid id = _organizationService.PostRepositoryToOrganization(organizationId, repositoryDto.Name);
-            return Ok(new ApiResponse { RequestName = "PostRepositoryToOrganization", TicketId = id });
+            try
+            {
+                if (organizationId == Guid.Empty)
+                {
+                    return BadRequest(new { message = "Invalid organization ID." });
+                }
+
+                // Call the service to get the repositories
+                Guid id = _organizationService.PostRepositoryToOrganization(organizationId, repositoryDto.Name);
+
+                return Ok(new ApiResponse
+                {
+                    RequestName = "PostRepositoryToOrganization",
+                    TicketId = id
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // Handle specific cases like organization not found
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // Handle unauthorized access
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Handle all other exceptions
+                return StatusCode(500, new { message = "An error occurred while processing the request.", error = ex.Message });
+            }
         }
 
     }
