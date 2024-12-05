@@ -12,7 +12,7 @@ namespace DAPM.Orchestrator.Consumers.StartProcessConsumers
             _engine = engine;
         }
 
-        public Task ConsumeAsync(CollabHandshakeRequest message)
+        public Task ConsumeAsync(CollabHandshakeRequest message, CancellationToken cancellationToken)
         {
             _engine.StartCollabHandshakeProcess(message.TicketId, message.RequestedPeerDomain);
             return Task.CompletedTask;

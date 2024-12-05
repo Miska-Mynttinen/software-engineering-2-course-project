@@ -19,7 +19,7 @@ namespace DAPM.Orchestrator.Consumers.StartProcessConsumers
             _logger = logger;
         }
 
-        public Task ConsumeAsync(TransferDataActionRequest message)
+        public Task ConsumeAsync(TransferDataActionRequest message, CancellationToken cancellationToken)
         {
             var identityService = _serviceScope.ServiceProvider.GetRequiredService<IIdentityService>();
             var identity = identityService.GetIdentity();

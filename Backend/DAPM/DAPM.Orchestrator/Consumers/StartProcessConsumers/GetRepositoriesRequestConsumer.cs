@@ -10,7 +10,7 @@ namespace DAPM.Orchestrator.Consumers.StartProcessConsumers
         {
             _engine = engine;
         }
-        public Task ConsumeAsync(GetRepositoriesRequest message)
+        public Task ConsumeAsync(GetRepositoriesRequest message, CancellationToken cancellationToken)
         {
             _engine.StartGetRepositoriesProcess(message.TicketId, message.OrganizationId, message.RepositoryId);
             return Task.CompletedTask;

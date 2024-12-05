@@ -20,7 +20,7 @@ namespace DAPM.RepositoryMS.Api.Consumers
             _repositoryService = repositoryService;
             _postRepoToRepoResultProducer = postRepoToRepoResultProducer;
         }
-        public async Task ConsumeAsync(PostRepoToRepoMessage message)
+        public async Task ConsumeAsync(PostRepoToRepoMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("PostRepoToRepoMessage received");
 

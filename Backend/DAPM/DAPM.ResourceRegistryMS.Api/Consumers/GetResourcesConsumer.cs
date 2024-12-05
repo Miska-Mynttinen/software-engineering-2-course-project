@@ -24,7 +24,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _resourceService = resourceService;
         }
 
-        public async Task ConsumeAsync(GetResourcesMessage message)
+        public async Task ConsumeAsync(GetResourcesMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("GetResourcesMessage received");
 

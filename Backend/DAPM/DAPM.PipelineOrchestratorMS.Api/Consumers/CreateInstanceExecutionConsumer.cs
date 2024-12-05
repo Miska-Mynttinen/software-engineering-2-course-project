@@ -20,7 +20,7 @@ namespace DAPM.PipelineOrchestratorMS.Api.Consumers
             _pipelineOrchestrationEngine = pipelineOrchestrationEngine;
             _createExecutionResultProducer = createExecutionResultProducer;
         }
-        public Task ConsumeAsync(CreateInstanceExecutionMessage message)
+        public Task ConsumeAsync(CreateInstanceExecutionMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("CreateInstanceExecutionMessage received");
 

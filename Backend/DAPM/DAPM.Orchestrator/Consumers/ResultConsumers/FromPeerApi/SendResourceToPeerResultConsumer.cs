@@ -12,7 +12,7 @@ namespace DAPM.Orchestrator.Consumers.ResultConsumers.FromPeerApi
             _orchestratorEngine = orchestratorEngine;
         }
 
-        public Task ConsumeAsync(SendResourceToPeerResultMessage message)
+        public Task ConsumeAsync(SendResourceToPeerResultMessage message, CancellationToken cancellationToken)
         {
             OrchestratorProcess process = _orchestratorEngine.GetProcess(message.SenderProcessId);
             process.OnSendResourceToPeerResult(message);

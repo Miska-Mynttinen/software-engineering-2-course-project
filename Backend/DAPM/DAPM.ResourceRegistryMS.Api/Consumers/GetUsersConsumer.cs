@@ -27,7 +27,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _userService = userService;
         }
 
-        public async Task ConsumeAsync(GetUsersMessage message)
+        public async Task ConsumeAsync(GetUsersMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("GetUsersMessage received");
 

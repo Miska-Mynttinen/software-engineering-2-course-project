@@ -10,7 +10,7 @@ namespace DAPM.Orchestrator.Consumers.StartProcessConsumers
         {
             _engine = engine;
         }
-        public Task ConsumeAsync(PostResourceRequest message)
+        public Task ConsumeAsync(PostResourceRequest message, CancellationToken cancellationToken)
         {
             _engine.StartPostResourceProcess(message.TicketId, message.OrganizationId, message.RepositoryId, message.Name, message.ResourceType, message.File);
             return Task.CompletedTask;

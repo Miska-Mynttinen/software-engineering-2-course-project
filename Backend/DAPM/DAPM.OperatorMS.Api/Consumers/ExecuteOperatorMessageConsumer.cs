@@ -19,7 +19,7 @@ namespace DAPM.OperatorMS.Api.Consumers
             _serviceScope = _serviceProvider.CreateScope();
         }
 
-        public async Task ConsumeAsync(ExecuteOperatorMessage message) 
+        public async Task ConsumeAsync(ExecuteOperatorMessage message, CancellationToken cancellationToken) 
         {
             _logger.LogInformation("ExecuteMinerMessage Received");
 

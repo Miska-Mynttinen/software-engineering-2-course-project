@@ -14,7 +14,7 @@ namespace DAPM.PipelineOrchestratorMS.Api.Consumers
             _pipelineOrchestrationEngine = pipelineOrchestrationEngine;
         }
 
-        public Task ConsumeAsync(ActionResultMessage message)
+        public Task ConsumeAsync(ActionResultMessage message, CancellationToken cancellationToken)
         {
             _pipelineOrchestrationEngine.ProcessActionResult(message.ActionResult);
             return Task.CompletedTask;

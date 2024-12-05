@@ -11,7 +11,7 @@ namespace DAPM.Orchestrator.Consumers.StartProcessConsumers
         {
             _engine = engine;
         }
-        public Task ConsumeAsync(GetPipelineExecutionStatusRequest message)
+        public Task ConsumeAsync(GetPipelineExecutionStatusRequest message, CancellationToken cancellationToken)
         {
             _engine.StartGetPipelineExecutionStatusProcess(message.TicketId, message.ExecutionId);
             return Task.CompletedTask;

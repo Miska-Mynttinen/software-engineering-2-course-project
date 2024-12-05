@@ -19,7 +19,7 @@ namespace DAPM.ClientApi.Consumers
             _ticketService = ticketService;
         }
 
-        public Task ConsumeAsync(GetResourcesProcessResult message)
+        public Task ConsumeAsync(GetResourcesProcessResult message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("GetResourcesProcessResult received");
 

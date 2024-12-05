@@ -13,7 +13,7 @@ namespace DAPM.Orchestrator.Consumers.ResultConsumers.FromRegistry
             _orchestratorEngine = orchestratorEngine;
         }
 
-        public Task ConsumeAsync(GetUsersResultMessage message)
+        public Task ConsumeAsync(GetUsersResultMessage message, CancellationToken cancellationToken)
         {
             GetUsersProcess process = (GetUsersProcess)_orchestratorEngine.GetProcess(message.ProcessId);
             process.OnGetUsersFromRegistryResult(message);

@@ -11,7 +11,7 @@ namespace DAPM.Orchestrator.Consumers.StartProcessConsumers
             _engine = engine;
         }
 
-        public Task ConsumeAsync(GetOrganizationsRequest message)
+        public Task ConsumeAsync(GetOrganizationsRequest message, CancellationToken cancellationToken)
         {
             _engine.StartGetOrganizationProcess(message.TicketId, message.OrganizationId);
             return Task.CompletedTask;

@@ -23,7 +23,7 @@ namespace DAPM.RepositoryMS.Api.Consumers
             _postPipelineToRepoResultProducer = postPipelineToRepoResultProducer;
         }
 
-        public async Task ConsumeAsync(PostPipelineToRepoMessage message)
+        public async Task ConsumeAsync(PostPipelineToRepoMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("PostPipelineToRepoMessage received");
 

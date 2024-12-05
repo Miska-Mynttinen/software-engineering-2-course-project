@@ -14,7 +14,7 @@ namespace DAPM.PeerApi.Consumers
             _httpService = httpService;
         }
 
-        public async Task ConsumeAsync(SendHandshakeRequestResponseMessage message)
+        public async Task ConsumeAsync(SendHandshakeRequestResponseMessage message, CancellationToken cancellationToken)
         {
             var targetDomain = message.TargetDomain;
             var senderIdentity = message.SenderPeerIdentity;

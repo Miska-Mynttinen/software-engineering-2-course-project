@@ -27,7 +27,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _repositoryService = repositoryService;
         }
 
-        public async Task ConsumeAsync(GetRepositoriesMessage message)
+        public async Task ConsumeAsync(GetRepositoriesMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("GetRepositoriesMessage received");
 

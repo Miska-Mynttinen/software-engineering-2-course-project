@@ -19,7 +19,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _postResourceToRegistryResultProducer = postResourceToRegistryResultProducer;
             _resourceService = resourceService;
         }
-        public async Task ConsumeAsync(PostResourceToRegistryMessage message)
+        public async Task ConsumeAsync(PostResourceToRegistryMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("PostResourceToRegistryMessage received");
 

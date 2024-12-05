@@ -23,7 +23,7 @@ namespace DAPM.RepositoryMS.Api.Consumers
             _userService = userService;
             _postUserGroupToRepoResultProducer = postUserGroupToRepoResultProducer;
         }
-        public async Task ConsumeAsync(PostUserGroupToRepoMessage message)
+        public async Task ConsumeAsync(PostUserGroupToRepoMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("PostUserGroupToRepoMessage received");
 

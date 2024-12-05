@@ -21,7 +21,7 @@ namespace DAPM.OperatorMS.Api.Consumers
             _serviceScope = _serviceProvider.CreateScope();
         }
 
-        public Task ConsumeAsync(GetExecutionOutputMessage message) 
+        public Task ConsumeAsync(GetExecutionOutputMessage message, CancellationToken cancellationToken) 
         {
             _logger.LogInformation("GetExecutionOutputMessage Received");
 

@@ -63,7 +63,7 @@ builder.Services.AddQueueMessageConsumer<UpdateUserRequestConsumer, UpdateUserRe
 builder.Services.AddQueueMessageConsumer<PostUserRequestConsumer, PostUserRequest>();
 builder.Services.AddQueueMessageConsumer<PostUserGroupRequestConsumer, PostUserGroupRequest>();
 builder.Services.AddQueueMessageConsumer<PostPipelineRequestConsumer, PostPipelineRequest>();
-builder.Services.AddQueueMessageConsumer<GetResourceFilesRequestConsumer, GetResourceFilesRequest>();
+builder.Services.AddQueueMessageConsumer<GetResourcesRequestConsumer, GetResourcesRequest>();
 
 //Handshake
 builder.Services.AddQueueMessageConsumer<CollabHandshakeRequestConsumer, CollabHandshakeRequest>();

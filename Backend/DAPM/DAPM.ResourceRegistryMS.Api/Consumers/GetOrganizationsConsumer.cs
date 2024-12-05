@@ -24,7 +24,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _peerService = peerService;
         }
 
-        public async Task ConsumeAsync(GetOrganizationsMessage message)
+        public async Task ConsumeAsync(GetOrganizationsMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Get OrganizationsMessage received");
 

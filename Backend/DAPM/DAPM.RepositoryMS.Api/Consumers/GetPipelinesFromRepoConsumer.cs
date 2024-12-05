@@ -24,7 +24,7 @@ namespace DAPM.RepositoryMS.Api.Consumers
             _getPipelinesFromRepoResultProducer = getPipelinesFromRepoResultProducer;
         }
 
-        public async Task ConsumeAsync(GetPipelinesFromRepoMessage message)
+        public async Task ConsumeAsync(GetPipelinesFromRepoMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("GetPipelinesFromRepoMessage received");
             var pipelines = Enumerable.Empty<Models.PostgreSQL.Pipeline>();

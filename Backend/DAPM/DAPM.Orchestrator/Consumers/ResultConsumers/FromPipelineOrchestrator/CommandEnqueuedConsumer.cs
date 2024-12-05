@@ -12,7 +12,7 @@ namespace DAPM.Orchestrator.Consumers.ResultConsumers.FromPipelineOrchestrator
             _orchestratorEngine = orchestratorEngine;
         }
 
-        public Task ConsumeAsync(CommandEnqueuedMessage message)
+        public Task ConsumeAsync(CommandEnqueuedMessage message, CancellationToken cancellationToken)
         {
             OrchestratorProcess process = _orchestratorEngine.GetProcess(message.ProcessId);
             process.OnCommandEnqueued(message);

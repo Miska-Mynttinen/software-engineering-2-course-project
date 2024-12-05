@@ -25,7 +25,7 @@ namespace DAPM.RepositoryMS.Api.Consumers
             _fileService = fileService;
         }
 
-        public async Task ConsumeAsync(GetResourceFilesFromRepoMessage message)
+        public async Task ConsumeAsync(GetResourceFilesFromRepoMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("GetResourceFilesFromRepoMessage received");
 

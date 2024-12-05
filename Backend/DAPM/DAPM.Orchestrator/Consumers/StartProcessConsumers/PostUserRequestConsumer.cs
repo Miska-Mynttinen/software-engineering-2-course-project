@@ -12,7 +12,7 @@ namespace DAPM.Orchestrator.Consumers.StartProcessConsumers
             _engine = engine;
         }
 
-        public Task ConsumeAsync(PostUserRequest message)
+        public Task ConsumeAsync(PostUserRequest message, CancellationToken cancellationToken)
         {
             _engine.StartCreateUserProcess(message.TicketId, message.OrganizationId, message.User);
             return Task.CompletedTask;

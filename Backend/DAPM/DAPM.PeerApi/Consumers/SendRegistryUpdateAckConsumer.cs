@@ -15,7 +15,7 @@ namespace DAPM.PeerApi.Consumers
             _httpService = httpService;
         }
 
-        public async Task ConsumeAsync(SendRegistryUpdateAckMessage message)
+        public async Task ConsumeAsync(SendRegistryUpdateAckMessage message, CancellationToken cancellationToken)
         {
             var targetDomain = message.TargetPeerDomain;
             var senderIdentity = message.SenderPeerIdentity;

@@ -19,7 +19,7 @@ namespace DAPM.ClientApi.Consumers
             _ticketService = ticketService;
         }
 
-        public Task ConsumeAsync(CollabHandshakeProcessResult message)
+        public Task ConsumeAsync(CollabHandshakeProcessResult message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("CollabHandshakeProcessResult received");
 

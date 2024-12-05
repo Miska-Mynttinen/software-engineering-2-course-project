@@ -18,7 +18,7 @@ namespace DAPM.PipelineOrchestratorMS.Api.Consumers
             _getPipelineExecutionStatusResultProducer = getPipelineExecutionStatusResultProducer;
         }
 
-        public Task ConsumeAsync(GetPipelineExecutionStatusMessage message)
+        public Task ConsumeAsync(GetPipelineExecutionStatusMessage message, CancellationToken cancellationToken)
         {
             var status = _pipelineOrchestrationEngine.GetPipelineExecutionStatus(message.ExecutionId);
 

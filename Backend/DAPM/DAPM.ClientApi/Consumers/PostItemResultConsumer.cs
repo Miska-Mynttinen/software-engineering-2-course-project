@@ -18,7 +18,7 @@ namespace DAPM.ClientApi.Consumers
             _ticketService = ticketService;
         }
 
-        public Task ConsumeAsync(PostItemProcessResult message)
+        public Task ConsumeAsync(PostItemProcessResult message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("CreateNewItemResultMessage received");
 

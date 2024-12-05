@@ -13,7 +13,7 @@ namespace DAPM.Orchestrator.Consumers
         }
 
 
-        public Task ConsumeAsync(ActionResultReceivedMessage message)
+        public Task ConsumeAsync(ActionResultReceivedMessage message, CancellationToken cancellationToken)
         {
             OrchestratorProcess process = _engine.GetProcess(message.ProcessId);
             process.OnActionResultFromPeer(message);

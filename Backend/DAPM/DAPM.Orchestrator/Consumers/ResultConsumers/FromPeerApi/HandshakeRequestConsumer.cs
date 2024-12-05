@@ -12,7 +12,7 @@ namespace DAPM.Orchestrator.Consumers.ResultConsumers.FromPeerApi
         {
             _engine = engine;
         }
-        public Task ConsumeAsync(HandshakeRequestMessage message)
+        public Task ConsumeAsync(HandshakeRequestMessage message, CancellationToken cancellationToken)
         {
             var senderIdentity = new Identity()
             {

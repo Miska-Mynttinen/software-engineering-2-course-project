@@ -21,7 +21,7 @@ namespace DAPM.OperatorMS.Api.Consumers
             _serviceScope = _serviceProvider.CreateScope();
         }
 
-        public Task ConsumeAsync(PostInputResourceMessage message) 
+        public Task ConsumeAsync(PostInputResourceMessage message, CancellationToken cancellationToken) 
         {
             _logger.LogInformation("PostInputResourceMessage Received");
 

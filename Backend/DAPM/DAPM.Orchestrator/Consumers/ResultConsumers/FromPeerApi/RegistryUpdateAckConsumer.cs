@@ -14,7 +14,7 @@ namespace DAPM.Orchestrator.Consumers.ResultConsumers.FromPeerApi
             _orchestratorEngine = orchestratorEngine;
         }
 
-        public Task ConsumeAsync(RegistryUpdateAckMessage message)
+        public Task ConsumeAsync(RegistryUpdateAckMessage message, CancellationToken cancellationToken)
         {
             OrchestratorProcess process = _orchestratorEngine.GetProcess(message.ProcessId);
             process.OnRegistryUpdateAck(message);

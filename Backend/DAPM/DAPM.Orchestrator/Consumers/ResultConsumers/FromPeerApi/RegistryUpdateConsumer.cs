@@ -13,7 +13,7 @@ namespace DAPM.Orchestrator.Consumers.ResultConsumers.FromPeerApi
             _orchestratorEngine = orchestratorEngine;
         }
 
-        public Task ConsumeAsync(RegistryUpdateMessage message)
+        public Task ConsumeAsync(RegistryUpdateMessage message, CancellationToken cancellationToken)
         {
             var isPartOfHandshake = message.IsPartOfHandshake;
 

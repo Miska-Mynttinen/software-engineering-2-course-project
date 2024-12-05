@@ -14,7 +14,7 @@ namespace DAPM.Orchestrator.Consumers.ResultConsumers.FromOperator
             _orchestratorEngine = orchestratorEngine;
         }
 
-        public Task ConsumeAsync(GetExecutionOutputResultMessage message)
+        public Task ConsumeAsync(GetExecutionOutputResultMessage message, CancellationToken cancellationToken)
         {
             OrchestratorProcess process = _orchestratorEngine.GetProcess(message.ProcessId);
             process.OnGetResourceFilesFromOperatorResult(message);

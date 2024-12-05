@@ -21,7 +21,7 @@ namespace DAPM.RepositoryMS.Api.Consumers
             _postResourceToRepoResultProducer = postResourceToRepoResultProducer;
         }
 
-        public async Task ConsumeAsync(PostOperatorToRepoMessage message)
+        public async Task ConsumeAsync(PostOperatorToRepoMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("PostOperatorToRepoMessage received");
 

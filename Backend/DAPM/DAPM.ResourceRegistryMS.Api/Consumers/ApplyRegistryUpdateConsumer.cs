@@ -25,7 +25,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _resultProducer = resultProducer;
         }
 
-        public async Task ConsumeAsync(ApplyRegistryUpdateMessage message)
+        public async Task ConsumeAsync(ApplyRegistryUpdateMessage message, CancellationToken cancellationToken)
         {
             var peers = message.RegistryUpdate.Organizations;
             var repositories = message.RegistryUpdate.Repositories;

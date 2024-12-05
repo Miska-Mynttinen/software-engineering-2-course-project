@@ -17,7 +17,7 @@ namespace DAPM.PeerApi.Consumers
             _logger = logger;
         }
 
-        public async Task ConsumeAsync(SendResourceToPeerMessage message)
+        public async Task ConsumeAsync(SendResourceToPeerMessage message, CancellationToken cancellationToken)
         {
             var targetDomain = message.TargetPeerDomain;
             var senderIdentity = message.SenderPeerIdentity;

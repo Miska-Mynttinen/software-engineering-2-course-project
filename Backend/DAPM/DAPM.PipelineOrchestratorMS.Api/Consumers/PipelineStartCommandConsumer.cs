@@ -17,7 +17,7 @@ namespace DAPM.PipelineOrchestratorMS.Api.Consumers
             _commandEnqueuedProducer = commandEnqueuedProducer;
         }
 
-        public Task ConsumeAsync(PipelineStartCommand message)
+        public Task ConsumeAsync(PipelineStartCommand message, CancellationToken cancellationToken)
         {
             _pipelineOrchestrationEngine.ExecutePipelineStartCommand(message.ExecutionId);
 

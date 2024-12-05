@@ -9,11 +9,13 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
 {
     public class GetPipelinesConsumer : IQueueConsumer<GetPipelinesMessage>
     {
-        private ILogger<GetPipelinesConsumer> _logger;
-        private IQueueProducer<GetPipelinesResultMessage> _getPipelinesResultQueueProducer;
-        private IRepositoryService _repositoryService;
-        private IPipelineService _pipelineService;
-        public GetPipelinesConsumer(ILogger<GetPipelinesConsumer> logger,
+        private readonly ILogger<GetPipelinesConsumer> _logger;
+        private readonly IQueueProducer<GetPipelinesResultMessage> _getPipelinesResultQueueProducer;
+        private readonly IRepositoryService _repositoryService;
+        private readonly IPipelineService _pipelineService;
+
+        public GetPipelinesConsumer(
+            ILogger<GetPipelinesConsumer> logger,
             IQueueProducer<GetPipelinesResultMessage> getPipelinesResultQueueProducer,
             IRepositoryService repositoryService,
             IPipelineService pipelineService)
@@ -24,7 +26,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _pipelineService = pipelineService;
         }
 
-        public async Task ConsumeAsync(GetPipelinesMessage message)
+        public async Task ConsumeAsync(GetPipelinesMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("GetPipelinesMessage received");
 
@@ -63,8 +65,6 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             };
 
             _getPipelinesResultQueueProducer.PublishMessage(resultMessage);
-
-            return;
         }
     }
 }

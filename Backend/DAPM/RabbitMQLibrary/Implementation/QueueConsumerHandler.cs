@@ -6,14 +6,15 @@ using RabbitMQ.Client;
 using RabbitMQLibrary.Exceptions;
 using RabbitMQLibrary.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RabbitMQLibrary.Implementation
 {
-    internal class QueueConsumerHandler<TMessageConsumer, TQueueMessage> : IQueueConsumerHandler<TMessageConsumer, TQueueMessage> where TMessageConsumer : IQueueConsumer<TQueueMessage> where TQueueMessage : class, IQueueMessage
+    internal class QueueConsumerHandler<TMessageConsumer, TQueueMessage> : IQueueConsumerHandler<TMessageConsumer, TQueueMessage> 
+        where TMessageConsumer : IQueueConsumer<TQueueMessage> 
+        where TQueueMessage : class, IQueueMessage
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<QueueConsumerHandler<TMessageConsumer, TQueueMessage>> _logger;
@@ -22,12 +23,12 @@ namespace RabbitMQLibrary.Implementation
         private string _consumerTag;
         private readonly string _consumerName;
 
-        public QueueConsumerHandler(IServiceProvider serviceProvider,
+        public QueueConsumerHandler(
+            IServiceProvider serviceProvider,
             ILogger<QueueConsumerHandler<TMessageConsumer, TQueueMessage>> logger)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
-
             _queueName = typeof(TQueueMessage).Name;
             _consumerName = typeof(TMessageConsumer).Name;
         }
@@ -37,14 +38,15 @@ namespace RabbitMQLibrary.Implementation
             _logger.LogInformation($"Registering {_consumerName} as a consumer for Queue {_queueName}");
 
             var scope = _serviceProvider.CreateScope();
-
-            // Request a channel for registering the Consumer for this Queue
             _consumerRegistrationChannel = scope.ServiceProvider.GetRequiredService<IQueueChannelProvider<TQueueMessage>>().GetChannel();
 
             var consumer = new AsyncEventingBasicConsumer(_consumerRegistrationChannel);
+            consumer.Received += async (ch, ea) =>
+            {
+                using var linkedCts = new CancellationTokenSource();
+                await HandleMessage(ch, ea, linkedCts.Token);
+            };
 
-            // Register the trigger
-            consumer.Received += HandleMessage;
             try
             {
                 _consumerTag = _consumerRegistrationChannel.BasicConsume(_queueName, false, consumer);
@@ -56,7 +58,7 @@ namespace RabbitMQLibrary.Implementation
                 throw new QueueingException(exMsg);
             }
 
-            _logger.LogInformation($"Succesfully registered {_consumerName} as a Consumer for Queue {_queueName}");
+            _logger.LogInformation($"Successfully registered {_consumerName} as a Consumer for Queue {_queueName}");
         }
 
         public void CancelQueueConsumer()
@@ -70,56 +72,38 @@ namespace RabbitMQLibrary.Implementation
             {
                 var message = $"Error canceling QueueConsumer registration for {_consumerName}";
                 _logger.LogError(message, ex);
-
                 throw new QueueingException(message, ex);
             }
         }
 
-        private async Task HandleMessage(object ch, BasicDeliverEventArgs ea)
+        private async Task HandleMessage(object ch, BasicDeliverEventArgs ea, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Received Message on Queue {_queueName}");
 
-            // Create a new scope for handling the consumption of the queue message
             var consumerScope = _serviceProvider.CreateScope();
-
-            // This is the channel on which the Queue message is delivered to the consumer
             var consumingChannel = ((AsyncEventingBasicConsumer)ch).Model;
 
             IModel producingChannel = null;
             try
             {
-                // Within this processing scope, we will open a new channel that will handle all messages produced within this consumer/scope.
-                // This is neccessairy to be able to commit them as a transaction
-                producingChannel = consumerScope.ServiceProvider.GetRequiredService<IChannelProvider>()
-                    .GetChannel();
-
-                // Serialize the message
+                producingChannel = consumerScope.ServiceProvider.GetRequiredService<IChannelProvider>().GetChannel();
                 var message = DeserializeMessage(ea.Body.ToArray());
-
                 _logger.LogInformation($"MessageID '{message.MessageId}'");
 
-                // Start a transaction which will contain all messages produced by this consumer
                 producingChannel.TxSelect();
 
-                // Request an instance of the consumer from the Service Provider
                 var consumerInstance = consumerScope.ServiceProvider.GetRequiredService<TMessageConsumer>();
+                await consumerInstance.ConsumeAsync(message, cancellationToken);
 
-                // Trigger the consumer to start processing the message
-                await consumerInstance.ConsumeAsync(message);
-
-                // Ensure both channels are open before committing
                 if (producingChannel.IsClosed || consumingChannel.IsClosed)
                 {
                     throw new QueueingException("A channel is closed during processing");
                 }
 
-                // Commit the transaction of any messages produced within this consumer scope
                 producingChannel.TxCommit();
-
-                // Acknowledge successfull handling of the message
                 consumingChannel.BasicAck(ea.DeliveryTag, false);
 
-                _logger.LogInformation("Message succesfully processed");
+                _logger.LogInformation("Message successfully processed");
             }
             catch (Exception ex)
             {
@@ -129,7 +113,6 @@ namespace RabbitMQLibrary.Implementation
             }
             finally
             {
-                // Dispose the scope which ensures that all Channels that are created within the consumption process will be disposed
                 consumerScope.Dispose();
             }
         }
@@ -138,24 +121,18 @@ namespace RabbitMQLibrary.Implementation
         {
             try
             {
-                // The consumption process could fail before the scope channel is created
                 if (scopeChannel != null)
                 {
-                    // Rollback any massages within the transaction
                     scopeChannel.TxRollback();
-                    _logger.LogInformation("Rollbacked the transaction");
+                    _logger.LogInformation("Rolled back the transaction");
                 }
 
-                // Reject the message on the consumption channel
                 consumeChannel.BasicReject(deliveryTag, false);
-
                 _logger.LogWarning("Rejected queue message");
             }
-            catch (Exception bex)
+            catch (Exception ex)
             {
-                var bexMsg =
-                    $"BasicReject failed";
-                _logger.LogCritical(bex, bexMsg);
+                _logger.LogCritical(ex, "BasicReject failed");
             }
         }
 
@@ -165,5 +142,4 @@ namespace RabbitMQLibrary.Implementation
             return JsonConvert.DeserializeObject<TQueueMessage>(stringMessage);
         }
     }
-
 }

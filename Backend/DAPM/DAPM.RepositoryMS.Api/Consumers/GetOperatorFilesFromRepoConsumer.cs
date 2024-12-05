@@ -23,7 +23,7 @@ namespace DAPM.RepositoryMS.Api.Consumers
             _resultMessageProducer = resultMessageProducer;
             _fileService = fileService;
         }
-        public async Task ConsumeAsync(GetOperatorFilesFromRepoMessage message)
+        public async Task ConsumeAsync(GetOperatorFilesFromRepoMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("GetOperatorFilesFromRepoMessage received");
 

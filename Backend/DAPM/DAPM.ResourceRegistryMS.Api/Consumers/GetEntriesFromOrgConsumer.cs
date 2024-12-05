@@ -26,7 +26,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _resultProducer = resultProducer;
         }
 
-        public async Task ConsumeAsync(GetEntriesFromOrgMessage message)
+        public async Task ConsumeAsync(GetEntriesFromOrgMessage message, CancellationToken cancellationToken)
         {
             var peer = await _peerService.GetPeer(message.OrganizationId);
             var repositories = (await _peerService.GetRepositoriesOfOrganization(message.OrganizationId)).ToList();

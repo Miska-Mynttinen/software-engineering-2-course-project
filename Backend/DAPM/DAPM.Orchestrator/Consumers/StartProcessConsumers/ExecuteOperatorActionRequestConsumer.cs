@@ -17,7 +17,7 @@ namespace DAPM.Orchestrator.Consumers.StartProcessConsumers
             _serviceScope = serviceProvider.CreateScope();
         }
 
-        public Task ConsumeAsync(ExecuteOperatorActionRequest message)
+        public Task ConsumeAsync(ExecuteOperatorActionRequest message, CancellationToken cancellationToken)
         {
             var identityService = _serviceScope.ServiceProvider.GetRequiredService<IIdentityService>();
             var identity = identityService.GetIdentity();

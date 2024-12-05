@@ -21,7 +21,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _postRepoToRegistryResultMessageProducer = postRepoToRegistryResultMessageProducer;
             _peerService = peerService;
         }
-        public async Task ConsumeAsync(PostRepositoryToRegistryMessage message)
+        public async Task ConsumeAsync(PostRepositoryToRegistryMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("PostRepositoryToRegistryMessage received");
 

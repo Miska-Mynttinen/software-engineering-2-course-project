@@ -13,7 +13,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _peerService = peerService;
         }
 
-        public async Task ConsumeAsync(PostPeerMessage message)
+        public async Task ConsumeAsync(PostPeerMessage message, CancellationToken cancellationToken)
         {
             await _peerService.PostPeer(message.Organization);
             return;

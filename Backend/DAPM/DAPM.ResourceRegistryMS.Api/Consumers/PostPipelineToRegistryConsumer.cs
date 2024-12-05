@@ -18,7 +18,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _postPipelineToRegistryResultProducer = postPipelineToRegistryResultProducer;
             _repositoryService = repositoryService;
         }
-        public async Task ConsumeAsync(PostPipelineToRegistryMessage message)
+        public async Task ConsumeAsync(PostPipelineToRegistryMessage message, CancellationToken cancellationToken)
         {
             _logger.LogInformation("PostPipelineToRegistryMessage received");
 

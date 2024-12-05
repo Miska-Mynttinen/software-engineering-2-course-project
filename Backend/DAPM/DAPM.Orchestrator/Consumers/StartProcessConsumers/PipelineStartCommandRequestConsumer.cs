@@ -12,7 +12,7 @@ namespace DAPM.Orchestrator.Consumers.StartProcessConsumers
         {
             _engine = engine;
         }
-        public Task ConsumeAsync(PipelineStartCommandRequest message)
+        public Task ConsumeAsync(PipelineStartCommandRequest message, CancellationToken cancellationToken)
         {
             _engine.StartPipelineStartCommandProcess(message.TicketId, message.ExecutionId);
             return Task.CompletedTask;

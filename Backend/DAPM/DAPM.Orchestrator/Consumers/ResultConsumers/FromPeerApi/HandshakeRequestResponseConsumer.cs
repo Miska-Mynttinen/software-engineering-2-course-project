@@ -13,7 +13,7 @@ namespace DAPM.Orchestrator.Consumers.ResultConsumers.FromPeerApi
             _orchestratorEngine = orchestratorEngine;
         }
 
-        public Task ConsumeAsync(HandshakeRequestResponseMessage message)
+        public Task ConsumeAsync(HandshakeRequestResponseMessage message, CancellationToken cancellationToken)
         {
             OrchestratorProcess process = _orchestratorEngine.GetProcess(message.SenderProcessId);
             process.OnHandshakeRequestResponse(message);
