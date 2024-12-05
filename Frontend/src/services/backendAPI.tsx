@@ -435,10 +435,7 @@ export async function fetchOrganizationUserGroups(orgId: string) {
 }
 
 export async function putRepository(orgId: string, repositoryName: string, formData: FormData) {
-    
-   
-    
-
+        console.log('POSTING REPO');
     try {
 
         formData.append("name", repositoryName);
@@ -476,7 +473,9 @@ export async function putRepository(orgId: string, repositoryName: string, formD
         };
 
         // Call getData function with the ticketId obtained from fetchOrganisations
-        return await getData(jsonData.ticketId);
+        const ret = await getData(jsonData.ticketId);
+        console.log('POST RETURN', ret);
+        return ret
     } catch (error) {
         console.error('put rep, Error fetching data:', error);
         throw error; // Propagate error to the caller

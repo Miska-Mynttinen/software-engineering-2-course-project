@@ -75,10 +75,10 @@ const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositor
 
         const validUsers = users
             .filter(user => user.organizationId === orgId)
-            .map(user => user.userId);
+            .map(user => user.username);
 
             // Validate owner: check if it exists in validUsers (userId) or validUserGroups (name)
-        const isOwnerTypeValid = validUsers.includes(ownerType) || validUserGroups.includes(ownerType);
+        // const isOwnerTypeValid = validUsers.includes(ownerType) || validUserGroups.includes(ownerType);
     
         // Validate owner: check if it exists in validUsers (userId) or validUserGroups (name)
         const isOwnerValid = validUsers.includes(owner) || validUserGroups.includes(owner);
@@ -88,11 +88,11 @@ const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositor
 
         
 
-        if (!isOwnerTypeValid) {
+        /* if (!isOwnerTypeValid) {
             setOwnerError('The entered owner type does not exist in the organization.');
         } else {
             setownerTypeError(null);
-        }
+        } */
 
         if (!isOwnerValid) {
             setOwnerError('The entered owner does not exist in the organization.');
@@ -107,10 +107,11 @@ const CreateRepositoryButton = ({ orgId , onRepositoryCreated }: CreateRepositor
         }
 
         // Stop submission if any error exists
-        if (!isOwnerValid || !isUserGroupValid || !isOwnerTypeValid) {
+        if (!isOwnerValid || !isUserGroupValid) {
             setDisabled(false);
             return;
         }
+
 
         if (repositoryName) {
             try {

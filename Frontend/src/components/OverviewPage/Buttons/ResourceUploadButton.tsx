@@ -78,22 +78,11 @@ const ResourceUploadButton = ({ orgId, repId, onResourceCreated }: UploadButtonP
             .filter(user => user.organizationId === orgId)
             .map(user => user.userId);
 
-            // Validate owner: check if it exists in validUsers (userId) or validUserGroups (name)
-        const isOwnerTypeValid = validUsers.includes(ownerType) || validUserGroups.includes(ownerType);
-    
         // Validate owner: check if it exists in validUsers (userId) or validUserGroups (name)
         const isOwnerValid = validUsers.includes(owner) || validUserGroups.includes(owner);
 
         // Validate userGroup: check if it exists in validUserGroups
         const isUserGroupValid = !userGroup || validUserGroups.includes(userGroup); // userGroup is optional
-
-        
-
-        if (!isOwnerTypeValid) {
-            setOwnerError('The entered owner type does not exist in the organization.');
-        } else {
-            setownerTypeError(null);
-        }
 
         if (!isOwnerValid) {
             setOwnerError('The entered owner does not exist in the organization.');
@@ -108,7 +97,7 @@ const ResourceUploadButton = ({ orgId, repId, onResourceCreated }: UploadButtonP
         }
 
         // Stop submission if any error exists
-        if (!isOwnerValid || !isUserGroupValid || !isOwnerTypeValid) {
+        if (!isOwnerValid || !isUserGroupValid) {
             setDisabled(false);
             return;
         }
