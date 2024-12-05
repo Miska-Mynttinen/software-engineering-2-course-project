@@ -30,6 +30,11 @@ namespace DAPM.ResourceRegistryMS.Api.Services
         {
             return await _userRepository.GetUserById(organizationId, userId);
         }
+        public async Task<User> UserLogin(Guid orgId, string userName, string password)
+        {
+            return await _userRepository.UserLogin(orgId, userName, password);
+        }
+
 
         public async Task<IEnumerable<UserGroup>> GetAllUserGroups()
         {

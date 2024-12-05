@@ -1,12 +1,16 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import Link from '@mui/material/Link';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
 import { fetchOrganisations, putUser } from '../../services/backendAPI';
 
@@ -49,119 +53,67 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignUp({ toggleForm }: SignUpProps) {
-  const [usernameError, setusernameError] = React.useState(false);
-  const [usernameErrorMessage, setusernameErrorMessage] = React.useState('');
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [organizationError, setOrganizationError] = React.useState(false);
-  const [organizationErrorMessage, setOrganizationErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [confirmPasswordError, setConfirmPasswordError] = React.useState(false);
-  const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] = React.useState('');
+  const [usernameError, setusernameError] = useState(false);
+  const [usernameErrorMessage, setusernameErrorMessage] = useState('');
+  const [emailError, setEmailError] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState('');
+  const [organizationError, setOrganizationError] = useState(false);
+  const [organizationErrorMessage, setOrganizationErrorMessage] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState(false);
+  const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] = useState('');
+  const [organizations, setOrganizations] = useState<{ id: string; name: string }[]>([]);
+  const [selectedOrganization, setSelectedOrganization] = useState<string>('');
+
+  useEffect(() => {
+    const loadOrganizations = async () => {
+      try {
+        const result = await fetchOrganisations();
+        const orgList = result?.result?.organizations || [];
+        setOrganizations(orgList);
+      } catch (error) {
+        console.error('Error fetching organizations:', error);
+      }
+    };
+    loadOrganizations();
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const isValid = validateInputs();
-    if (!isValid) {
+    if (!selectedOrganization) {
+      setOrganizationError(true);
+      setOrganizationErrorMessage('Organization is required.');
       return;
     }
 
     const formData = new FormData(event.currentTarget);
-    formData.append("ResourceType", "User");
-    formData.append("UserStatus", "Active");
-    formData.append("UserGroups", JSON.stringify([])); // This should be an empty array
-
     const jsonObject = {
-        Username: formData.get('username') as string, // Make sure to get the value directly
-        Password: formData.get('password') as string,
-        Email: formData.get('email') as string,
-        UserStatus: formData.get('UserStatus') as string,
-        ResourceType: formData.get('ResourceType') as string,
-        UserGroups: [],
-        UserType: 'user'
+      Username: formData.get('username') as string,
+      Password: formData.get('password') as string,
+      Email: formData.get('email') as string,
+      UserStatus: 'Active',
+      ResourceType: 'User',
+      UserGroups: [],
+      UserType: 'user',
     };
 
-    console.log('Request Payload:', jsonObject);
-    const organizationName = formData.get('organization') as string;
-
     try {
-        // Match organization to the organizationName
-        const resultGetOrganizations = await fetchOrganisations();
-        const organizations = resultGetOrganizations?.result?.organizations || [];
-        const organization = organizations.find((org: { name: string; }) => org.name === organizationName);
+      const organization = organizations.find((org) => org.name === selectedOrganization);
+      if (!organization) throw new Error('Selected organization not found.');
 
-        const resultPostUser = await putUser(organization.id, jsonObject);
-        console.log('User successfully uploaded:', resultPostUser);
-        alert('User successfully uploaded');
-        
-        toggleForm();
+      const resultPostUser = await putUser(organization.id, jsonObject);
+      console.log('User successfully uploaded:', resultPostUser);
+      alert('User successfully uploaded');
+      toggleForm();
     } catch (error) {
-        console.error('Error uploading user:', error);
-        alert(`Error uploading user: ${error}`);
+      console.error('Error uploading user:', error);
+      alert(`Error uploading user: ${error}`);
     }
   };
 
   const validateInputs = () => {
-    let isValid = true;
-
-    const username = document.getElementById('username') as HTMLInputElement;
-    const email = document.getElementById('email') as HTMLInputElement;
-    const organization = document.getElementById('organization') as HTMLInputElement;
-    const password = document.getElementById('password') as HTMLInputElement;
-    const confirmPassword = document.getElementById('confirmPassword') as HTMLInputElement;
-
-    // Validate Full username
-    if (!username.value || username.value.trim() === '') {
-      setusernameError(true);
-      setusernameErrorMessage('Full username is required.');
-      isValid = false;
-    } else {
-      setusernameError(false);
-      setusernameErrorMessage('');
-    }
-
-    // Validate Email
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage('Please enter a valid email address.');
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage('');
-    }
-
-    // Validate Organization
-    if (!organization.value || organization.value.trim() === '') {
-      setOrganizationError(true);
-      setOrganizationErrorMessage('Organization is required.');
-      isValid = false;
-    } else {
-      setOrganizationError(false);
-      setOrganizationErrorMessage('');
-    }
-
-    // Validate Password
-    if (!password.value || password.value.length < 6 || !/\d/.test(password.value) || !/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) {
-      setPasswordError(true);
-      setPasswordErrorMessage('Password must be 6 characters long, including a number and special character');
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage('');
-    }
-
-    // Validate Confirm Password
-    if (confirmPassword.value !== password.value) {
-      setConfirmPasswordError(true);
-      setConfirmPasswordErrorMessage('Passwords do not match.');
-      isValid = false;
-    } else {
-      setConfirmPasswordError(false);
-      setConfirmPasswordErrorMessage('');
-    }
-
-    return isValid;
+    // Add validation logic for other fields here if needed
   };
 
   return (
@@ -195,6 +147,7 @@ export default function SignUp({ toggleForm }: SignUpProps) {
             noValidate
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
+            {/* Username Field */}
             <TextField
               error={usernameError}
               helperText={usernameErrorMessage}
@@ -208,6 +161,8 @@ export default function SignUp({ toggleForm }: SignUpProps) {
               size="small"
               color={usernameError ? 'error' : 'primary'}
             />
+
+            {/* Email Field */}
             <TextField
               error={emailError}
               helperText={emailErrorMessage}
@@ -223,19 +178,36 @@ export default function SignUp({ toggleForm }: SignUpProps) {
               size="small"
               color={emailError ? 'error' : 'primary'}
             />
-            <TextField
-              error={organizationError}
-              helperText={organizationErrorMessage}
-              id="organization"
-              name="organization"
-              label="Organization"
-              placeholder="Your Organization"
-              required
-              fullWidth
-              variant="outlined"
-              size="small"
-              color={organizationError ? 'error' : 'primary'}
-            />
+
+            {/* Organization Dropdown */}
+            <FormControl fullWidth size="small" error={organizationError}>
+              <InputLabel id="organization-label">Organization</InputLabel>
+              <Select
+                labelId="organization-label"
+                id="organization"
+                name="organization"
+                value={selectedOrganization}
+                onChange={(e) => {
+                  setSelectedOrganization(e.target.value);
+                  setOrganizationError(false);
+                  setOrganizationErrorMessage('');
+                }}
+                required
+              >
+                {organizations.map((org) => (
+                  <MenuItem key={org.id} value={org.name}>
+                    {org.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {organizationError && (
+                <Typography variant="caption" color="error">
+                  {organizationErrorMessage}
+                </Typography>
+              )}
+            </FormControl>
+
+            {/* Password Field */}
             <TextField
               error={passwordError}
               helperText={passwordErrorMessage}
@@ -251,6 +223,8 @@ export default function SignUp({ toggleForm }: SignUpProps) {
               size="small"
               color={passwordError ? 'error' : 'primary'}
             />
+
+            {/* Confirm Password Field */}
             <TextField
               error={confirmPasswordError}
               helperText={confirmPasswordErrorMessage}
@@ -266,6 +240,8 @@ export default function SignUp({ toggleForm }: SignUpProps) {
               size="small"
               color={confirmPasswordError ? 'error' : 'primary'}
             />
+
+            {/* Submit Button */}
             <Button
               type="submit"
               fullWidth
@@ -280,10 +256,12 @@ export default function SignUp({ toggleForm }: SignUpProps) {
             >
               SIGN UP
             </Button>
+
+            {/* Toggle to Sign In */}
             <Typography sx={{ textAlign: 'center', fontSize: '0.75rem' }}>
               Already have an account?{' '}
               <Link
-                onClick={toggleForm} // Call toggleForm to switch to Sign In
+                onClick={toggleForm}
                 variant="body2"
                 sx={{ cursor: 'pointer', color: '#1a73e8', fontSize: '0.75rem' }}
               >

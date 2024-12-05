@@ -120,5 +120,32 @@ namespace DAPM.ClientApi.Services
             }
             _logger.LogInformation($"Ticket resolution of ticket {ticketId} has been updated");
         }
+        public T WaitForResponse<T>(Guid ticketId, TimeSpan timeout)
+        {
+            var startTime = DateTime.UtcNow;
+            while (true)
+            {
+                // Check if the ticket has been completed
+                var status = GetTicketStatus(ticketId);
+                if (status == TicketStatus.Completed)
+                {
+                    // Extract the resolution and deserialize it to the expected type
+                    var resolution = GetTicketResolution(ticketId);
+                    return resolution["result"].ToObject<T>(); // Convert the result to the expected type
+                }
+                else if (status == TicketStatus.Failed)
+                {
+                    throw new Exception($"Ticket {ticketId} failed to resolve.");
+                }
+                else if (DateTime.UtcNow - startTime > timeout)
+                {
+                    throw new TimeoutException($"Ticket {ticketId} timed out after {timeout.TotalSeconds} seconds.");
+                }
+
+                // Wait briefly before checking again
+                Thread.Sleep(100);
+            }
+        }
+
     }
 }

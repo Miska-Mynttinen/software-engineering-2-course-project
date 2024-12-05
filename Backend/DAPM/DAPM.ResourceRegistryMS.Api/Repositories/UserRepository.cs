@@ -49,6 +49,17 @@ namespace DAPM.ResourceRegistryMS.Api.Repositories
 
             return user;
         }
+        public async Task<User> UserLogin(Guid orgId, string userName, string password)
+        {
+            var user = _context.Users.Include(r => r.Peer).Single(r => r.Username == userName && r.Password == password && r.PeerId == orgId);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return user;
+        }
 
         public async Task<UserGroup> PostUserGroup(UserGroup userGroup)
         {

@@ -1,5 +1,6 @@
 import { Stream } from "stream";
 import { json } from "stream/consumers";
+import { LoginRequest, LoginResponse } from "../redux/states/apiState";
 
 // const vmPath = `dapm1.compute.dtu.dk:5000`
 const vmPath = `se2-f.compute.dtu.dk:5000`
@@ -15,9 +16,15 @@ if (isVM) {
     path = vmPath
 }
 
-export async function fetchPipelineExecutionStatus(orgId: string, repId: string, pipeId: string, exeId:string) {
+export async function fetchPipelineExecutionStatus(orgId: string, repId: string, pipeId: string, exeId: string) {
     try {
-        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines/${pipeId}/executions/${exeId}/status`);
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines/${pipeId}/executions/${exeId}/status`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`, // Ensure the token is included
+                'Content-Type': 'application/json',
+            },
+        });
+
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -25,9 +32,11 @@ export async function fetchPipelineExecutionStatus(orgId: string, repId: string,
         const jsonData = await response.json();
         return jsonData;
     } catch (error) {
-        return error;
+        console.error('Error fetching execution status:', error);
+        throw error;
     }
 }
+
 
 export async function fetchStatus(ticket: string) {
 
@@ -138,7 +147,21 @@ export async function fetchOrganisation(orgId: string) {
 
 export async function fetchOrganisationRepositories(orgId: string) {
     try {
-        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories`);
+        // Retrieve the JWT token from localStorage
+        const token = localStorage.getItem('token');
+        console.log("Auth:",token)
+        if (!token) {
+            throw new Error('No authentication token found. Please log in.');
+        }
+
+        // Make the initial request to fetch repositories
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`, // Include the token in the Authorization header
+                'Content-Type': 'application/json'
+            }
+        });
         if (!response.ok) {
             throw new Error('Fecthing reps, Network response was not ok');
         }
@@ -211,10 +234,17 @@ export async function fetchRepository(orgId: string, repId: string) {
 
 export async function fetchRepositoryResources(orgId: string, repId: string) {
     try {
-        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/resources`);
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/resources`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`, // Include token in header
+                'Content-Type': 'application/json',
+            },
+        });
+
         if (!response.ok) {
             throw new Error('Fetching resources, Network response was not ok');
         }
+
         const jsonData = await response.json();
 
         // Fetch additional data recursively
@@ -228,7 +258,6 @@ export async function fetchRepositoryResources(orgId: string, repId: string) {
                     if (data.status) {
                         return data;
                     }
-
                     await delay(1000); // Wait for 1 second before retrying
                 } catch (error) {
                     if (retries === maxRetries - 1) {
@@ -246,12 +275,11 @@ export async function fetchRepositoryResources(orgId: string, repId: string) {
         throw error; // Propagate error to the caller
     }
 }
-
 export async function fetchResource(orgId: string, repId: string, resId: string) {
     try {
-        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/resources/${resId}`);
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/resources/${resId}`);
         if (!response.ok) {
-            throw new Error('Fetching resource, Feching Network response was not ok');
+            throw new Error('Fetching resource, Network response was not ok');
         }
         const jsonData = await response.json();
 
@@ -286,7 +314,13 @@ export async function fetchResource(orgId: string, repId: string, resId: string)
 
 export async function fetchRepositoryPipelines(orgId: string, repId: string) {
     try {
-        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/pipelines`);
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`, // Include token in header
+                'Content-Type': 'application/json',
+            },
+        });
+
         if (!response.ok) {
             throw new Error('fetching pipelines, Network response was not ok');
         }
@@ -322,11 +356,24 @@ export async function fetchRepositoryPipelines(orgId: string, repId: string) {
 }
 
 export async function fetchPipeline(orgId: string, repId: string, pipId: string) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+    }
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    headers.append('Authorization', `Bearer ${token}`); // Include the token if authentication is required.
+
     try {
-        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/pipelines/${pipId}`);
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines/${pipId}`, {
+            method: 'GET',
+            headers: headers,
+        });
+
         if (!response.ok) {
-            throw new Error('fetching pipeline, Network response was not ok');
+            throw new Error('Fetching pipeline, Network response was not ok');
         }
+
         const jsonData = await response.json();
 
         // Fetch additional data recursively
@@ -350,10 +397,10 @@ export async function fetchPipeline(orgId: string, repId: string, pipId: string)
             throw new Error('Failed to fetch data');
         };
 
-        // Call getData function with the ticketId obtained from fetchOrganisations
+        // Call getData function with the ticketId obtained from fetchPipeline
         return await getData(jsonData.ticketId);
     } catch (error) {
-        console.error('fetching pipeline, Error fetching data:', error);
+        console.error('Fetching pipeline, Error fetching data:', error);
         throw error; // Propagate error to the caller
     }
 }
@@ -435,59 +482,74 @@ export async function fetchOrganizationUserGroups(orgId: string) {
 }
 
 export async function putRepository(orgId: string, repositoryName: string) {
-    
-    const headers = new Headers()
-    headers.append("accept", "application/json")
-    headers.append("Content-Type", "application/json")
-    
+    // Retrieve the JWT token from local storage
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+    }
+
+    // Set headers for the request
+    const headers = new Headers();
+    headers.append("Accept", "application/json");
+    headers.append("Content-Type", "application/json");
+    headers.append("Authorization", `Bearer ${token}`); // Add JWT token to Authorization header
 
     try {
-        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories`, {
+        // Send POST request to create the repository
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories`, {
             method: "POST",
             headers: headers,
-            body: JSON.stringify({ name: repositoryName })
+            body: JSON.stringify({ name: repositoryName }),
         });
 
+        // Check if the response status is not OK (non-2xx)
         if (!response.ok) {
-            throw new Error('put rep, Network response was not ok');
+            throw new Error(`Failed to create repository. Status: ${response.status}`);
         }
 
+        // Parse the response JSON
         const jsonData = await response.json();
 
-        // Fetch additional data recursively
+        // Recursive function to fetch the data based on ticket ID
         const getData = async (ticketId: string): Promise<any> => {
             const maxRetries = 10;
             const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
             for (let retries = 0; retries < maxRetries; retries++) {
                 try {
+                    // Fetch the status of the operation using ticketId
                     const data = await fetchStatus(ticketId);
                     if (data.status) {
-                        return data;
+                        return data; // Return the data when the operation is successful
                     }
                     await delay(1000); // Wait for 1 second before retrying
                 } catch (error) {
+                    // Retry if an error occurs
                     if (retries === maxRetries - 1) {
-                        throw new Error('Max retries reached');
+                        throw new Error('Max retries reached while fetching repository status.');
                     }
                 }
             }
-            throw new Error('Failed to fetch data');
+            throw new Error('Failed to fetch repository data after retries.');
         };
 
-        // Call getData function with the ticketId obtained from fetchOrganisations
+        // Call getData with the ticketId obtained from the response
         return await getData(jsonData.ticketId);
     } catch (error) {
-        console.error('put rep, Error fetching data:', error);
-        throw error; // Propagate error to the caller
+        console.error('Error creating repository:', error);
+        throw error; // Propagate the error to the caller
     }
 }
 
+
 export async function putResource(orgId: string, repId: string, formData: FormData) {
     try {
-        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/resources`, {
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/resources`, {
             method: "POST",
-            body: formData
+            body: formData,
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`, // Include token in header
+            },
         });
 
         if (!response.ok) {
@@ -524,8 +586,7 @@ export async function putResource(orgId: string, repId: string, formData: FormDa
         throw error; // Propagate error to the caller
     }
 }
-
-export async function putPipeline(orgId: string, repId: string, pipelineData:any){
+export async function putPipeline(orgId: string, repId: string, pipelineData: any) {
     try {
         const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines`, {
             method: "POST",
@@ -541,6 +602,7 @@ export async function putPipeline(orgId: string, repId: string, pipelineData:any
         }
 
         const jsonData = await response.json();
+
         // Fetch additional data recursively
         const getData = async (ticketId: string): Promise<any> => {
             const maxRetries = 1000;
@@ -654,9 +716,12 @@ export async function putCommandStart(orgId: string, repId: string, pipeId: stri
 
 export async function putOperator(orgId: string, repId: string, formData: FormData) {
     try {
-        const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/resources/operators`, {
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/resources/operators`, {
             method: "POST",
-            body: formData
+            body: formData,
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`, // Include token in header
+            },
         });
 
         if (!response.ok) {
@@ -693,37 +758,38 @@ export async function putOperator(orgId: string, repId: string, formData: FormDa
         throw error; // Propagate error to the caller
     }
 }
-export async function loginUser(username: string, password: string) {
-    console.log("Username:",username)
-    console.log("Password:",password)
-    const headers = new Headers();
-    headers.append("Content-Type", "application/json");
-    
+
+export async function loginUser(loginRequest: LoginRequest) {
+    console.log("Login Request:", loginRequest);
+  
     try {
-        const response = await fetch(`http://${path}/authentication/login`, {
-            method: "POST",
-            headers: headers,
-            body: JSON.stringify({ username, password })
-           
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Login failed: ${errorText}`);
-        }
-
-        const jsonData = await response.json();
-        
-        // Store the JWT token in localStorage
-        localStorage.setItem("token", jsonData.token);
-        console.log("Token",jsonData.token)
-        return jsonData;
+      // Prepare the request options for fetch
+      const response = await fetch(`http://${path}/authentication/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginRequest), // Convert the request body to a JSON string
+      });
+  
+      if (!response.ok) {
+        // Handle non-2xx status codes
+        throw new Error(`Login failed with status: ${response.status}`);
+      }
+  
+      // Parse the response JSON
+      const data: LoginResponse = await response.json();
+      console.log("Data: ",data)
+      console.log("token: ",data.token)
+      // Store the token in localStorage
+      localStorage.setItem('token', data.token);
+      return data;
     } catch (error) {
-        console.error("Error during login:", error);
-        throw error;
+      console.error('Login error', error);
+      throw error;
     }
-}
-
+  }
+  
 export async function logoutUser() {
     const token = localStorage.getItem("token");
 
@@ -932,9 +998,9 @@ export async function PostNewPeer(domainName: string) {
 
 export async function downloadResource(organizationId: string, repositoryId: string, resourceId: string) {
     try {
-        const response = await fetch(`http://` + path + `/organizations/${organizationId}/repositories/${repositoryId}/resources/${resourceId}/file`);
+        const response = await fetch(`http://${path}/organizations/${organizationId}/repositories/${repositoryId}/resources/${resourceId}/file`);
         if (!response.ok) {
-            throw new Error('Fetching orgs, Network response was not ok');
+            throw new Error('Fetching resource, Network response was not ok');
         }
         const jsonData = await response.json();
 
@@ -946,9 +1012,8 @@ export async function downloadResource(organizationId: string, repositoryId: str
             for (let retries = 0; retries < maxRetries; retries++) {
                 try {
                     const response = await fetchFile(ticketId) as any;
-                    console.log(response)
                     if (response.ok) {
-                        await delay(1000);
+                        await delay(1000); // Wait before returning the response
                         return response;
                     }
                     await delay(1000); // Wait for 1 second before retrying
@@ -961,10 +1026,9 @@ export async function downloadResource(organizationId: string, repositoryId: str
             throw new Error('Failed to fetch data');
         };
 
-        // Call getData function with the ticketId obtained from fetchOrganisations
         return await getData(jsonData.ticketId);
     } catch (error) {
-        console.error('Fetching orgs, Error fetching data:', error);
+        console.error('Error fetching resource:', error);
         throw error; // Propagate error to the caller
     }
 }

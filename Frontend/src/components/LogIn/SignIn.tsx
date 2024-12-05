@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -8,10 +8,14 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
-import { loginUser } from '../../services/backendAPI'; // Import the loginUser function
+import { loginUser, fetchOrganisations } from '../../services/backendAPI';
+import { LoginRequest } from '../../redux/states/apiState';
 
-// Define the toggleForm prop type
 interface SignInProps {
   toggleForm: () => void;
 }
@@ -61,56 +65,86 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 
 export default function SignIn({ toggleForm }: SignInProps) {
   const navigate = useNavigate();
+  const [usernameError, setusernameError] = useState(false);
+  const [usernameErrorMessage, setusernameErrorMessage] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+  const [organizationError, setOrganizationError] = useState(false);
+  const [organizationErrorMessage, setOrganizationErrorMessage] = useState('');
+  const [organizations, setOrganizations] = useState<{ id: string; name: string }[]>([]);
+  const [selectedOrganization, setSelectedOrganization] = useState<string>('');
 
-  const [usernameError, setusernameError] = React.useState(false);
-  const [usernameErrorMessage, setusernameErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
+  useEffect(() => {
+    const loadOrganizations = async () => {
+      try {
+        const result = await fetchOrganisations();
+        setOrganizations(result?.result?.organizations || []);
+      } catch (error) {
+        console.error('Error fetching organizations:', error);
+      }
+    };
+    loadOrganizations();
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Prevent default form submission
-
-    // Validate inputs first
-    if (!validateInputs()) {
-      return;
-    }
-
-    const data = new FormData(event.currentTarget);
-    const username = data.get('username') as string;
-    const password = data.get('password') as string;
-
-    if (username === 'admin' && password === 'admin1!') {
-      navigate('/admin');
-      localStorage.setItem("token", "test");
-      return;
-    } else if (username === 'user' && password === 'user1!') {
-      navigate('/user');
-      localStorage.setItem("token", "test");
-      return;
-    }
-
+    event.preventDefault();
+  
+    if (!validateInputs()) return;
+  
+    const formData = new FormData(event.currentTarget);
+    const username = formData.get('username') as string;
+    const password = formData.get('password') as string;
+  
     try {
-      // Call login API and store the token if successful
-      const response = await loginUser(username, password);
-      
+      const selectedOrg = organizations.find((org) => org.name === selectedOrganization);
+  
+      if (!selectedOrg) {
+        setOrganizationError(true);
+        setOrganizationErrorMessage('Please select a valid organization.');
+        return;
+      }
+  
+      const loginRequest: LoginRequest = {
+        username,
+        password,
+        organizationId: selectedOrg.id,
+      };
+  
+      const response = await loginUser(loginRequest); // Pass the entire loginRequest
+  
       if (response && response.token) {
-        // Navigate based on user role
-        if (username === 'admin') {
-          navigate('/admin');
-        } else {
+        // Navigate based on the role or other conditions
+        localStorage.setItem('token', response.token);
+        response.userType ="user";
+        if(response.userType==="user"){
           navigate('/user');
         }
+        if(response.userType==="admin"){
+          navigate('/admin');
+        }     
+        
+        return;
       }
     } catch (error) {
-      alert('Login failed. Please check your username and password.');
+      alert('Login failed. Please check your credentials and try again.');
     }
   };
+  
 
   const validateInputs = () => {
+    let isValid = true;
+
+    if (!selectedOrganization) {
+      setOrganizationError(true);
+      setOrganizationErrorMessage('Organization is required.');
+      isValid = false;
+    } else {
+      setOrganizationError(false);
+      setOrganizationErrorMessage('');
+    }
+
     const username = document.getElementById('username') as HTMLInputElement;
     const password = document.getElementById('password') as HTMLInputElement;
-
-    let isValid = true;
 
     if (!username.value) {
       setusernameError(true);
@@ -123,7 +157,7 @@ export default function SignIn({ toggleForm }: SignInProps) {
 
     if (!password.value || password.value.length < 6 || !/\d/.test(password.value) || !/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) {
       setPasswordError(true);
-      setPasswordErrorMessage('Password must be 6 characters long, including a number and special character');
+      setPasswordErrorMessage('Password must be 6 characters long, including a number and special character.');
       isValid = false;
     } else {
       setPasswordError(false);
@@ -152,34 +186,22 @@ export default function SignIn({ toggleForm }: SignInProps) {
             DAPM
           </Typography>
 
-          <Typography
-            component="h1"
-            variant="h6"
-            sx={{ width: '100%', fontSize: '1.25rem', textAlign: 'left'  }}
-          >
+          <Typography component="h1" variant="h6" sx={{ width: '100%', fontSize: '1.25rem', textAlign: 'left' }}>
             Sign In
           </Typography>
           <Box
             component="form"
             onSubmit={handleSubmit}
             noValidate
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              gap: 1.5,
-            }}
+            sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 1.5 }}
           >
             <TextField
               error={usernameError}
               helperText={usernameErrorMessage}
               id="username"
-              type="username"
               name="username"
               label="Username"
               placeholder="Username"
-              autoComplete="username"
-              autoFocus
               required
               fullWidth
               variant="outlined"
@@ -194,18 +216,42 @@ export default function SignIn({ toggleForm }: SignInProps) {
               placeholder="••••••"
               type="password"
               id="password"
-              autoComplete="current-password"
               required
               fullWidth
               variant="outlined"
               size="small"
               color={passwordError ? 'error' : 'primary'}
             />
+            <FormControl fullWidth size="small" error={organizationError}>
+              <InputLabel id="organization-label">Organization</InputLabel>
+              <Select
+                labelId="organization-label"
+                id="organization"
+                name="organization"
+                value={selectedOrganization}
+                onChange={(e) => {
+                  setSelectedOrganization(e.target.value);
+                  setOrganizationError(false);
+                  setOrganizationErrorMessage('');
+                }}
+                required
+              >
+                {organizations.map((org) => (
+                  <MenuItem key={org.id} value={org.name}>
+                    {org.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {organizationError && (
+                <Typography variant="caption" color="error">
+                  {organizationErrorMessage}
+                </Typography>
+              )}
+            </FormControl>
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
               sx={{
                 bgcolor: '#1a73e8',
                 color: 'white',
@@ -219,13 +265,9 @@ export default function SignIn({ toggleForm }: SignInProps) {
             <Typography sx={{ textAlign: 'center', fontSize: '0.75rem' }}>
               Don&apos;t have an account?{' '}
               <Link
-                onClick={toggleForm} // Call toggleForm to switch to Sign Up
+                onClick={toggleForm}
                 variant="body2"
-                sx={{
-                  cursor: 'pointer',
-                  color: '#1a73e8',
-                  fontSize: '0.75rem',
-                }}
+                sx={{ cursor: 'pointer', color: '#1a73e8', fontSize: '0.75rem' }}
               >
                 Sign up
               </Link>

@@ -23,6 +23,7 @@ namespace DAPM.Orchestrator
         public void OnGetRepositoriesFromRegistryResult(GetRepositoriesResultMessage message);
 
         public void OnGetUsersFromRegistryResult(GetUsersResultMessage message);
+        public void OnLoginResult(LoginProcessResultMessage message);
         public void OnGetUserGroupsFromRegistryResult(GetUserGroupsResultMessage message);
         public void OnGetResourcesFromRegistryResult(GetResourcesResultMessage message);
         public void OnGetPipelinesFromRegistryResult(GetPipelinesResultMessage message);

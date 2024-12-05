@@ -117,6 +117,13 @@ namespace DAPM.Orchestrator
             _processes[processId] = getRepositoriesProcess;
             getRepositoriesProcess.StartProcess();
         }
+        public void StartLoginProcess(Guid apiTicketId, string username, string password, Guid orgId)
+        {
+            var processId = apiTicketId; // Use apiTicketId as the processId
+            var loginProcess = new LoginProcess(this, _serviceProvider, apiTicketId, orgId, processId, username, password);
+            _processes[processId] = loginProcess;
+            loginProcess.StartProcess();
+        }
 
         public void StartGetUsersProcess(Guid apiTicketId, Guid organizationId, Guid? userId)
         {
