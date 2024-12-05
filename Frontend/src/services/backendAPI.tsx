@@ -148,8 +148,9 @@ export async function fetchOrganisation(orgId: string) {
 export async function fetchOrganisationRepositories(orgId: string) {
     try {
         // Retrieve the JWT token from localStorage
-        const authToken = localStorage.getItem('authToken');
-        if (!authToken) {
+        const token = localStorage.getItem('token');
+        console.log("Auth:",token)
+        if (!token) {
             throw new Error('No authentication token found. Please log in.');
         }
 
@@ -157,7 +158,7 @@ export async function fetchOrganisationRepositories(orgId: string) {
         const response = await fetch(`http://${path}/organizations/${orgId}/repositories`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${authToken}`, // Include the token in the Authorization header
+                'Authorization': `Bearer ${token}`, // Include the token in the Authorization header
                 'Content-Type': 'application/json'
             }
         });
@@ -355,13 +356,13 @@ export async function fetchRepositoryPipelines(orgId: string, repId: string) {
 }
 
 export async function fetchPipeline(orgId: string, repId: string, pipId: string) {
-    const authToken = localStorage.getItem('authToken');
-    if (!authToken) {
+    const token = localStorage.getItem('token');
+    if (!token) {
         throw new Error('No authentication token found. Please log in.');
     }
     const headers = new Headers();
     headers.append('Content-Type', 'application/json');
-    headers.append('Authorization', `Bearer ${authToken}`); // Include the token if authentication is required.
+    headers.append('Authorization', `Bearer ${token}`); // Include the token if authentication is required.
 
     try {
         const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines/${pipId}`, {
@@ -482,8 +483,8 @@ export async function fetchOrganizationUserGroups(orgId: string) {
 
 export async function putRepository(orgId: string, repositoryName: string) {
     // Retrieve the JWT token from local storage
-    const authToken = localStorage.getItem('authToken');
-    if (!authToken) {
+    const token = localStorage.getItem('token');
+    if (!token) {
         throw new Error('No authentication token found. Please log in.');
     }
 
@@ -491,7 +492,7 @@ export async function putRepository(orgId: string, repositoryName: string) {
     const headers = new Headers();
     headers.append("Accept", "application/json");
     headers.append("Content-Type", "application/json");
-    headers.append("Authorization", `Bearer ${authToken}`); // Add JWT token to Authorization header
+    headers.append("Authorization", `Bearer ${token}`); // Add JWT token to Authorization header
 
     try {
         // Send POST request to create the repository
@@ -779,8 +780,9 @@ export async function loginUser(loginRequest: LoginRequest) {
       // Parse the response JSON
       const data: LoginResponse = await response.json();
       console.log("Data: ",data)
+      console.log("token: ",data.token)
       // Store the token in localStorage
-      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('token', data.token);
       return data;
     } catch (error) {
       console.error('Login error', error);
