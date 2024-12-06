@@ -6,6 +6,7 @@ public class LoginMessage : IQueueMessage
     public TimeSpan TimeToLive { get; set; } = TimeSpan.FromMinutes(1);
     public Guid OrgId {get; set;}
     public string Username { get; set; }
+    public string UserType { get; set; }
     public string Password { get; set; }
     public Guid MessageId { get; set; }
 }

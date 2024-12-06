@@ -29,10 +29,10 @@ namespace DAPM.ClientApi.Controllers
             try
             {
                 // Authenticate the user and generate the token and ticketId
-                var (token, ticketId) = _authenticationService.Login(request.Username, request.Password, request.OrganizationId);
+                var (token, ticketId, userType) = _authenticationService.Login(request.Username, request.Password, request.OrganizationId);
 
-                _logger.LogInformation($"Login successful for username: {request.Username}");
-                return Ok(new { Token = token, TicketId = ticketId}); // Return both token and ticketId
+                _logger.LogInformation($"Login successful for username: {request.Username} and type: {userType}");
+                return Ok(new { Token = token, TicketId = ticketId, UserType = userType}); // Return both token and ticketId
             }
             catch (UnauthorizedAccessException ex)
             {

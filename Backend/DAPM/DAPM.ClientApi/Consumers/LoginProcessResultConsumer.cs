@@ -21,7 +21,7 @@ namespace DAPM.ClientApi.Consumers
 
         public Task ConsumeAsync(LoginProcessResult message)
         {
-            _logger.LogInformation($"Processing login result for ticket: {message.TicketId}, username: {message.Username}");
+            _logger.LogInformation($"LoginProcessResult");
 
             // Ensure the TicketId is valid (convert to Guid)
             Guid ticketId = GetValidTicketId(message.TicketId);
@@ -30,7 +30,7 @@ namespace DAPM.ClientApi.Consumers
             bool isValid = ValidateCredentials(message.Username, message.Password);
 
             // Prepare the result as a JToken
-            JToken result = PrepareLoginResult(isValid, message.Username);
+            JToken result = PrepareLoginResult(isValid, message);
 
             // Update the ticket resolution with the result
             _ticketService.UpdateTicketResolution(ticketId, result);
@@ -55,12 +55,13 @@ namespace DAPM.ClientApi.Consumers
             return !string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password);
         }
 
-        private JToken PrepareLoginResult(bool isValid, string username)
+        private JToken PrepareLoginResult(bool isValid, LoginProcessResult message)
         {
             return JObject.FromObject(new
             {
                 success = isValid,
-                username = username
+                username = message.Username,
+                userType = message.UserType
             });
         }
     }

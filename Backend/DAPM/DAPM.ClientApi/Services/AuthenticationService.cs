@@ -35,7 +35,7 @@ namespace DAPM.ClientApi.Services
             _ticketService = ticketService;
         }
 
-        public (string token, Guid ticketId) Login(string username, string password, Guid orgId)
+        public (string token, Guid ticketId, string userType) Login(string username, string password, Guid orgId)
         {
             _logger.LogInformation($"[Login] Initiating login for user: {username} at {DateTime.UtcNow}");
 
@@ -63,10 +63,12 @@ namespace DAPM.ClientApi.Services
                 _logger.LogWarning($"[Login] Login failed for user: {username}. Invalid credentials or timeout.");
                 throw new UnauthorizedAccessException("Authentication failed.");
             }
-
+            if(validationResponse.UserType!="user"){
+                validationResponse.UserType ="unknown";
+            }
             // Step 5: Generate JWT token for successful login
             var token = GenerateJwtToken(username, orgId, ticketId);
-            return (token, ticketId);  // Return both the token and the ticketId
+            return (token, ticketId, validationResponse.UserType);  // Return both the token and the ticketId
         }
         public string GenerateJwtToken(string username, Guid orgId,Guid ticketId)
         {

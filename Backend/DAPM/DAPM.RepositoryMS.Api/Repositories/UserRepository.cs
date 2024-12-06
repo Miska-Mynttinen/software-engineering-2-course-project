@@ -37,7 +37,10 @@ namespace DAPM.RepositoryMS.Api.Repositories
         {
             return await _context.Users.FirstOrDefaultAsync(r => r.UserId == userId);
         }
-
+        public async Task<User> GetUserByName(string userName)
+        {
+            return await _context.Users.FirstOrDefaultAsync(r => r.Username == userName);
+        }
         public async Task<UserGroup> CreateUserGroup(string name)
         {
             UserGroup userGroup = new UserGroup() { Name = name };
@@ -50,7 +53,7 @@ namespace DAPM.RepositoryMS.Api.Repositories
         {
             return await _context.UserGroups.FirstOrDefaultAsync(r => r.Id == userGroupId);
         }
-
+    
         public async Task<User> UpdateUser(Guid userId, List<string> userGroups)
         {
             // Find the existing user

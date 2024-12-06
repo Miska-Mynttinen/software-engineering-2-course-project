@@ -114,8 +114,8 @@ export default function SignIn({ toggleForm }: SignInProps) {
   
       if (response && response.token) {
         // Navigate based on the role or other conditions
-        localStorage.setItem('token', response.token);
-        response.userType ="user";
+        localStorage.setItem('authToken', response.token);
+        //response.userType ="user";
         if(response.userType==="user"){
           navigate('/user');
         }
