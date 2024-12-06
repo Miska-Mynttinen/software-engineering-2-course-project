@@ -11,6 +11,7 @@ namespace RabbitMQLibrary.Messages.ClientApi
     public class LoginProcessResult : IQueueMessage
     {
         public string Username { get; set; }
+        public string UserType { get; set; }
         public string Password { get; set; }
         public Guid OrgId {get; set;}
         public Guid TicketId { get; set; } // Required by IQueueMessage

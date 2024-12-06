@@ -55,7 +55,8 @@ namespace DAPM.Orchestrator.Processes
                 TimeToLive = TimeSpan.FromMinutes(1), // Assuming you want to set a TTL
                 Username = message.Username,
                 Password = _password, // You may want to hash or mask this in production environments
-                OrgId = _orgId
+                OrgId = _orgId,
+                UserType = message.UserType
             };
 
             loginProcessResultProducer.PublishMessage(processResultMessage);

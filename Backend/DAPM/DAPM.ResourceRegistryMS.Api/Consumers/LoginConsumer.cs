@@ -43,12 +43,12 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
                 users = await _peerService.GetUsersOfOrganization(message.OrgId);
             }
 
-            //var usertype = "";
+            var usertype = "";
             foreach (var user in users)
             {
                 if(user.Username== message.Username && user.Password == message.Password && user.PeerId == (Guid)message.OrgId){
                     success = true;
-                    //usertype = user.UserType;
+                    usertype = user.UserType;
                 }
             }
             _logger.LogInformation($"--------------------Processing Login Message for username: {message.Username}-------------------------------------");
@@ -60,7 +60,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
                 Username = message.Username,
                 OrgId = message.OrgId,
                 Message = success ? "Login successful" : "Invalid username or password",
-                //UserType = usertype,
+                UserType = usertype,
                 TimeToLive = TimeSpan.FromMinutes(1)
             };
 
