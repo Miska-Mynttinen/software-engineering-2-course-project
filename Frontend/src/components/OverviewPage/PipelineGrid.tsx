@@ -15,7 +15,7 @@ import ReactDOM from 'react-dom';
 import { toPng } from 'html-to-image';
 import { getNodesBounds, getViewportForBounds } from 'reactflow';
 import { v4 as uuidv4 } from 'uuid';
-
+ 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
   ...theme.typography.body2,
@@ -23,32 +23,32 @@ const Item = styled(Paper)(({ theme }) => ({
   textAlign: 'center',
   color: theme.palette.text.secondary,
 }));
-
+ 
 export default function AutoGrid() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const pipelines = useSelector(getPipelines);
-
+ 
   const [username, setUsername] = useState(''); // State for username
-
+ 
   useEffect(() => {
     // Fetch username from localStorage
     const storedUsername = localStorage.getItem('username') || 'User';
     setUsername(storedUsername);
   }, []);
-
+ 
   const handleLogout = () => {
     // Clear any necessary data, e.g., session tokens
     localStorage.removeItem('username'); // Example: Clear username
     localStorage.removeItem("token");
     navigate('/'); // Redirect to the login page
   };
-
+ 
   const createNewPipeline = () => {
     dispatch(addNewPipeline({ id: `pipeline-${uuidv4()}`, flowData: { nodes: [], edges: [] } }));
     { navigate("/pipeline") }
   };
-
+ 
   pipelines.map(({ pipeline: flowData, id, name }) => {
     const nodes = flowData.nodes;
     const edges = flowData.edges;
@@ -59,17 +59,17 @@ export default function AutoGrid() {
     container.style.top = '-10000px';
     container.id = pipelineId;
     document.body.appendChild(container);
-
+ 
     ReactDOM.render(
       <FlowDiagram nodes={nodes} edges={edges} />,
       container,
       () => {
         const width = 800;
         const height = 600;
-
+ 
         const nodesBounds = getNodesBounds(nodes!);
         const { x, y, zoom } = getViewportForBounds(nodesBounds, width, height, 0.5, 2, 1);
-
+ 
         toPng(document.querySelector(`#${pipelineId} .react-flow__viewport`) as HTMLElement, {
           backgroundColor: '#333',
           width: width,
@@ -86,7 +86,7 @@ export default function AutoGrid() {
       }
     );
   });
-
+ 
   return (
     <Box sx={{flexGrow: 1, flexBasis: "100%", position: 'relative' }}>
       {/* Create New Pipeline Button */}
@@ -98,7 +98,7 @@ export default function AutoGrid() {
       >
         Create New
       </Button>
-
+ 
       {/* Username Display and Logout Button */}
       <Box sx={{ display: 'flex', alignItems: 'center', position: 'absolute', gap: '8px', top: '10px', right: '10px' }}>
         <Typography variant="body1" style={{ marginRight: '16px', color: 'white' }}>
@@ -112,19 +112,20 @@ export default function AutoGrid() {
           Logout
         </Button>
       </Box>
-
-      
-
-      
-
+ 
+     
+ 
+     
+ 
       {/* Grid Display of Pipelines */}
       <Grid container spacing={{ xs: 1, md: 1 }} sx={{ padding: "10px" }}>
         {pipelines.map(({ id, name, imgData }) => (
           <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
-            <PipelineCard id={id} name={name} imgData={imgData}></PipelineCard>
+            <PipelineCard id={id} name={name} imgData={imgData} orgId={''} repId={''}></PipelineCard>
           </Grid>
         ))}
       </Grid>
     </Box>
   );
 }
+ 

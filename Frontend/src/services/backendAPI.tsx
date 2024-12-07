@@ -208,7 +208,78 @@ export async function fetchRepository(orgId: string, repId: string) {
         throw error; // Propagate error to the caller
     }
 }
-
+export async function editRepository(
+    orgId: string,
+    repId: string,
+    updatedData: object // Data for updating the repository
+  ) {
+    try {
+      const response = await fetch(
+        `http://` + path + `/organizations/${orgId}/repositories/${repId}`,
+        {
+          method: 'PUT', // HTTP method for editing
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedData), // Send the updated repository data
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`Editing repository failed, status: ${response.status}`);
+      }
+  
+      const jsonData = await response.json();
+  
+      // Recursive data fetch logic
+      const getData = async (ticketId: string): Promise<any> => {
+        const maxRetries = 10;
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  
+        for (let retries = 0; retries < maxRetries; retries++) {
+          try {
+            const data = await fetchStatus(ticketId); // Check status for completion
+            if (data.status) {
+              return data; // If status is complete, return the data
+            }
+            await delay(1000); // Wait 1 second before retrying
+          } catch (error) {
+            if (retries === maxRetries - 1) {
+              throw new Error('Max retries reached');
+            }
+          }
+        }
+        throw new Error('Failed to fetch data');
+      };
+  
+      // Use `getData` with the ticketId obtained from the response
+      return await getData(jsonData.ticketId);
+    } catch (error) {
+      console.error('Editing repository failed:', error);
+      throw error; // Propagate error to the caller
+    }
+  }
+  
+  export async function deleteRepository(orgId: string, repId: string): Promise<void> {
+    try {
+      const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}`, {
+        method: 'DELETE', // HTTP method for deletion
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Deleting repository failed, status: ${response.status}`);
+      }
+  
+      console.log(`Repository with ID ${repId} deleted successfully.`);
+    } catch (error) {
+      console.error('Error deleting repository:', error);
+      throw error; // Propagate error to the caller
+    }
+  }
+  
 export async function fetchRepositoryResources(orgId: string, repId: string) {
     try {
         const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/resources`);
@@ -355,6 +426,33 @@ export async function fetchPipeline(orgId: string, repId: string, pipId: string)
     } catch (error) {
         console.error('fetching pipeline, Error fetching data:', error);
         throw error; // Propagate error to the caller
+    }
+}
+export async function deletePipeline(orgId: string, repId: string, pipId: string) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+    }
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    headers.append('Authorization', `Bearer ${token}`); // Include the token if authentication is required.
+ 
+    try {
+        const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines/${pipId}`, {
+            method: 'DELETE',
+            headers: headers,
+        });
+ 
+        if (!response.ok) {
+            throw new Error('Pipeline deletion failed, Network response was not ok');
+        }
+ 
+        const result = await response.json();
+        console.log('Pipeline deleted successfully:', result);
+        return result; // Return the result of the delete request, if needed
+    } catch (error) {
+        console.error('Error deleting pipeline:', error);
+        throw error; // Propagate the error to the caller
     }
 }
 
@@ -693,6 +791,69 @@ export async function putOperator(orgId: string, repId: string, formData: FormDa
         throw error; // Propagate error to the caller
     }
 }
+export async function editOperator(orgId: string, repId: string, operatorId: string, updatedData: object): Promise<any> {
+    try {
+      const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/resources/operators/${operatorId}`, {
+        method: 'PUT', // HTTP method for editing/updating
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData), // Updated data sent in the body
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Edit operator failed, status: ${response.status}`);
+      }
+  
+      const jsonData = await response.json();
+  
+      // Fetch additional data recursively
+      const getData = async (ticketId: string): Promise<any> => {
+        const maxRetries = 10;
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  
+        for (let retries = 0; retries < maxRetries; retries++) {
+          try {
+            const data = await fetchStatus(ticketId);
+            if (data.status) {
+              return data;
+            }
+            await delay(1000); // Wait for 1 second before retrying
+          } catch (error) {
+            if (retries === maxRetries - 1) {
+              throw new Error('Max retries reached');
+            }
+          }
+        }
+        throw new Error('Failed to fetch data');
+      };
+  
+      return await getData(jsonData.ticketId);
+    } catch (error) {
+      console.error('Error editing operator:', error);
+      throw error;
+    }
+  }
+  export async function deleteOperator(orgId: string, repId: string, operatorId: string): Promise<void> {
+    try {
+      const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}/resources/operators/${operatorId}`, {
+        method: 'DELETE', // HTTP method for deletion
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Delete operator failed, status: ${response.status}`);
+      }
+  
+      console.log(`Operator with ID ${operatorId} deleted successfully.`);
+    } catch (error) {
+      console.error('Error deleting operator:', error);
+      throw error;
+    }
+  }
+    
 export async function loginUser(username: string, password: string) {
     console.log("Username:",username)
     console.log("Password:",password)
@@ -968,3 +1129,82 @@ export async function downloadResource(organizationId: string, repositoryId: str
         throw error; // Propagate error to the caller
     }
 }
+export async function editResource(
+    organizationId: string, 
+    repositoryId: string, 
+    resourceId: string, 
+    updatedData: object
+  ) {
+    try {
+      const response = await fetch(
+        `http://` + path + `/organizations/${organizationId}/repositories/${repositoryId}/resources/${resourceId}/file`,
+        {
+          method: 'PUT', // Using PUT for editing/updating
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedData), // Sending the updated data
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`Network response was not ok, status: ${response.status}`);
+      }
+  
+      const jsonData = await response.json();
+  
+      // Recursive polling function
+      const getData = async (ticketId: string): Promise<any> => {
+        const maxRetries = 10;
+        const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  
+        for (let retries = 0; retries < maxRetries; retries++) {
+          try {
+            const response = await fetchFile(ticketId) as any; // Assuming `fetchFile` fetches data for ticketId
+            console.log(response);
+  
+            if (response.ok) {
+              return response.json(); // Parse and return JSON
+            }
+            await delay(1000); // Wait for 1 second before retrying
+          } catch (error) {
+            if (retries === maxRetries - 1) {
+              throw new Error('Max retries reached');
+            }
+            await delay(1000); // Retry on error
+          }
+        }
+        throw new Error('Failed to fetch data');
+      };
+  
+      // Call getData function with the ticketId from the edit response
+      return await getData(jsonData.ticketId);
+    } catch (error) {
+      console.error('Error editing resource:', error);
+      throw error; // Propagate error to the caller
+    }
+  }
+  export async function deleteResource(
+    organizationId: string,
+    repositoryId: string,
+    resourceId: string
+  ) {
+    try {
+      const response = await fetch(
+        `http://` + path + `/organizations/${organizationId}/repositories/${repositoryId}/resources/${resourceId}/file`,
+        {
+          method: 'DELETE', // DELETE HTTP method
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`Network response was not ok, status: ${response.status}`);
+      }
+  
+      return { success: true };
+    } catch (error) {
+      console.error('Error while deleting resource:', error);
+      throw error;
+    }
+  }
+  

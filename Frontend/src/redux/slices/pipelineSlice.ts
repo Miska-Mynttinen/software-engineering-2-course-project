@@ -1,19 +1,19 @@
 import { addEdge as addFlowEdge, applyEdgeChanges, applyNodeChanges, Connection, Edge, EdgeChange, MarkerType, Node, NodeChange } from "reactflow";
-
+ 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { EdgeData, NodeData, NodeState, PipelineData, PipelineState } from "../states/pipelineState";
-
+ 
 export const initialState: PipelineState = {
   pipelines: [],
   activePipelineId: ""
 }
-
+ 
 const takeSnapshot = (state: PipelineState) => {
   var activePipeline = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)
   if (!activePipeline) return
   activePipeline?.history?.past?.push({nodes: activePipeline.pipeline.nodes, edges: activePipeline.pipeline.edges})
 }
-
+ 
 const pipelineSlice = createSlice({
   name: 'pipelines',
   initialState: initialState,
@@ -30,15 +30,15 @@ const pipelineSlice = createSlice({
       if (!pipeline) return
       pipeline.imgData = payload.imgData
     },
-
+ 
     // actions for undo and redo
-
+ 
     undo(state){
       var activePipeline = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)
       if (!activePipeline) return
       const pastState = activePipeline?.history?.past?.pop()
       if (!pastState) return
-
+ 
       activePipeline.history.future.push({nodes: activePipeline.pipeline.nodes, edges: activePipeline.pipeline.edges})
       activePipeline.pipeline.nodes = pastState.nodes
       activePipeline.pipeline.edges = pastState.edges
@@ -48,16 +48,16 @@ const pipelineSlice = createSlice({
       if (!activePipeline) return
       const futureState = activePipeline?.history?.future?.pop()
       if (!futureState) return
-
+ 
       activePipeline.pipeline.nodes = futureState.nodes
       activePipeline.pipeline.edges = futureState.edges
     },
     createSnapShot(state){
       takeSnapshot(state)
     },
-    
+   
     // actions for the active pipeline
-    
+   
     updatePipelineName: (state, { payload }: PayloadAction<string>) => {
       var activePipeline = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)
       if (!activePipeline) return
@@ -71,22 +71,22 @@ const pipelineSlice = createSlice({
       const { nodeId, handleId, newType } = payload;
       // Find the active pipeline based on the activePipelineId
       var activeFlowData = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)?.pipeline
-      
+     
       if (!activeFlowData) return; // Early exit if no active pipeline is found
-    
+   
       // Find the node within the active pipeline's flowData that matches the nodeId
       const targetNode = activeFlowData.nodes.find(node => node.id === nodeId);
-
+ 
       if (!targetNode) return; // Early exit if no matching node is found
-    
+   
       // Initialize templateData and sourceHandles if they are not defined
       if (!targetNode.data.templateData?.sourceHandles) return; // Early exit if templateData or sourceHandles are not defined
-    
+   
       // Find the handle to update within the sourceHandles
       const handleToUpdate = targetNode.data.templateData.sourceHandles.find(handle => handle.id === handleId);
-    
+   
       if (!handleToUpdate) return; // Early exit if no matching handle is found
-
+ 
       // Update the handle's type
       handleToUpdate.type = newType;
     },
@@ -94,26 +94,26 @@ const pipelineSlice = createSlice({
       const { nodeId, handleId, newType } = payload;
       // Find the active pipeline based on the activePipelineId
       var activeFlowData = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)?.pipeline
-      
+     
       if (!activeFlowData) return; // Early exit if no active pipeline is found
-    
+   
       // Find the node within the active pipeline's flowData that matches the nodeId
       const targetNode = activeFlowData.nodes.find(node => node.id === nodeId);
-
+ 
       if (!targetNode) return; // Early exit if no matching node is found
-    
+   
       // Initialize templateData and sourceHandles if they are not defined
       if (!targetNode.data.templateData?.targetHandles) return; // Early exit if templateData or sourceHandles are not defined
-    
+   
       // Find the handle to update within the sourceHandles
       const handleToUpdate = targetNode.data.templateData.targetHandles.find(handle => handle.id === handleId);
-    
+   
       if (!handleToUpdate) return; // Early exit if no matching handle is found
-
+ 
       // Update the handle's type
       handleToUpdate.type = newType;
     },
-    
+   
     updateNode: (state, { payload }: PayloadAction<Node<NodeData> | undefined>) => {
       if (!payload) return
       var activeFlowData = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)?.pipeline
@@ -124,14 +124,14 @@ const pipelineSlice = createSlice({
     addNode: (state, { payload }: PayloadAction<Node>) => {
       var activeFlowData = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)?.pipeline
       if (!activeFlowData) return
-      
+     
       activeFlowData.nodes.push(payload)
     },
     removeNode: (state, { payload }: PayloadAction<Node<NodeData>>) => {
       var activeFlowData = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)?.pipeline
       if (!activeFlowData) return
       //takeSnapshot(state)
-
+ 
       activeFlowData.nodes = activeFlowData.nodes.filter(node => node.id !== payload.id && node.parentNode !== payload.id)
       activeFlowData.edges = activeFlowData.edges.filter(edge =>
         !payload.data?.templateData?.sourceHandles.find(data => data.id === edge.sourceHandle) &&
@@ -141,7 +141,7 @@ const pipelineSlice = createSlice({
       var activeFlowData = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)?.pipeline
       if (!activeFlowData) return
       //takeSnapshot(state)
-
+ 
       activeFlowData!.edges = activeFlowData?.edges.filter(edge => edge.id !== payload.id)
     },
     updateEdge: (state, { payload }: PayloadAction<Edge<EdgeData> | undefined>) => {
@@ -156,65 +156,71 @@ const pipelineSlice = createSlice({
     onNodesChange: (state, { payload }: PayloadAction<NodeChange[]>) => {
       var activeFlowData = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)?.pipeline
       if (!activeFlowData) return
-
+ 
       activeFlowData.nodes = applyNodeChanges(payload, activeFlowData.nodes);
     },
     onEdgesChange: (state, { payload }: PayloadAction<EdgeChange[]>) => {
       var activeFlowData = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)?.pipeline
       if (!activeFlowData) return
-
+ 
       activeFlowData.edges = applyEdgeChanges(payload, activeFlowData.edges);
     },
     onConnect: (state, { payload }: PayloadAction<Connection>) => {
       var activeFlowData = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)?.pipeline
       if (!activeFlowData) return
       takeSnapshot(state)
-
+ 
       const strokeColor = activeFlowData.nodes.find(node => node.id == payload.target)?.type === 'dataSink' ? 'red' : 'white'
-
+ 
       activeFlowData.edges = addFlowEdge({ ...payload, type: 'default'}, activeFlowData.edges);
     },
     setNodes: (state, { payload }: PayloadAction<Node[]>) => {
       var activeFlowData = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)?.pipeline
       if (!activeFlowData) return
-
+ 
       activeFlowData.nodes = payload;
     },
     setEdges: (state, { payload }: PayloadAction<Edge[]>) => {
       var activeFlowData = state.pipelines.find(pipeline => pipeline.id === state.activePipelineId)?.pipeline
       if (!activeFlowData) return
-
+ 
       activeFlowData.edges = payload;
+    },
+    removePipeline: (state, { payload }: PayloadAction<string>) => {
+      // Filter out the pipeline with the matching ID
+      state.pipelines = state.pipelines.filter(pipeline => pipeline.id !== payload);
     },
   },
 })
-
-export const { 
+ 
+export const {
   //actions for all pipelines
-  addNewPipeline, 
-  setActivePipeline, 
-  setImageData, 
-  
+  addNewPipeline,
+  setActivePipeline,
+  setImageData,
+ 
   // actions for undo and redo
   undo,
   redo,
   createSnapShot,
-
+ 
   // actions for the active pipeline
   updateSourceHandle,
   updateTargetHandle,
-  updatePipelineName, 
-  addHandle, 
-  updateNode, 
-  addNode, 
-  removeNode, 
-  removeEdge, 
-  updateEdge, 
-  onNodesChange, 
-  onEdgesChange, 
-  onConnect, 
-  setNodes, 
-  setEdges 
+  updatePipelineName,
+  addHandle,
+  updateNode,
+  addNode,
+  removeNode,
+  removeEdge,
+  updateEdge,
+  onNodesChange,
+  onEdgesChange,
+  onConnect,
+  setNodes,
+  setEdges ,
+  removePipeline
 } = pipelineSlice.actions
-
-export default pipelineSlice.reducer 
+ 
+export default pipelineSlice.reducer
+ 
