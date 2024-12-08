@@ -8,7 +8,7 @@ namespace DAPM.RepositoryMS.Api.Models.PostgreSQL
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid UserId { get; set; }
-        public Guid OrganizationId { get; set; }
+        public Guid? OrganizationId { get; set; }
 
         [Required]
         public string Username { get; set; }

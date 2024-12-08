@@ -27,10 +27,10 @@ namespace DAPM.ResourceRegistryMS.Api.Models
         [Required]
         public List<string> UserGroups { get; set; }
 
-        public Guid PeerId { get; set; }
+        public Guid? PeerId { get; set; }
 
         // Navigation Attributes (Foreign Keys)
         [ForeignKey("PeerId")]
-        public virtual Peer Peer { get; set; }
+        public virtual Peer? Peer { get; set; }
     }
 }

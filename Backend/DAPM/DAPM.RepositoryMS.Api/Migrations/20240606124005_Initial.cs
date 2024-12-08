@@ -96,7 +96,7 @@ namespace DAPM.RepositoryMS.Api.Migrations
                     UserType = table.Column<string>(type: "text", nullable: false),
                     UserStatus = table.Column<string>(type: "text", nullable: false),
                     UserGroups = table.Column<string>(type: "jsonb", nullable: false), // Store List<string> as JSONB
-                    OrganizationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uuid", nullable: true),
                 },
                 constraints: table =>
                 {
