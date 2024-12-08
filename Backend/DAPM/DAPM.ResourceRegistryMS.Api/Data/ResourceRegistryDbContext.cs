@@ -28,12 +28,15 @@ public class ResourceRegistryDbContext : DbContext
         builder.Entity<Repository>().HasKey(r => new { r.PeerId, r.Id });
         builder.Entity<Resource>().HasKey(r => new { r.PeerId, r.RepositoryId, r.Id });
         builder.Entity<Pipeline>().HasKey(r => new { r.PeerId, r.RepositoryId, r.Id });
-        builder.Entity<User>()
-            .Property(u => u.UserGroups)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null), // Convert List<string> to JSON
-                v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null)) // Convert JSON to List<string>
-            .HasColumnType("jsonb"); // Specify the column type as JSONB
+        builder.Entity<User>(entity =>
+        {
+            entity.HasIndex(u => u.Username).IsUnique(); // Ensure uniqueness of Username
+            entity.Property(u => u.UserGroups)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null), // Convert List<string> to JSON
+                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null)) // Convert JSON to List<string>
+                .HasColumnType("jsonb");
+        });
         builder.Entity<UserGroup>().HasKey(r => new { r.PeerId, r.Id });
     }
 
@@ -44,7 +47,30 @@ public class ResourceRegistryDbContext : DbContext
             Database.EnsureDeleted();
             Database.Migrate();
 
-     
+            SaveChanges();
+        }
+
+        SeedAdmin();
+    }
+
+    public async void SeedAdmin()
+    {
+        var adminExists = Users.Any(u => u.Username == "admin");
+        if (!adminExists)
+        {
+            var adminUser = new User
+            {
+                UserId = Guid.NewGuid(),
+                Username = "admin",
+                Password = "admin1!", // Use a hashed password instead
+                Email = "default@example.com",
+                UserType = "admin",
+                UserStatus = "active",
+                UserGroups = new List<string> {},
+                PeerId = null,
+            };
+
+            await Users.AddAsync(adminUser);
             SaveChanges();
         }
     }

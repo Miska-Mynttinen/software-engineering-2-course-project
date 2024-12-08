@@ -32,7 +32,10 @@ namespace DAPM.ResourceRegistryMS.Api.Services
         }
         public async Task<User> UserLogin(Guid orgId, string userName, string password)
         {
-            return await _userRepository.UserLogin(orgId, userName, password);
+            _logger.LogWarning($"Username: {userName} Password: {password} OrgId: {orgId}");
+            var user = await  _userRepository.UserLogin(orgId, userName, password);
+            _logger.LogWarning($"Username: {user}");
+            return user;
         }
 
 

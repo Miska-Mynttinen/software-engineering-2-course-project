@@ -16,9 +16,7 @@ namespace DAPM.RepositoryMS.Api.Data
             : base(options)
         {
             _logger = logger;
-            // Optionally, you can call InitializeDatabaseAsync here if you want to ensure the database is ready
             InitializeDatabase();
-            // SeedData();
         }
 
         public DbSet<User> Users { get; set; }
@@ -26,16 +24,18 @@ namespace DAPM.RepositoryMS.Api.Data
 
         public void InitializeDatabase()
         {
-            /* if (Database.GetPendingMigrations().Any())
+            if (Database.GetPendingMigrations().Any())
             {
                 Database.EnsureDeleted();
                 Database.Migrate();
 
                 SaveChanges();
-            } */
+            }
 
             Database.EnsureCreated();
             SaveChanges();
+
+            // SeedAdmin();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -46,29 +46,33 @@ namespace DAPM.RepositoryMS.Api.Data
                 WriteIndented = true // Optional: for formatted JSON
             };
 
-            modelBuilder.Entity<User>()
-                .Property(u => u.UserGroups)
-                .HasConversion(
-                    v => JsonSerializer.Serialize(v, options),
-                    v => JsonSerializer.Deserialize<List<string>>(v, options) ?? new List<string>()); // Fallback to an empty list if null
+            modelBuilder.Entity<User>(entity =>
+                {
+                    entity.HasIndex(u => u.Username).IsUnique(); // Ensure uniqueness of Username
+                    entity.Property(u => u.UserGroups)
+                        .HasConversion(
+                            v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null), // Convert List<string> to JSON
+                            v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null)) // Convert JSON to List<string>
+                        .HasColumnType("jsonb");
+                });
         }
 
-        // Optional: Seed initial data
-        /* public void SeedData()
+        /* public async void SeedAdmin()
         {
             var adminUser = new User
             {
+                OrganizationId = null,
                 UserId = new Guid("00000000-0000-0000-0000-000000000001"),
                 Username = "admin",
-                Password = "admin", // Use a hashed password instead
+                Password = "admin1!", // Use a hashed password instead
                 Email = "default@example.com",
-                UserType = "Admin",
-                UserStatus = "Active",
+                UserType = "admin",
+                UserStatus = "active",
                 UserGroups = new List<string> {}
             };
 
-            Users.Add(adminUser); // Add the user to the DbSet
-            SaveChanges(); // Save changes to the database
-        } */
+            await Users.AddAsync(adminUser);
+            SaveChanges();
+        }*/
     }
 }

@@ -94,7 +94,7 @@ namespace DAPM.ResourceRegistryMS.Api.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    PeerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PeerId = table.Column<Guid>(type: "uuid", nullable: true),
                     Username = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
@@ -104,13 +104,13 @@ namespace DAPM.ResourceRegistryMS.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => new { x.PeerId, x.UserId });
-                    table.ForeignKey(
+                    table.PrimaryKey("PK_Users", x => x.UserId); // Only UserId is a primary key, removed PeerId
+                    /* table.ForeignKey(
                         name: "FK_Users_Peers_PeerId",
                         column: x => x.PeerId,
                         principalTable: "Peers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade);*/
                 });
             
             migrationBuilder.CreateTable(

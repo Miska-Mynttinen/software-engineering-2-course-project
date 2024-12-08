@@ -26,7 +26,7 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _logger.LogInformation("PostUserToRegistryMessage received");
 
 
-            var createdUser = await _peerService.PostUserToOrganization(message.User.OrganizationId, message.User);
+            var createdUser = await _peerService.PostUserToOrganization((Guid)message.User.OrganizationId, message.User);
             if (createdUser != null)
             {
                 var userDto = new UserDTO()
