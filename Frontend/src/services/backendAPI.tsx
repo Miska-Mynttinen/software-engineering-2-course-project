@@ -782,7 +782,9 @@ export async function loginUser(loginRequest: LoginRequest) {
       console.log("Data: ",data)
       console.log("token: ",data.token)
       // Store the token in localStorage
+      localStorage.setItem('username', loginRequest.username);
       localStorage.setItem('token', data.token);
+      localStorage.setItem('userType', data.userType);
       return data;
     } catch (error) {
       console.error('Login error', error);

@@ -41,6 +41,7 @@ export default function AutoGrid() {
     // Clear any necessary data, e.g., session tokens
     localStorage.removeItem('username'); // Example: Clear username
     localStorage.removeItem("token");
+    localStorage.removeItem("userType");
     navigate('/'); // Redirect to the login page
   };
 
