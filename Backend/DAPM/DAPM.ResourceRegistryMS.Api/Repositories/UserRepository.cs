@@ -1,6 +1,7 @@
 ﻿using DAPM.ResourceRegistryMS.Api.Models;
 using DAPM.ResourceRegistryMS.Api.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace DAPM.ResourceRegistryMS.Api.Repositories
 {
@@ -69,14 +70,20 @@ namespace DAPM.ResourceRegistryMS.Api.Repositories
             var user = _context.Users
                     .Include(u => u.Peer)
                     .SingleOrDefault(u => u.Username == userName 
-                                        && u.Password == password 
+                                        //&& u.Password == password 
                                         && u.PeerId == orgId);
 
-
+            
             if (user == null)
             {
                 return null;
             }
+            else{
+                bool isPasswordValid = BCrypt.Net.BCrypt.Verify(password, user.Password);
+                if(!isPasswordValid){
+                    return null;
+                }
+            }          
 
             return user;
         }
