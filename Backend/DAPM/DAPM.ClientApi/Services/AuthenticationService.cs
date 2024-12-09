@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using RabbitMQLibrary.Interfaces;
 using RabbitMQLibrary.Messages.Orchestrator.ProcessRequests;
+using BCrypt.Net;
 
 namespace DAPM.ClientApi.Services
 {
@@ -41,8 +42,6 @@ namespace DAPM.ClientApi.Services
 
             // Step 1: Create a ticket to track the response
             Guid ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
-
-            // Step 2: Prepare the validation request message
             var validateUserMessage = new LoginRequest
             {
                 TicketId = ticketId,
@@ -62,9 +61,6 @@ namespace DAPM.ClientApi.Services
             {
                 _logger.LogWarning($"[Login] Login failed for user: {username}. Invalid credentials or timeout.");
                 throw new UnauthorizedAccessException("Authentication failed.");
-            }
-            if(validationResponse.UserType!="user"){
-                validationResponse.UserType ="unknown";
             }
             // Step 5: Generate JWT token for successful login
             var token = GenerateJwtToken(username, orgId, ticketId);

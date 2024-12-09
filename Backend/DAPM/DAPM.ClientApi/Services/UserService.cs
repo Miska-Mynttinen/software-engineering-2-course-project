@@ -122,13 +122,13 @@ namespace DAPM.ClientApi.Services
         {
             Guid ticketId = _ticketService.CreateNewTicket(TicketResolutionType.Json);
             // Hash the user's password
-            //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
             var newUser = new UserDTO()
             {
                 UserId = user.UserId,
                 Username = user.Username,
-                Password = user.Password,//hashedPassword,
+                Password = hashedPassword,//hashedPassword,
                 Email = user.Email,
                 UserType = user.UserType,
                 UserStatus = user.UserStatus,

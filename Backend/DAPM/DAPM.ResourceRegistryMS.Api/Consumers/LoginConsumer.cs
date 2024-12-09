@@ -31,27 +31,37 @@ namespace DAPM.ResourceRegistryMS.Api.Consumers
             _logger.LogInformation($"Processing Login Message for username: {message.Username}");
             bool success = false;
             var users = Enumerable.Empty<User>();
+            var usertype = "";
 
-            if (message.Username != null)
+            if (!string.IsNullOrEmpty(message.Username))
             {
                 var user = await _userService.UserLogin((Guid)message.OrgId, message.Username,message.Password);
+                usertype = user.UserType;
                 users = users.Append(user);
                 
             }
             else
             {
                 users = await _peerService.GetUsersOfOrganization(message.OrgId);
-            }
-
-            var usertype = "";
-            foreach (var user in users)
-            {
-                if(user.Username== message.Username && user.Password == message.Password && user.PeerId == (Guid)message.OrgId){
-                    success = true;
-                    usertype = user.UserType;
+                foreach (var user in users)
+                {
+                    if(message.Username!="admin"){
+                        if(user.Username== message.Username && message.Password == user.Password){
+                        success = true;
+                        usertype = user.UserType;
+                        }
+                    }
+                    else{
+                        if(user.Username== message.Username && BCrypt.Net.BCrypt.Verify(message.Password, user.Password) && user.PeerId == (Guid)message.OrgId){
+                        success = true;
+                        usertype = user.UserType;
+                        }
+                    }
+                    
                 }
-            }
-            _logger.LogInformation($"--------------------Processing Login Message for username: {message.Username}-------------------------------------");
+            }           
+            
+            _logger.LogInformation($"--------------------Processing Login Message for username: {message.Username} type: {usertype}-------------------------------------");
             // Prepare the result message
             var resultMessage = new LoginProcessResultMessage
             {

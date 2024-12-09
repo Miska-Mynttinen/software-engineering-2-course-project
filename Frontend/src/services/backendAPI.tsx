@@ -781,6 +781,7 @@ export async function loginUser(loginRequest: LoginRequest) {
       const data: LoginResponse = await response.json();
       console.log("Data: ",data)
       console.log("token: ",data.token)
+      console.log("userType: ",data.userType)
       // Store the token in localStorage
       localStorage.setItem('username', loginRequest.username);
       localStorage.setItem('token', data.token);
