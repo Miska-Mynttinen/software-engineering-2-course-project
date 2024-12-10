@@ -1,5 +1,5 @@
-import { Box, Button, FormControl, FormLabel, MenuItem, Modal, Select, TextField, Typography } from '@mui/material';
-import React, { ChangeEvent } from 'react';
+import { Box, Button, FormControl, FormLabel, Modal, Select, MenuItem, TextField, Typography } from '@mui/material';
+import React, { useState } from 'react';
 import { putUserGroup } from '../../../services/backendAPI';
 
 export interface UploadButtonProps {
@@ -21,59 +21,65 @@ const style = {
 
 const UserGroupUploadButton = ({ orgId, onUserGroupCreated }: UploadButtonProps) => {
 
-    const [open, setOpen] = React.useState(false);
-    const [disabled, setDisabled] = React.useState(false);
+    const [open, setOpen] = useState(false);
+    const [disabled, setDisabled] = useState(false);
+    const [userGroup, setUserGroup] = useState(""); // User Group input value
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-    
+
         // Disable the submit button to prevent multiple submissions
         setDisabled(true);
-    
-        const formData = new FormData(event.currentTarget);
-        const userGroup = formData.get('UserGroup') as string;
-    
+
         try {
-            const result = await putUserGroup(orgId, userGroup);
+            const result = await putUserGroup(orgId, userGroup); // Pass the user group directly
             console.log('User Group successfully uploaded:', result);
             onUserGroupCreated();
-    
             handleClose();
         } catch (error) {
             console.error('Error uploading userGroup:', error);
         }
-    
+
         // Re-enable the submit button after submission is done
         setDisabled(false);
     };
-    
 
     return (
         <div>
-            <Button sx={{ backgroundColor: "gray", padding: "1px", color: "black" }} onClick={handleOpen}>Add User Group</Button>
+            <Button sx={{ backgroundColor: "gray", padding: "1px", color: "black" }} onClick={handleOpen}>
+                Add User Group
+            </Button>
             <Modal
                 open={open}
                 onClose={handleClose}
-                aria-labelledby="modal-create-repository"
-                aria-describedby="modal-create-repository"
+                aria-labelledby="modal-create-user-group"
+                aria-describedby="modal-create-user-group"
             >
                 <Box sx={style}>
                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ color: 'white' }}>
-                            Upload User Group
+                            Create New User Group
                         </Typography>
                         <form onSubmit={handleSubmit}>
-                            <FormControl fullWidth margin="normal">
+                            <FormControl fullWidth margin="dense">
                                 <FormLabel>User Group</FormLabel>
-                                <input type="string" name="UserGroup" />
+                                <TextField
+                                    required
+                                    name="UserGroup"
+                                    value={userGroup}
+                                    onChange={(e) => setUserGroup(e.target.value)}
+                                    variant="outlined"
+                                    fullWidth
+                                    margin="dense"
+                                />
                             </FormControl>
 
-                            <Button 
+                            <Button
                                 disabled={disabled}
-                                type="submit" 
+                                type="submit"
                                 sx={{ backgroundColor: "gray", padding: "1px", color: disabled ? "lightgray" : "black" }}
                             >
                                 {disabled ? 'Submitting...' : 'Submit'}
