@@ -17,6 +17,8 @@ import { useAppDispatch, useAppSelector } from "../../hooks";
 import React from "react";
 import { Organization } from "../../redux/states/apiState";
 import { organizationThunk, userGroupThunk, userThunk } from "../../redux/slices/apiSlice";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface Step {
   executionTime: string;
@@ -203,7 +205,7 @@ export default function PipelineAppBar() {
 
  const selectedOrg = organizations[0];
 
-  const handleFormSubmit = async () => {
+  const HandleFormSubmit = async () => {
     const { owner, ownerType, userGroup } = formData;
 
     const dispatch = useAppDispatch()
@@ -360,6 +362,33 @@ export default function PipelineAppBar() {
     dispatch(addNewStartedTicket({ ticketId: startId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, pipeName: pipelineName, exeId: executionId.itemIds.executionId }));
   };
 
+  const deployPipeline = async () => {
+    try {
+        // Assuming these are pre-defined values in your app
+        const selectedOrg = { id: 'org123' }; // Example org ID
+        const selectedRepo = { id: 'repo123' }; // Example repo ID
+        const requestData = {}; // Example pipeline data
+        const pipelineName = "MyPipeline"; // Replace with actual pipeline name from state or props
+
+        // Trigger the deployment API calls
+        const pipelineId = await putPipeline(selectedOrg.id, selectedRepo.id, requestData);
+        await putExecution(selectedOrg.id, selectedRepo.id, pipelineId);
+
+        // Show success notification
+        toast.success(`Pipeline Deployed: ${pipelineName} (ID: ${pipelineId})`, {
+            position: 'bottom-right',
+            autoClose: 5000,
+        });
+        } catch (error) {
+        // Show error notification
+        toast.error('Failed to deploy pipeline!', {
+            position: 'bottom-right',
+            autoClose: 5000,
+        });
+        console.error('Deployment Error:', error);
+        }
+  };
+
   return (
     <>
       <AppBar position="fixed">
@@ -397,6 +426,8 @@ export default function PipelineAppBar() {
               Deploy pipeline
             </Typography>
           </Button>
+          <button onClick={deployPipeline}>Deploy Pipeline</button>
+          <ToastContainer />
         </Toolbar>
       </AppBar>
 
@@ -443,7 +474,7 @@ export default function PipelineAppBar() {
           <Button onClick={handleDialogClose} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleFormSubmit} color="primary">
+          <Button onClick={HandleFormSubmit} color="primary">
             Submit
           </Button>
         </DialogActions>
