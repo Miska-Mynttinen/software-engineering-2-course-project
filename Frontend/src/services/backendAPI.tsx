@@ -36,8 +36,6 @@ export async function fetchPipelineExecutionStatus(orgId: string, repId: string,
         throw error;
     }
 }
-
-
 export async function fetchStatus(ticket: string) {
 
     try {
@@ -52,7 +50,6 @@ export async function fetchStatus(ticket: string) {
         return error;
     }
 }
-
 export async function fetchFile(ticket: string) {
 
     try {
@@ -67,8 +64,6 @@ export async function fetchFile(ticket: string) {
         return error;
     }
 }
-
-
 export async function fetchOrganisations() {
     try {
         const response = await fetch(`http://` + path + `/organizations`);
@@ -105,9 +100,6 @@ export async function fetchOrganisations() {
         throw error; // Propagate error to the caller
     }
 }
-
-
-
 export async function fetchOrganisation(orgId: string) {
     try {
         const response = await fetch(`http://` + path + `/organizations/${orgId}`);
@@ -144,7 +136,6 @@ export async function fetchOrganisation(orgId: string) {
         throw error; // Propagate error to the caller
     }
 }
-
 export async function fetchOrganisationRepositories(orgId: string) {
     try {
         // Retrieve the JWT token from localStorage
@@ -195,7 +186,6 @@ export async function fetchOrganisationRepositories(orgId: string) {
         throw error; // Propagate error to the caller
     }
 }
-
 export async function fetchRepository(orgId: string, repId: string) {
     try {
         const response = await fetch(`http://` + path + `/organizations/${orgId}/repositories/${repId}`);
@@ -231,7 +221,6 @@ export async function fetchRepository(orgId: string, repId: string) {
         throw error; // Propagate error to the caller
     }
 }
-
 export async function fetchRepositoryResources(orgId: string, repId: string) {
     try {
         const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/resources`, {
