@@ -155,7 +155,7 @@ export default function PipelineStatusDialogBox({ statuses }: PipelineStatusDial
         onClose={handlePopupClose}
         aria-labelledby="popup-dialog-title"
         aria-describedby="popup-dialog-description"
-        maxWidth="md"
+        maxWidth="lg"
         fullWidth
       >
         <AppBar sx={{ position: 'relative' }}>
