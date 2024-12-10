@@ -581,7 +581,7 @@ export async function putPipeline(orgId: string, repId: string, pipelineData: an
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
             },
             body: JSON.stringify(pipelineData)
         });
@@ -625,6 +625,10 @@ export async function putExecution(orgId: string, repId: string, pipeId: string)
     try {
         const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines/${pipeId}/executions`, {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            },
         });
 
         if (!response.ok) {
@@ -666,6 +670,10 @@ export async function putCommandStart(orgId: string, repId: string, pipeId: stri
     try {
         const response = await fetch(`http://${path}/organizations/${orgId}/repositories/${repId}/pipelines/${pipeId}/executions/${exeId}/commands/start`, {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            },
         });
 
         if (!response.ok) {
