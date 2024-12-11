@@ -75,8 +75,7 @@ const ResourceUploadButton = ({ orgId, repId, onResourceCreated }: UploadButtonP
             .map(group => group.name);
 
         const validUsers = users
-            .filter(user => user.organizationId === orgId)
-            .map(user => user.userId);
+            .map(user => user.username);
 
         // Validate owner: check if it exists in validUsers (userId) or validUserGroups (name)
         const isOwnerValid = validUsers.includes(owner) || validUserGroups.includes(owner);

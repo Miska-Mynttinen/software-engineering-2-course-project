@@ -224,8 +224,7 @@ export default function PipelineAppBar() {
         .filter(group => group.organizationId === selectedOrg?.id)
         .map(group => group.name);
     const validUsers = users
-        .filter(user => user.organizationId === selectedOrg?.id)
-        .map(user => user.userId);
+        .map(user => user.username);
 
     // Validate owner
     if (!owner || !(validUsers.includes(owner) || validUserGroups.includes(owner))) {
