@@ -166,6 +166,7 @@ export default function PipelineAppBar() {
   const flowData = useSelector(getActiveFlowData);
 
   const generateJson = async () => {
+    alert(`Pipeline "${pipelineName}" is starting to deploy.`);
     var edges = flowData!.edges.map(edge => {
       return { sourceHandle: edge.sourceHandle, targetHandle: edge.targetHandle };
     });
@@ -248,6 +249,7 @@ export default function PipelineAppBar() {
     const selectedRepo = repositories.filter(repo => repo.organizationId === selectedOrg.id)[0];
 
     const pipelineId = await putPipeline(selectedOrg.id, selectedRepo.id, requestData);
+    alert(`Pipeline: "${pipelineName}", ID: "${pipelineId}" started to deploy. See More on Pipeline Status.`);
     const executionId = await putExecution(selectedOrg.id, selectedRepo.id, pipelineId);
     dispatch(addNewNotStartedTicket({ ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, pipeName: pipelineName, exeId: executionId.itemIds.executionId }));
   
