@@ -50,7 +50,6 @@ interface PipelineStatusDialogBoxProps {
 
 export default function PipelineStatusDialogBox({ statuses }: PipelineStatusDialogBoxProps) {
   const pipelines = useSelector(getPipelines);
-  //console.log("All Pipeline:", pipelines);
   const [open, setOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<PipelineStatus | null>(null);
   const [popupOpen, setPopupOpen] = useState(false);
