@@ -47,14 +47,26 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
   minHeight: '100%',
   padding: theme.spacing(1),
   backgroundColor: theme.palette.background.default,
+  backgroundImage: 'url(/lg.jpg)', // Reference image from the public folder
+  backgroundSize: 'cover', // Ensures the image covers the container
+  backgroundPosition: 'center', // Centers the image
   [theme.breakpoints.up('sm')]: {
     padding: theme.spacing(1.5),
   },
 }));
 
+// Autofill styling to prevent blue background after autofill
+const autofillStyles = {
+  '& input:-webkit-autofill': {
+    WebkitBoxShadow: '0 0 0px 1000px #1e1e1e inset', // Matches dark background
+    WebkitTextFillColor: '#fff', // Ensure text remains white
+    transition: 'background-color 5000s ease-in-out 0s', // Remove blue color transition
+  },
+};
+
 export default function SignUp({ toggleForm }: SignUpProps) {
-  const [usernameError, setusernameError] = useState(false);
-  const [usernameErrorMessage, setusernameErrorMessage] = useState('');
+  const [usernameError, setUsernameError] = useState(false);
+  const [usernameErrorMessage, setUsernameErrorMessage] = useState('');
   const [emailError, setEmailError] = useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
   const [organizationError, setOrganizationError] = useState(false);
@@ -160,6 +172,7 @@ export default function SignUp({ toggleForm }: SignUpProps) {
               variant="outlined"
               size="small"
               color={usernameError ? 'error' : 'primary'}
+              sx={autofillStyles} // Apply autofill styling here
             />
 
             {/* Email Field */}
@@ -177,6 +190,7 @@ export default function SignUp({ toggleForm }: SignUpProps) {
               variant="outlined"
               size="small"
               color={emailError ? 'error' : 'primary'}
+              sx={autofillStyles} // Apply autofill styling here
             />
 
             {/* Organization Dropdown */}
@@ -222,6 +236,7 @@ export default function SignUp({ toggleForm }: SignUpProps) {
               variant="outlined"
               size="small"
               color={passwordError ? 'error' : 'primary'}
+              sx={autofillStyles} // Apply autofill styling here
             />
 
             {/* Confirm Password Field */}
@@ -239,6 +254,7 @@ export default function SignUp({ toggleForm }: SignUpProps) {
               variant="outlined"
               size="small"
               color={confirmPasswordError ? 'error' : 'primary'}
+              sx={autofillStyles} // Apply autofill styling here
             />
 
             {/* Submit Button */}

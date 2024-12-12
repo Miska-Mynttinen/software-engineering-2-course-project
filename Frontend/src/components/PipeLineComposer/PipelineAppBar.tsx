@@ -67,75 +67,67 @@ export default function PipelineAppBar() {
   }, []); // Only run once
 
   // Function to fetch ticket statuses
-  const fetchTicketStatuses = async () => {
-    if (tickets.startedTickets.length === 0) return; // Prevent API call if there are no running tickets
+const fetchTicketStatuses = async () => {
+  if (tickets.startedTickets.length === 0) return; // Prevent API call if there are no running tickets
 
-    const fetchedStatuses: PipelineStatus[] = []; // Initialize an array to hold the fetched statuses
+  const fetchedStatuses: PipelineStatus[] = [...statuses]; // Initialize fetchedStatuses with the current state to retain existing statuses
 
-    for (const ticket of tickets.startedTickets) {
-      try {
-        const response = await fetchPipelineExecutionStatus(ticket.orgId, ticket.repId, ticket.pipeId, ticket.exeId);
-      
-        // Fetch additional data recursively
-        const getData = async (ticketId: string): Promise<any> => {
-          const maxRetries = 10;
-          const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  for (const ticket of tickets.startedTickets) {
+    try {
+      const response = await fetchPipelineExecutionStatus(ticket.orgId, ticket.repId, ticket.pipeId, ticket.exeId);
+    
+      // Fetch additional data recursively
+      const getData = async (ticketId: string): Promise<any> => {
+        const maxRetries = 10;
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-          for (let retries = 0; retries < maxRetries; retries++) {
-              try {
-                  const data = await fetchStatus(ticketId);
-                  if (data.status) {
-                      return data;
-                  }
-                  await delay(1000); // Wait for 1 second before retrying
-              } catch (error) {
-                  if (retries === maxRetries - 1) {
-                      throw new Error('Max retries reached');
-                  }
-              }
-          }
-          throw new Error('Failed to command start');
-        };
-
-        // Call getData function with the ticketId obtained from putExecution
-        const pipelineStatus = await getData(response.ticketId);
-
-        console.log(`Pipeline status for pipeline: ${ticket.pipeId}`, pipelineStatus.result.status.state, pipelineStatus);
-
-        const status = pipelineStatus.result.status.state as 'Not Started' | 'Running' | 'Completed'; // Cast the status
-
-        if (status === 'Completed') {
-          dispatch(deleteTicket({ ticketId: ticket.ticketId, orgId: ticket.orgId, repId: ticket.repId, pipeId: ticket.pipeId, pipeName: ticket.pipeName, exeId: ticket.exeId}));
-          dispatch(addNewFinishedTicket({ ticketId: ticket.ticketId, orgId: ticket.orgId, repId: ticket.repId, pipeId: ticket.pipeId, pipeName: ticket.pipeName, exeId: ticket.exeId }));
-
-          fetchedStatuses.filter((pipelineStatus) => pipelineStatus.pipelineId !== ticket.pipeId);
-          fetchedStatuses.push({
-            ticketId: ticket.ticketId,
-            pipelineId: ticket.pipeId,
-            pipelineName: ticket.pipeName,
-            status,
-            steps: pipelineStatus.result.status.currentSteps
-          });
-        } else {
-          const pipelineExists = fetchedStatuses.some(pipelineStatus => pipelineStatus.pipelineId === ticket.pipeId);
-          if (!pipelineExists) {
-            // If not found, add it to fetchedStatuses
-            fetchedStatuses.push({
-              ticketId: ticket.ticketId,
-              pipelineId: ticket.pipeId,
-              pipelineName: ticket.pipeName,
-              status,
-              steps: pipelineStatus.result.status.currentSteps
-            });
-          }
+        for (let retries = 0; retries < maxRetries; retries++) {
+            try {
+                const data = await fetchStatus(ticketId);
+                if (data.status) {
+                    return data;
+                }
+                await delay(1000); // Wait for 1 second before retrying
+            } catch (error) {
+                if (retries === maxRetries - 1) {
+                    throw new Error('Max retries reached');
+                }
+            }
         }
-      } catch (error) {
-        console.error(`Error fetching status for ticket ${ticket.ticketId}:`, error);
-      }
-    }
+        throw new Error('Failed to command start');
+      };
 
-    setStatuses(fetchedStatuses); // Update the statuses state with the fetched statuses
-  };
+      // Call getData function with the ticketId obtained from putExecution
+      const pipelineStatus = await getData(response.ticketId);
+
+      console.log(`Pipeline status for pipeline: ${ticket.pipeId}`, pipelineStatus.result.status.state, pipelineStatus);
+
+      const status = pipelineStatus.result.status.state as 'Not Started' | 'Running' | 'Completed'; // Cast the status
+
+      // Update the existing statuses for the same pipelineId or add new entry if it's a new pipeline
+      const existingPipeline = fetchedStatuses.find((pipelineStatus) => pipelineStatus.pipelineId === ticket.pipeId);
+      if (existingPipeline) {
+        // If pipeline already exists, update it
+        existingPipeline.status = status;
+        existingPipeline.steps = pipelineStatus.result.status.currentSteps;
+      } else {
+        // If not found, add it as a new pipeline entry
+        fetchedStatuses.push({
+          ticketId: ticket.ticketId,
+          pipelineId: ticket.pipeId,
+          pipelineName: ticket.pipeName,
+          status,
+          steps: pipelineStatus.result.status.currentSteps
+        });
+      }
+    } catch (error) {
+      console.error(`Error fetching status for ticket ${ticket.ticketId}:`, error);
+    }
+  }
+
+  setStatuses(fetchedStatuses); // Update the statuses state with the fetched statuses
+};
+
 
   // Set up the interval for polling the API
   useEffect(() => {
@@ -166,6 +158,7 @@ export default function PipelineAppBar() {
   const flowData = useSelector(getActiveFlowData);
 
   const generateJson = async () => {
+    alert(`Pipeline "${pipelineName}" is starting to deploy.`);
     var edges = flowData!.edges.map(edge => {
       return { sourceHandle: edge.sourceHandle, targetHandle: edge.targetHandle };
     });
@@ -248,6 +241,7 @@ export default function PipelineAppBar() {
     const selectedRepo = repositories.filter(repo => repo.organizationId === selectedOrg.id)[0];
 
     const pipelineId = await putPipeline(selectedOrg.id, selectedRepo.id, requestData);
+    alert(`Pipeline: "${pipelineName}", ID: "${pipelineId}" started to deploy. See More on Pipeline Status.`);
     const executionId = await putExecution(selectedOrg.id, selectedRepo.id, pipelineId);
     dispatch(addNewNotStartedTicket({ ticketId: executionId.ticketId, orgId: executionId.itemIds.organizationId, repId: executionId.itemIds.executionId, pipeId: executionId.itemIds.executionId, pipeName: pipelineName, exeId: executionId.itemIds.executionId }));
   

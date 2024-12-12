@@ -16,6 +16,7 @@ import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
 import { loginUser, fetchOrganisations } from '../../services/backendAPI';
 import { LoginRequest } from '../../redux/states/apiState';
 
+
 interface SignInProps {
   toggleForm: () => void;
 }
@@ -51,22 +52,32 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
     padding: theme.spacing(2),
   },
   backgroundColor: theme.palette.background.default,
+  backgroundImage: 'url(/lg.jpg)', // Replace with your image URL
+  backgroundSize: 'cover', // Ensures the image covers the entire container
+  backgroundPosition: 'center', // Centers the background image
   '&::before': {
     content: '""',
     display: 'block',
     position: 'absolute',
     zIndex: -1,
     inset: 0,
-    backgroundImage:
-      'radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))',
-    backgroundRepeat: 'no-repeat',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional dark overlay to make text more readable
   },
 }));
 
+// Autofill styling to prevent blue background after autofill
+const autofillStyles = {
+  '& input:-webkit-autofill': {
+    WebkitBoxShadow: '0 0 0px 1000px #1e1e1e inset', // Matches dark background
+    WebkitTextFillColor: '#fff', // Ensure text remains white
+    transition: 'background-color 5000s ease-in-out 0s', // Remove blue color transition
+  },
+};
+
 export default function SignIn({ toggleForm }: SignInProps) {
   const navigate = useNavigate();
-  const [usernameError, setusernameError] = useState(false);
-  const [usernameErrorMessage, setusernameErrorMessage] = useState('');
+  const [usernameError, setUsernameError] = useState(false);
+  const [usernameErrorMessage, setUsernameErrorMessage] = useState('');
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
   const [organizationError, setOrganizationError] = useState(false);
@@ -88,48 +99,45 @@ export default function SignIn({ toggleForm }: SignInProps) {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-  
+
     if (!validateInputs()) return;
-  
+
     const formData = new FormData(event.currentTarget);
     const username = formData.get('username') as string;
     const password = formData.get('password') as string;
-  
+
     try {
       const selectedOrg = organizations.find((org) => org.name === selectedOrganization);
-  
+
       if (!selectedOrg) {
         setOrganizationError(true);
         setOrganizationErrorMessage('Please select a valid organization.');
         return;
       }
-  
+
       const loginRequest: LoginRequest = {
         username,
         password,
         organizationId: selectedOrg.id,
       };
-  
+
       const response = await loginUser(loginRequest); // Pass the entire loginRequest
-  
+
       if (response && response.token) {
         // Navigate based on the role or other conditions
         localStorage.setItem('authToken', response.token);
-        //response.userType ="user";
-        if(response.userType==="user"){
+        if (response.userType === 'user') {
           navigate('/user');
         }
-        if(response.userType==="admin"){
+        if (response.userType === 'admin') {
           navigate('/admin');
-        }     
-        
+        }
         return;
       }
     } catch (error) {
       alert('Login failed. Please check your credentials and try again.');
     }
   };
-  
 
   const validateInputs = () => {
     let isValid = true;
@@ -147,12 +155,12 @@ export default function SignIn({ toggleForm }: SignInProps) {
     const password = document.getElementById('password') as HTMLInputElement;
 
     if (!username.value) {
-      setusernameError(true);
-      setusernameErrorMessage('Please enter a valid username.');
+      setUsernameError(true);
+      setUsernameErrorMessage('Please enter a valid username.');
       isValid = false;
     } else {
-      setusernameError(false);
-      setusernameErrorMessage('');
+      setUsernameError(false);
+      setUsernameErrorMessage('');
     }
 
     if (!password.value || password.value.length < 6 || !/\d/.test(password.value) || !/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) {
@@ -183,11 +191,11 @@ export default function SignIn({ toggleForm }: SignInProps) {
               color: '#FFFFFF',
             }}
           >
-            DAPM
+            Welcome to DAPM
           </Typography>
 
           <Typography component="h1" variant="h6" sx={{ width: '100%', fontSize: '1.25rem', textAlign: 'left' }}>
-            Sign In
+            Sign in
           </Typography>
           <Box
             component="form"
@@ -201,25 +209,25 @@ export default function SignIn({ toggleForm }: SignInProps) {
               id="username"
               name="username"
               label="Username"
-              placeholder="Username"
               required
               fullWidth
               variant="outlined"
               size="small"
+              sx={autofillStyles} // Apply autofill styling here
               color={usernameError ? 'error' : 'primary'}
             />
             <TextField
               error={passwordError}
               helperText={passwordErrorMessage}
+              id="password"
               name="password"
               label="Password"
-              placeholder="••••••"
               type="password"
-              id="password"
               required
               fullWidth
               variant="outlined"
               size="small"
+              sx={autofillStyles} // Apply autofill styling here
               color={passwordError ? 'error' : 'primary'}
             />
             <FormControl fullWidth size="small" error={organizationError}>
@@ -260,7 +268,7 @@ export default function SignIn({ toggleForm }: SignInProps) {
                 fontWeight: 'bold',
               }}
             >
-              SIGN IN
+              Sign in
             </Button>
             <Typography sx={{ textAlign: 'center', fontSize: '0.75rem' }}>
               Don&apos;t have an account?{' '}

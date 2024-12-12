@@ -25,30 +25,30 @@ const AllUser: React.FC<AllUserProps> = ({ rows = [], userGroups, onUserUpdated 
 
   return (
     <Box>
-      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+      <Typography variant="h6" sx={{ marginBottom: 2, color: 'white' }}>
         Manage All Users
       </Typography>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ backgroundColor: '#292929' }}>
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ backgroundColor: '#1976d2', color: '#fff', fontWeight: 'bold' }}>Username</TableCell>
-              <TableCell sx={{ backgroundColor: '#1976d2', color: '#fff', fontWeight: 'bold' }}>User Id</TableCell>
-              <TableCell sx={{ backgroundColor: '#1976d2', color: '#fff', fontWeight: 'bold' }}>User Type</TableCell>
-              <TableCell sx={{ backgroundColor: '#1976d2', color: '#fff', fontWeight: 'bold' }}>User Groups</TableCell>
-              <TableCell sx={{ backgroundColor: '#1976d2', color: '#fff', fontWeight: 'bold' }}>Update User Groups</TableCell>
-              <TableCell sx={{ backgroundColor: '#1976d2', color: '#fff', fontWeight: 'bold' }}>User Status</TableCell>
-              <TableCell sx={{ backgroundColor: '#1976d2', color: '#fff', fontWeight: 'bold' }}>Actions</TableCell>
+              <TableCell sx={{ backgroundColor: '#292929', color: '#fff', fontWeight: 'bold' }}>Username</TableCell>
+              <TableCell sx={{ backgroundColor: '#292929', color: '#fff', fontWeight: 'bold' }}>User Id</TableCell>
+              <TableCell sx={{ backgroundColor: '#292929', color: '#fff', fontWeight: 'bold' }}>User Type</TableCell>
+              <TableCell sx={{ backgroundColor: '#292929', color: '#fff', fontWeight: 'bold' }}>User Groups</TableCell>
+              <TableCell sx={{ backgroundColor: '#292929', color: '#fff', fontWeight: 'bold' }}>Update User Groups</TableCell>
+              <TableCell sx={{ backgroundColor: '#292929', color: '#fff', fontWeight: 'bold' }}>User Status</TableCell>
+              <TableCell sx={{ backgroundColor: '#292929', color: '#fff', fontWeight: 'bold' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {/* Mapping over rows with pagination */}
             {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-              <TableRow key={row.userId}>
-                <TableCell>{row.username}</TableCell>
-                <TableCell>{row.userId}</TableCell>
-                <TableCell>{row.userType}</TableCell>
-                <TableCell>
+              <TableRow key={row.userId} sx={{ backgroundColor: '#333333' }}>
+                <TableCell sx={{ color: 'white' }}>{row.username}</TableCell>
+                <TableCell sx={{ color: 'white' }}>{row.userId}</TableCell>
+                <TableCell sx={{ color: 'white' }}>{row.userType}</TableCell>
+                <TableCell sx={{ color: 'white' }}>
                   {/* Displaying user groups */}
                   {row.userGroups && row.userGroups.map((userGroup) => (
                     <p style={{ padding: '0', fontSize: '15px', marginBlock: '5px' }} key={userGroup}>
@@ -59,7 +59,7 @@ const AllUser: React.FC<AllUserProps> = ({ rows = [], userGroups, onUserUpdated 
                 <TableCell>
                   <UserUpdateButton orgId={row.organizationId} userId={row.userId} userGroups={userGroups} onUserUpdated={onUserUpdated} />
                 </TableCell>
-                <TableCell>{row.userStatus}</TableCell>
+                <TableCell sx={{ color: 'white' }}>{row.userStatus}</TableCell>
                 <TableCell>
                   {/* Suspend user button */}
                   <Button variant="contained" color="secondary" onClick={() => console.log(`Suspended user: ${row.userId}`)}>
@@ -80,6 +80,7 @@ const AllUser: React.FC<AllUserProps> = ({ rows = [], userGroups, onUserUpdated 
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        sx={{ color: 'white' }} // Make pagination text white
       />
     </Box>
   );

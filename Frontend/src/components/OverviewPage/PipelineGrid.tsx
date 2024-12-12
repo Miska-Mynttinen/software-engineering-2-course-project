@@ -89,39 +89,44 @@ export default function AutoGrid() {
   });
 
   return (
-    <Box sx={{flexGrow: 1, flexBasis: "100%", position: 'relative' }}>
-      {/* Create New Pipeline Button */}
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => createNewPipeline()}
-        sx={{ backgroundColor: "#bbb", "&:hover": { backgroundColor: "#eee" }, marginBlockStart: "10px" }}
-      >
-        Create New
-      </Button>
+    <Box sx={{ flexGrow: 1, flexBasis: "100%", position: 'relative' }}>
+      {/* Navbar */}
+      <Box sx={{
+        position: 'fixed', top: 0, left: 0, width: '100%', backgroundColor: '#292929', zIndex: 1, padding: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white'
+      }}>
+        <Typography variant="h6" sx={{ marginLeft: '20px' }}>Pipeline Dashboard</Typography>
 
-      {/* Username Display and Logout Button */}
-      <Box sx={{ display: 'flex', alignItems: 'center', position: 'absolute', gap: '8px', top: '10px', right: '10px' }}>
-        <Typography variant="body1" style={{ marginRight: '16px', color: 'white' }}>
-          Username: {username}
-        </Typography>
+        {/* Create New Button on the Navbar */}
         <Button
           variant="contained"
-          sx={{ backgroundColor: '#bbb', "&:hover": { backgroundColor: '#eee' } }}
-          onClick={handleLogout}
+          startIcon={<AddIcon />}
+          onClick={() => createNewPipeline()}
+          sx={{
+            backgroundColor: "#bbb", "&:hover": { backgroundColor: "#eee" }, marginRight: '20px'
+          }}
         >
-          Logout
+          Create New
         </Button>
+
+        {/* Username Display and Logout Button */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', paddingRight: '20px' }}>
+          <Typography variant="body1" sx={{ color: 'white' }}>
+            Username: {username}
+          </Typography>
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: '#bbb', "&:hover": { backgroundColor: '#eee' } }}
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
+        </Box>
       </Box>
 
-      
-
-      
-
       {/* Grid Display of Pipelines */}
-      <Grid container spacing={{ xs: 1, md: 1 }} sx={{ padding: "10px" }}>
+      <Grid container spacing={{ xs: 1, md: 1 }} sx={{ padding: "10px", marginTop: '80px' }}>
         {pipelines.map(({ id, name, imgData }) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
+          <Grid item xs={12} sm={6} md={4} lg={3} xl={3} key={id}>
             <PipelineCard id={id} name={name} imgData={imgData}></PipelineCard>
           </Grid>
         ))}
