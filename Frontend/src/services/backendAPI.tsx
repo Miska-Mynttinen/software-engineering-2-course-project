@@ -998,7 +998,14 @@ export async function PostNewPeer(domainName: string) {
 
 export async function downloadResource(organizationId: string, repositoryId: string, resourceId: string) {
     try {
-        const response = await fetch(`http://${path}/organizations/${organizationId}/repositories/${repositoryId}/resources/${resourceId}/file`);
+        const headers = new Headers();
+        headers.append("accept", "application/json");
+        headers.append("Content-Type", "application/json");
+        headers.append("Authorization", `Bearer ${localStorage.getItem("token")}`);
+        const response = await fetch(`http://${path}/organizations/${organizationId}/repositories/${repositoryId}/resources/${resourceId}/file`,{
+            method: "get",
+            headers: headers,
+        });
         if (!response.ok) {
             throw new Error('Fetching resource, Network response was not ok');
         }

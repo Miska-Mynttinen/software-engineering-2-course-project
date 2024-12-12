@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { Drawer, List, Typography, Divider, ListItem, ListItemButton, ListItemText, Box, Button } from '@mui/material';
+import { Drawer, List, Typography, Divider, ListItem, ListItemButton, ListItemText, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getOrganizations, getRepositories, getResources } from '../../redux/selectors/apiSelector';
@@ -46,20 +46,61 @@ export default function PersistentDrawerLeft() {
   }, [dispatch]);
 
   const handleDownload = async (resource: Resource) => {
-    const response = await downloadResource(resource.organizationId, resource.repositoryId, resource.id);
-    await downloadReadableStream(response.url, resource.name);
+    try {
+      const fileInfo = await downloadResource(resource.organizationId, resource.repositoryId, resource.id);
+      if (fileInfo && fileInfo.url) {
+        await downloadReadableStream(fileInfo.url, resource.name);
+      } else {
+        console.error('Invalid file information received');
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error handling file download:', error.message);
+      } else {
+        console.error('Unknown error handling file download:', error);
+      }
+    }
   };
 
   async function downloadReadableStream(url: string, fileName: string) {
-    window.open(url, '_blank');
-  }
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to download file from URL. Status: ${response.status}`);
+        }
 
+        const text = await response.text(); // Read the response as plain text
+
+        // Create a Blob from the text data
+        const blob = new Blob([text], { type: 'text/plain' });
+
+        // Create a URL for the Blob
+        const downloadUrl = URL.createObjectURL(blob);
+
+        // Create an anchor element and trigger download
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = fileName.endsWith('.txt') ? fileName : `${fileName}.txt`; // Ensure the file has a .txt extension
+        document.body.appendChild(a);
+        a.click();
+
+        // Clean up
+        URL.revokeObjectURL(downloadUrl);
+        document.body.removeChild(a);
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error('Error during file download:', error.message);
+        } else {
+            console.error('Unknown error during file download:', error);
+        }
+    }
+}
   return (
     <Drawer
       PaperProps={{
         sx: {
           backgroundColor: '#292929',
-          overflow: 'hidden', // Disable scrolling inside the drawer
+          overflow: 'hidden',
         },
       }}
       sx={{
