@@ -93,9 +93,9 @@ export default function SignUp({ toggleForm }: SignUpProps) {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!selectedOrganization) {
-      setOrganizationError(true);
-      setOrganizationErrorMessage('Organization is required.');
+    
+    const isValid = validateInputs();
+    if (!isValid) {
       return;
     }
 
@@ -125,7 +125,64 @@ export default function SignUp({ toggleForm }: SignUpProps) {
   };
 
   const validateInputs = () => {
-    // Add validation logic for other fields here if needed
+    let isValid = true;
+
+    const username = document.getElementById('username') as HTMLInputElement;
+    const password = document.getElementById('password') as HTMLInputElement;
+    const email = document.getElementById('email') as HTMLInputElement;
+    const confirmPassword = document.getElementById('confirmPassword') as HTMLInputElement;
+
+
+    if (!selectedOrganization) {
+      setOrganizationError(true);
+      setOrganizationErrorMessage('Organization is required.');
+      isValid = false;
+    } else {
+      setOrganizationError(false);
+      setOrganizationErrorMessage('');
+    }
+
+  
+    if (!username.value || username.value.trim() === '') {
+      setUsernameError(true);
+      setUsernameErrorMessage('Please enter a valid username.');
+      isValid = false;
+    } else {
+      setUsernameError(false);
+      setUsernameErrorMessage('');
+    }
+
+     // Validate Email
+     if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+      setEmailError(true);
+      setEmailErrorMessage('Please enter a valid email address.');
+      isValid = false;
+    } else {
+      setEmailError(false);
+      setEmailErrorMessage('');
+    }
+
+    // Validate Password
+    if (!password.value || password.value.length < 6 || !/\d/.test(password.value) || !/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) {
+      setPasswordError(true);
+      setPasswordErrorMessage('Password must be 6 characters long, including a number and special character');
+      isValid = false;
+    } else {
+      setPasswordError(false);
+      setPasswordErrorMessage('');
+    }
+
+    // Validate Confirm Password
+    if (confirmPassword.value !== password.value) {
+      setConfirmPasswordError(true);
+      setConfirmPasswordErrorMessage('Passwords do not match.');
+      isValid = false;
+    } else {
+      setConfirmPasswordError(false);
+      setConfirmPasswordErrorMessage('');
+    }
+
+    return isValid;
   };
 
   return (
